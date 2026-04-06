@@ -28,3 +28,6 @@ exports/
 
 # User settings
 *.cfg.lock
+
+# Agent Harness
+.sisyphus/
