@@ -1,175 +1,387 @@
-# WHAT EXPECTED BEHAVIOR
+# 当前产品预期行为（WHAT EXPECTED BEHAVIOR）
 
-## Purpose
+## 文档目的
 
-This document describes the **expected behavior of the current product build** in this repository. It is not an ideal future design doc. It is a practical baseline for QA, iteration, and archival reference.
+这份文档描述的是**当前仓库中这版产品应该如何表现**。
 
-## Product Summary
+它不是未来规划文档，也不是理想设计稿，而是一个用于下列场景的现实基线：
 
-The current product is a Godot 4 top-down landship defense roguelike prototype. The player moves on a fixed landship, manages turrets, survives combat waves, and progresses through a 3-layer route-selection structure with combat, rest, and shop nodes.
+- 产品对齐
+- 人工验收
+- 回归验证
+- 版本归档
 
-## Expected Runtime Flow
+如果代码实际行为与本文档不一致，应当二选一：
 
-1. Launching the project should start a run immediately and show the **map screen**.
-2. Selecting a combat-related node should enter a **combat session**.
-3. Combat should run as a **wave-based defense encounter** around the landship.
-4. Completing a combat session should return the player to the **map flow** for the next layer or node.
-5. Entering a shop node should show the **shop UI**, allow purchases, then return to the map.
-6. Destroying the ship should trigger **game over**.
-7. Completing the layer-3 boss combat should trigger **victory**.
+1. 修正实现，使其符合本文档；
+2. 如果当前行为本身就是新的正确目标，则更新本文档。
 
-## Expected Core Player Behavior
+---
 
-### 1. Player Movement
+## 产品概述
 
-- The player character exists on the landship as a child object.
-- Movement uses WASD-style directional input.
-- The player should remain constrained to the ship play area and not freely leave the hull.
+当前产品是一个使用 Godot 4 开发的俯视角陆行舰塔防 Roguelike 原型。
 
-### 2. Landship
+玩家在固定的陆行舰上活动，通过移动、接管炮台、购买升级、承受并击退敌方波次，完成一个 3 层结构的路线推进流程。流程中包含：
 
-- The landship is a fixed combat platform during battle.
-- The ship has visible HP state and can take damage from enemies.
-- The ship can be repaired when the player stays near the hull and holds the repair input long enough.
-- When ship HP reaches zero, the run should end in failure.
+- 地图选择
+- 战斗节点
+- 商店节点
+- 休整节点
+- 最终层胜利结算
 
-### 3. Turrets
+---
 
-- The ship exposes 8 turret slots around the hull.
-- A new run should begin with starter turrets already installed on some slots.
-- Turrets should support:
-  - manual control when the player is close enough,
-  - autonomous fire once fire-control is unlocked,
-  - toughness/paralysis behavior,
-  - repair after paralysis.
+## 一、预期运行主流程
 
-#### Manual Turret Behavior
+### 1. 启动流程
 
-- If the player moves into a turret interaction zone and activates it, the turret should enter manual mode.
-- In manual mode, the turret barrel should rotate toward the mouse position.
-- Firing input should launch projectiles toward the aim point.
-- Leaving turret range or entering paralysis should exit manual mode.
+- 启动项目后，应直接进入一局新游戏。
+- 初始进入的主界面应为**地图选择界面**，而不是传统主菜单。
+- 游戏开始时应自动完成基础状态初始化，包括货币、层数、击杀数、升级状态等。
 
-#### Auto-Fire Behavior
+### 2. 地图到战斗流程
 
-- Auto-fire is not active by default at run start.
-- Buying the fire-control upgrade should unlock auto-fire globally for turrets.
-- When auto-fire is unlocked and a turret is not in manual mode or paralyzed, it should target the nearest valid enemy and fire automatically.
+- 玩家在地图上选择可到达节点后，应进入对应流程。
+- 选择战斗、精英、Boss、结束类节点时，应进入战斗场景流。
+- 选择商店节点时，应打开商店界面。
+- 选择休整节点时，应立即触发部分船体修复，然后返回地图继续推进。
 
-#### Turret Toughness Behavior
+### 3. 战斗到结算流程
 
-- Nearby ship damage events should reduce turret toughness.
-- If toughness is depleted, the turret should become paralyzed and stop functioning.
-- Toughness should recover over time.
-- A paralyzed turret should be repairable by the player after holding repair input nearby.
+- 战斗开始后，应进入波次制防守。
+- 当前战斗所有波次完成后：
+  - 非最终层：返回地图，推进到下一层起点或后续路线；
+  - 最终层：触发胜利。
+- 如果船体血量归零，应立即触发失败。
 
-## Expected Enemy Behavior
+---
 
-### Tank
+## 二、玩家预期行为
 
-- Tanks should spawn from designated spawn points.
-- Tanks should move toward the ship.
-- On reaching the ship, they should damage it.
-- On death, they should emit death flow and reward currency.
+### 1. 玩家角色移动
 
-### Mechanical Dog
+- 玩家角色应作为船体上的子对象存在。
+- 玩家应能使用 WASD 进行移动。
+- 玩家移动范围应被限制在船体活动区域内，不能自由离舰。
 
-- Mechanical dogs should spawn from designated spawn points.
-- They should act as ranged enemies.
-- Their attacks should pressure the ship during combat waves.
+### 2. 玩家与炮台交互
 
-### Boss Tank
+- 玩家进入炮台交互范围后，炮台应进入“可交互”状态。
+- 玩家在炮台附近触发交互后，应进入该炮台的手动控制模式。
+- 玩家离开炮台交互范围，或炮台进入瘫痪状态时，应退出手动控制。
 
-- The final layer should contain boss combat pressure via the boss tank setup.
-- Clearing the final combat session is expected to represent the run’s victory condition.
+### 3. 玩家维修行为
 
-## Expected Wave System Behavior
+- 玩家靠近船体中心区域并持续按住维修键时，应能修理船体。
+- 玩家靠近瘫痪炮台并持续按住维修键时，应能修复炮台。
+- 维修行为应当需要持续输入一段时间，而不是瞬时完成。
 
-- Combat should be split into multiple waves per layer session.
-- Before the first wave, there should be a short preparation/intermission period.
-- During active waves, enemies spawn over time from spawn markers.
-- When all enemies in a wave are defeated, the game should enter intermission.
-- Intermission UI should support:
-  - continue to next wave,
-  - repair the ship,
-  - jump to upgrade/shop flow when applicable.
-- Completing all waves for a non-final combat should return the run to map progression.
-- Completing all waves for the final layer should end the run with victory.
+---
 
-## Expected Map / Progression Behavior
+## 三、船体预期行为
 
-- The run uses a 3-layer progression structure.
-- The map should show reachable nodes and allow selecting the next valid node.
-- Node types currently expected in flow include:
-  - combat,
-  - elite,
-  - shop,
-  - rest,
-  - boss/end progression nodes.
-- Rest nodes should heal part of the ship HP.
-- Shop nodes should pause combat flow and open the shop screen.
+### 1. 船体基础状态
 
-## Expected Shop Behavior
+- 船体在战斗期间应固定不动，作为防守平台存在。
+- 船体应拥有可见或可驱动的生命值状态。
+- 船体应能接收来自敌方碰撞或投射物的伤害。
 
-The shop is expected to show fixed upgrade items rather than a random pool.
+### 2. 船体受伤与修理
 
-Current expected purchasable effects:
+- 船体受到攻击后，血量应下降。
+- 船体受到伤害时，应触发船体受伤反馈，包括事件或视觉提示。
+- 玩家成功完成维修后，船体血量应回升。
+- 商店或波次间修理行为也应能恢复船体生命值。
 
-- **Turret Damage +10%**: increases turret damage output.
-- **Fire Control System**: unlocks automatic turret fire.
-- **Hull Repair Kit**: restores part of ship HP.
-- **New Turret**: installs a turret into an empty slot.
+### 3. 船体失败条件
 
-Additional expectations:
+- 当船体血量降为 0 时，本局应结束。
+- 失败后应进入 game over 状态，而不是继续允许推进路线或波次。
 
-- Purchases should cost currency.
-- Unaffordable items should not be purchasable.
-- Purchased one-time items should not be repeatedly buyable in the same run where that would break progression.
+---
 
-## Expected State / Reset Behavior
+## 四、炮台预期行为
 
-- A new run should initialize with baseline currency, layer, level-display, kills, and upgrade state.
-- Ending a run should transition to a terminal state (victory or defeat).
-- Resetting a run should restore default progression state, clear upgrades, reset map progress, and restore ship HP.
+### 1. 炮位与初始炮台
 
-## Expected UI Behavior
+- 船体上应存在 8 个固定炮位。
+- 新局开始时，应自动装配一部分初始炮台，而不是所有炮位都为空。
 
-- HUD should show ship health.
-- Wave UI should appear during intermission or completion states and hide during active combat.
-- Map UI should be the primary navigation layer between combats.
-- Shop UI should be modal enough to clearly separate shopping from combat/map flow.
-- Turret visual state should communicate:
-  - idle,
-  - interactable,
-  - manual control,
-  - paralyzed.
+### 2. 手动炮台行为
 
-## Expected Non-Goals For Current Build
+- 进入手动模式后：
+  - 炮台炮管应朝向鼠标位置旋转；
+  - 开火输入应生成投射物；
+  - 投射物应朝当前目标方向飞行。
+- 手动模式应优先体现“玩家直接接管”的手感，而不是继续自动射击。
 
-The current archived product is **not expected** to provide:
+### 3. 自动火控行为
 
-- multiple turret archetypes,
-- relic/collection systems,
-- persistent metaprogression,
-- out-of-run unlock trees,
-- multiplayer,
-- save/load mid-run,
-- polished art/audio production.
+- 游戏开局时，自动火控默认不解锁。
+- 购买火控相关升级后，炮台应解锁自动开火能力。
+- 自动开火时，炮台应优先选择最近的有效敌人作为目标。
+- 当炮台处于手动模式或瘫痪状态时，不应执行自动射击逻辑。
 
-## QA-Oriented Acceptance View
+### 4. 炮台韧性行为
 
-For the current archived product, the most important expected outcomes are:
+- 船体附近遭受伤害事件时，附近炮台应损失韧性。
+- 韧性降为 0 时，炮台应进入瘫痪状态。
+- 瘫痪状态下，炮台不能正常工作。
+- 韧性应随时间自动恢复。
+- 玩家维修应能使瘫痪炮台恢复可用状态。
 
-1. The project launches successfully.
-2. The player can move on the ship.
-3. The ship can take damage and be repaired.
-4. Turrets can be manually controlled.
-5. Auto-fire can be unlocked and then works.
-6. Waves spawn enemies and resolve correctly.
-7. Map progression, shop flow, and rest flow are connected.
-8. Losing the ship causes game over.
-9. Clearing the final layer combat causes victory.
+### 5. 炮台视觉反馈
 
-## Document Intent
+- 炮台空闲时应显示默认外观。
+- 玩家进入交互范围时应显示“可交互”反馈。
+- 手动控制时应显示明显的“已接管”状态。
+- 瘫痪时应显示受损或失效状态。
 
-This file is the archival reference for **what the build is supposed to do right now**. If implementation and runtime behavior diverge from this document, either the code should be fixed or this document should be updated to match the intentional product baseline.
+---
+
+## 五、敌人预期行为
+
+### 1. 坦克
+
+- 坦克应从预设生成点生成。
+- 坦克应朝船体移动。
+- 坦克接触或到达船体后，应对船体造成伤害。
+- 坦克被击杀后，应进入死亡流程并提供货币奖励。
+
+### 2. 机械狗
+
+- 机械狗应从预设生成点生成。
+- 机械狗应作为远程压力单位存在。
+- 机械狗应通过远程攻击对船体造成威胁。
+
+### 3. Boss Tank
+
+- 最终层应存在 Boss 压力单位或等价的最终战表现。
+- 清理最终层战斗应代表本局胜利。
+
+---
+
+## 六、波次系统预期行为
+
+### 1. 波次结构
+
+- 每场战斗应由多波敌人构成。
+- 第一波开始前应存在短暂准备期。
+- 波次激活期间，敌人应按一定节奏从生成点出现。
+
+### 2. 波次完成逻辑
+
+- 当前波所有敌人死亡且生成队列清空后，该波应判定完成。
+- 波次完成后，应进入波间期。
+
+### 3. 波间期行为
+
+- 波间期 UI 应出现。
+- 波间期应支持以下动作：
+  - 继续下一波；
+  - 修理船体；
+  - 进入升级 / 商店相关流转（如果当前设计允许）。
+- 波间期结束后，应能正常继续后续战斗，而不是卡死在中间状态。
+
+### 4. 战斗结束逻辑
+
+- 非最终层战斗全部完成后，应返回地图推进流程。
+- 最终层战斗完成后，应触发胜利。
+
+---
+
+## 七、地图与推进预期行为
+
+### 1. 地图结构
+
+- 当前版本应表现为 3 层推进结构。
+- 地图上应存在可达与不可达节点区分。
+- 玩家只能选择当前路线允许抵达的节点。
+
+### 2. 节点类型
+
+当前运行流中预期包含以下节点类别：
+
+- 战斗
+- 精英
+- 商店
+- 休整
+- Boss / 终点类节点
+
+### 3. 节点结果
+
+- 战斗节点：进入战斗。
+- 商店节点：进入商店。
+- 休整节点：修理船体后返回地图。
+- 最终层相关节点：应通向最终战和胜利结算。
+
+---
+
+## 八、商店预期行为
+
+### 1. 商店基础表现
+
+- 商店应展示固定商品，而不是随机池。
+- 商店开启时，应清晰显示当前货币。
+- 商品应包含名称、描述、价格与购买按钮。
+
+### 2. 当前预期商品效果
+
+- **炮台伤害 +10%**：提升炮台伤害输出。
+- **火控系统**：解锁炮台自动开火。
+- **船体维修包**：恢复船体生命值。
+- **新炮台**：为空闲炮位安装新炮台。
+
+### 3. 购买规则
+
+- 购买需要消耗货币。
+- 货币不足时不应允许购买。
+- 一次性升级项在同一局中不应被无限重复购买。
+
+---
+
+## 九、状态与重开预期行为
+
+### 1. 新局初始化
+
+- 新局应初始化以下状态：
+  - 默认货币；
+  - 当前层数；
+  - 击杀数；
+  - 等级展示值；
+  - 炮台伤害倍率；
+  - 自动火控是否解锁。
+
+### 2. 结束状态
+
+- 失败时进入 Game Over 状态。
+- 胜利时进入 Victory 状态。
+- 结束状态不应继续正常战斗推进。
+
+### 3. 重置行为
+
+- 重开时应重置地图状态。
+- 重开时应清空局内升级。
+- 重开时应恢复船体血量。
+- 重开后应回到新的可推进流程起点。
+
+---
+
+## 十、UI 预期行为
+
+### 1. HUD
+
+- HUD 应展示船体血量。
+
+### 2. Wave UI
+
+- 主动战斗中应隐藏或弱化。
+- 波间期应显示。
+- 全部波次完成时应显示战斗完成状态。
+
+### 3. 地图 UI
+
+- 地图 UI 应是战斗之间的主要导航界面。
+- 节点应具备可点击和可达反馈。
+
+### 4. 商店 UI
+
+- 商店 UI 应与地图 / 战斗流清晰区分。
+- 打开商店时，应避免误操作导致同时进行战斗流程。
+
+---
+
+## 十一、当前版本非目标（明确不要求）
+
+当前版本**不预期包含**以下内容：
+
+- 多种炮台职业或复杂炮台体系
+- 藏品 / 遗物系统
+- 局外永久成长
+- 多人联机
+- 中途存档 / 读档
+- 高完成度美术和音频打磨
+- 复杂外部 meta 系统
+
+---
+
+## 十二、人工验证优先级清单
+
+下面的人工验证优先级，用于在时间有限时决定先测什么。
+
+### P0（阻塞级，必须优先人工验证）
+
+这些问题一旦失败，当前构建就不适合继续验收。
+
+1. **项目能否成功启动**
+   - 启动后不能报致命错误。
+   - 必须能进入首个可交互界面。
+
+2. **地图 → 战斗 → 地图 的主循环是否打通**
+   - 选择战斗节点后必须能进入战斗。
+   - 完成战斗后必须能回到地图继续推进。
+
+3. **船体受伤与失败是否正确**
+   - 敌人必须能对船体造成真实伤害。
+   - 船体血量归零后必须触发失败。
+
+4. **最终胜利是否正确触发**
+   - 最终层战斗完成后必须触发胜利。
+   - 不能在过早层数错误胜利，也不能永远不胜利。
+
+5. **炮台手动模式是否可进入且可开火**
+   - 玩家靠近炮台后必须能进入手动模式。
+   - 手动模式下必须能朝鼠标方向发射投射物。
+
+### P1（核心玩法级，强优先人工验证）
+
+这些项目决定“这是不是当前产品要验证的玩法”。
+
+1. **自动火控升级是否能解锁并生效**
+   - 购买后炮台应自动寻找并攻击敌人。
+
+2. **炮台韧性 / 瘫痪 / 修理链路是否完整**
+   - 韧性下降、瘫痪、自动恢复、人工修理都应成立。
+
+3. **波间期 UI 是否可用**
+   - Continue、Repair、Upgrade 路径应都能正常工作。
+
+4. **商店购买结果是否真实落地**
+   - 伤害提升、火控解锁、船体修理、新炮台安装都应实际生效。
+
+5. **休整节点是否能正确回血并返回地图**
+
+### P2（体验完整性级，建议人工验证）
+
+这些项目主要保证当前版本“玩起来像一个完整原型”。
+
+1. **地图节点可达性与选择反馈**
+2. **初始炮台配置是否合理出现**
+3. **敌人生成点与生成节奏是否自然**
+4. **HUD / 波次 UI / 商店 UI 的显示切换是否稳定**
+5. **重开一局后状态是否干净重置**
+
+### P3（细节与回归级，有空再测）
+
+这些项目不决定是否阻塞发布，但适合在每轮迭代后回归。
+
+1. 视觉状态是否足够清晰（可交互、手动、瘫痪）
+2. 连续快速输入时是否出现 UI 或状态错乱
+3. 长时间运行后是否出现流程卡死或状态泄漏
+4. 非典型路径下的返回逻辑是否稳定（如商店关闭、失败后重开）
+
+---
+
+## 十三、归档说明
+
+这份文档是当前版本的“产品行为归档基线”。
+
+后续如果：
+
+- 改了胜利条件，
+- 改了地图流转，
+- 改了商店作用，
+- 改了炮台手动 / 自动行为，
+
+就应该同步更新这份文档，避免“代码行为”和“产品预期”长期分叉。
