@@ -1,4 +1,4 @@
-# PROJECT KNOWLEDGE BASE
+# 项目知识库
 
 **Generated:** 2026-04-07
 **Commit:** fdc695b

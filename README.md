@@ -1,8 +1,8 @@
-# operation-taklamakan
+# Operation Taklamakan 塔克拉玛干行动
 
 一个基于 Godot 4.6 的俯视角陆行舰塔防 Roguelike 原型。
 
-## 你应该先看哪里
+## 先看
 
 - 产品预期：`docs/what-expected-behavior.md`
 - 项目知识基线：`AGENTS.md`
