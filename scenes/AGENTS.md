@@ -4,39 +4,39 @@
 
 `scenes/` 是运行时装配层。这里定义视觉层级、节点关系、脚本挂载点和预制体边界。
 
-## WHERE TO LOOK
+## 查找指南
 
-| Task | Location | Notes |
+| 任务 | 位置 | 说明 |
 |------|----------|-------|
-| Root runtime scene | `main.tscn` | Root scene for the whole run |
-| Ship composition | `ship/landship.tscn`, `ship/player_character.tscn` | Hull, slots, player |
-| Turret prefab | `turret/turret.tscn` | Barrel, interaction area, toughness |
-| Enemy prefabs | `enemy/*.tscn` | Tank, dog, boss, enemy projectile |
-| UI scenes | `ui/*.tscn` | HUD, map, wave, victory/game-over |
-| Shop scene | `map/shop_screen.tscn` | Shop layout |
-| Projectile prefabs | `projectile.tscn`, `enemy/enemy_projectile.tscn` | Friendly/enemy shots |
+| 根运行时场景 | `main.tscn` | 整个运行的根场景 |
+| 舰船装配 | `ship/landship.tscn`, `ship/player_character.tscn` | 船体、槽位、玩家 |
+| 炮塔预制体 | `turret/turret.tscn` | 炮管、交互区、韧性 |
+| 敌人预制体 | `enemy/*.tscn` | 坦克、狗、Boss、敌人弹药 |
+| UI 场景 | `ui/*.tscn` | HUD、地图、波次、胜利/失败 |
+| 商店场景 | `map/shop_screen.tscn` | 商店布局 |
+| 弹药预制体 | `projectile.tscn`, `enemy/enemy_projectile.tscn` | 友军/敌人弹药 |
 
-## CONVENTIONS
+## 约定
 
-- Scene files are grouped by gameplay domain, not by engine node type
-- UI scenes live in `scenes/ui/`, but some UI-like domain scenes live outside (`scenes/map/shop_screen.tscn`)
-- `.tscn` files generally pair with a script under `scripts/` using mirrored names
-- Main scene holds gameplay root, ship, UI layer, and spawn points together
+- 场景文件按玩法域分组，而非引擎节点类型
+- UI 场景放在 `scenes/ui/`，但某些类 UI 域场景在外部（如 `scenes/map/shop_screen.tscn`）
+- `.tscn` 文件通常与 `scripts/` 下同名脚本配对
+- 主场景包含玩法根、舰船、UI 层和生成点
 
-## ANTI-PATTERNS
+## 反模式
 
-- Do not move nodes casually when scripts rely on `$Path` bindings or parent-relative lookups
-- Do not rename ship/turret/player nodes without checking script discovery assumptions
-- Do not duplicate prefab behavior into scenes when a paired script already owns it
-- Do not assume all UI scenes are pure presentation; several contain flow-critical scripts
+- 不要随意移动节点——脚本可能依赖 `$Path` 绑定或父相对查找
+- 不要重命名舰船/炮塔/玩家节点——需检查脚本发现假设
+- 不要在场景中重复预制体行为——配对脚本已拥有该职责
+- 不要假设所有 UI 场景都是纯展示——若干包含流程关键脚本
 
-## HOTSPOTS
+## 风险热点
 
-- `main.tscn`: scene glue for runtime composition
-- `ui/map_screen.tscn`: large navigation surface tied to `map_screen.gd`
-- `ship/landship.tscn`: source of turret slots and ship gameplay anchors
+- `main.tscn`：运行时装配的场景粘合
+- `ui/map_screen.tscn`：大型导航面，与 `map_screen.gd` 绑定
+- `ship/landship.tscn`：炮塔槽位和舰船玩法锚点的来源
 
-## VALIDATION
+## 验证
 
-- Scene changes should be checked in running project, not only by reading text scene files
-- When scene hierarchy changes, re-check all `$NodePath` and `get_node_or_null()` lookups in paired scripts
+- 场景变更应在运行项目中检查，不能只读文本场景文件
+- 场景层级变更时，重新检查配对脚本中所有 `$NodePath` 和 `get_node_or_null()` 查找

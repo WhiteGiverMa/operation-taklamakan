@@ -4,9 +4,9 @@
 **Commit:** fdc695b
 **Branch:** master
 
-## OVERVIEW
+## 概述
 
-Godot 4.6 top-down landship defense roguelike prototype. Runtime is scene-driven; gameplay state is coordinated through autoload singletons and typed EventBus signals.
+Godot 4.6 俯视角陆行舰塔防 Roguelike 原型。运行时场景驱动，游戏状态通过 autoload 单例和类型化 EventBus 信号协调。
 
 ## STRUCTURE
 
@@ -21,19 +21,19 @@ Godot 4.6 top-down landship defense roguelike prototype. Runtime is scene-driven
 └── docs/                  # product behavior baseline
 ```
 
-## WHERE TO LOOK
+## 查找指南
 
-| Task | Location | Notes |
+| 任务 | 位置 | 说明 |
 |------|----------|-------|
-| Startup flow | `project.godot`, `scenes/main.tscn`, `scripts/main.gd` | Main scene bootstraps the whole run directly |
-| Global state | `scripts/game_state.gd` | Currency, layer, upgrades, reset |
-| Global events | `scripts/event_bus.gd` | Typed signal hub |
-| Map progression | `scripts/map_manager.gd`, `scripts/floor_graph.gd`, `scripts/ui/map_screen.gd` | Route selection and layer flow |
-| Combat waves | `scripts/wave_manager.gd` | Spawning, intermission, completion |
-| Ship / player / turrets | `scripts/ship/landship.gd`, `scripts/player.gd`, `scripts/turret.gd` | Core moment-to-moment gameplay |
-| Shop | `scripts/shop_screen.gd` | Fixed upgrade list |
-| Validation baseline | `docs/what-expected-behavior.md` | Current expected product behavior in Chinese |
-| MCP runtime control | `addons/godot_mcp/mcp_interaction_server.gd` | Autoload TCP server on 127.0.0.1:9090 |
+| 启动流程 | `project.godot`, `scenes/main.tscn`, `scripts/main.gd` | 主场景直接引导整个运行 |
+| 全局状态 | `scripts/game_state.gd` | 货币、层数、升级、重置 |
+| 全局事件 | `scripts/event_bus.gd` | 类型化信号中心 |
+| 地图推进 | `scripts/map_manager.gd`, `scripts/floor_graph.gd`, `scripts/ui/map_screen.gd` | 路线选择与层流程 |
+| 战斗波次 | `scripts/wave_manager.gd` | 生成、间歇、完成 |
+| 舰船 / 玩家 / 炮塔 | `scripts/ship/landship.gd`, `scripts/player.gd`, `scripts/turret.gd` | 核心实时玩法 |
+| 商店 | `scripts/shop_screen.gd` | 固定升级列表 |
+| 验证基线 | `docs/what-expected-behavior.md` | 当前预期产品行为（中文） |
+| MCP 运行时控制 | `addons/godot_mcp/mcp_interaction_server.gd` | Autoload TCP 服务，端口 127.0.0.1:9090 |
 
 ## ENTRY POINTS
 
@@ -45,43 +45,43 @@ Godot 4.6 top-down landship defense roguelike prototype. Runtime is scene-driven
   - `WaveManager`
   - `McpInteractionServer`
 
-## CONVENTIONS
+## 约定
 
-- Files: `snake_case.gd`, `snake_case.tscn`, `snake_case.tres`
-- Classes: `PascalCase`
-- Components: `*Component` suffix (`HealthComponent`, `ToughnessComponent`)
-- UI helper classes: `*UI` suffix (`MapNodeUI`)
-- Private runtime fields: leading underscore (`_can_fire`, `_repair_timer`)
-- Signals are typed where possible; prefer signal flow over direct polling across systems
-- Product docs are written in Chinese; code comments are mixed but mostly English
+- 文件命名：`snake_case.gd`、`snake_case.tscn`、`snake_case.tres`
+- 类命名：`PascalCase`
+- 组件后缀：`*Component`（如 `HealthComponent`、`ToughnessComponent`）
+- UI 辅助类后缀：`*UI`（如 `MapNodeUI`）
+- 私有运行时字段：前导下划线（如 `_can_fire`、`_repair_timer`）
+- 信号尽量类型化；跨系统通信优先用信号流而非直接轮询
+- 产品文档用中文；代码注释混用但以英文为主
 
-## ANTI-PATTERNS (THIS PROJECT)
+## 反模式（本项目）
 
-- Do not assume there is a real automated test suite; there is none
-- Do not add `.sisyphus/` files back into git history; local-only workspace metadata
-- Do not rely on `turret_ui.gd` for real upgrade flow; current upgrade path lives in shop/game state
-- Do not hardcode new wave/layer mappings in more places; `wave_manager.gd` is already brittle here
-- Do not expose MCP server beyond local debugging assumptions without reviewing `_cmd_eval()` risk
+- 不要假设存在真正的自动化测试套件——没有
+- 不要把 `.sisyphus/` 文件重新加入 git 历史——这是本地工作区元数据
+- 不要依赖 `turret_ui.gd` 实现真正的升级流程——当前升级路径在商店/游戏状态
+- 不要在更多地方硬编码波次/层数映射——`wave_manager.gd` 已够脆弱
+- 不要在未审查 `_cmd_eval()` 风险的情况下将 MCP 服务暴露到本地调试范围之外
 
-## UNIQUE STYLES
+## 特殊风格
 
-- Main gameplay loop starts directly into map flow; no traditional main menu gate
-- Validation is expected to be Godot-MCP driven or manual checklist driven, not unit-test driven
-- Wave resources use 1-based wave lookup (`WaveSet.get_wave()`)
-- Ship and enemies use node groups (`ship`, `enemies`) as loose discovery points
+- 主玩法循环直接进入地图流程——无传统主菜单门
+- 验证预期通过 Godot-MCP 驱动或人工清单驱动，非单元测试驱动
+- 波次资源使用 1 基数查找（`WaveSet.get_wave()`）
+- 舰船和敌人使用节点组（`ship`、`enemies`）作为松散发现点
 
-## COMMANDS
+## 命令
 
 ```bash
-# Run project from repo root
+# 从仓库根目录运行项目
 godot4 --path .
 
-# In this environment, preferred runtime verification is via Godot MCP
-# Main project path: G:\dev\operation-taklamakan
+# 本环境下，首选运行时验证方式是 Godot MCP
+# 项目主路径：G:\dev\operation-taklamakan
 ```
 
-## NOTES
+## 备注
 
-- `addons/godot_mcp/` is not passive tooling; it runs as an autoload at runtime
-- `docs/what-expected-behavior.md` is the product baseline; keep code and doc aligned
-- There is no CI, no export preset, and no packaged test runner right now
+- `addons/godot_mcp/` 不是被动工具——它作为 autoload 在运行时运行
+- `docs/what-expected-behavior.md` 是产品基线——保持代码与文档一致
+- 当前无 CI、无导出预设、无打包测试运行器
