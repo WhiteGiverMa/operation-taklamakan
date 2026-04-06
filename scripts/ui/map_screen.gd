@@ -13,6 +13,7 @@ const MAP_VIEWPORT_WIDTH: float = 960.0
 const MAP_VIEWPORT_HEIGHT: float = 720.0
 const LAYER_VERTICAL_GAP: float = 840.0
 const NODE_SCALE: float = 1.0
+const TOTAL_LAYERS: int = 3
 
 # Connection colors
 const COLOR_CONNECTION_ACTIVE := Color(0.8, 0.8, 0.8, 0.8)
@@ -37,6 +38,7 @@ var _pan_start_offset: Vector2
 func _ready() -> void:
 	_setup_ui()
 	_connect_signals()
+	_connect_localization()
 	_refresh_map()
 
 func _setup_ui() -> void:
@@ -48,6 +50,13 @@ func _connect_signals() -> void:
 	MapManager.map_generated.connect(_on_map_generated)
 	MapManager.current_node_changed.connect(_on_current_node_changed)
 	MapManager.layer_changed.connect(_on_layer_changed)
+
+func _connect_localization() -> void:
+	if not Localization.language_changed.is_connected(_on_language_changed):
+		Localization.language_changed.connect(_on_language_changed)
+
+func _on_language_changed(_locale: String) -> void:
+	_apply_localization()
 
 func _on_map_generated(_seed: int, _graph) -> void:
 	_refresh_map()
@@ -61,8 +70,11 @@ func _on_layer_changed(_new_layer: int) -> void:
 
 func _update_layer_info() -> void:
 	var current_layer := MapManager.current_layer
-	layer_info_label.text = "第 %d 层 / 共 3 层" % [current_layer + 1]
-	current_layer_indicator.text = "当前: 第%d层" % [current_layer + 1]
+	layer_info_label.text = Localization.t("map.screen.layer_info", "", {
+		"layer": current_layer + 1,
+		"total_layers": TOTAL_LAYERS,
+	})
+	current_layer_indicator.text = Localization.t("map.screen.current_layer", "", {"layer": current_layer + 1})
 
 func _refresh_map() -> void:
 	_clear_map()
@@ -97,7 +109,7 @@ func _draw_connections(graph) -> void:
 		return
 	
 	# Draw connections for all layers
-	for layer_index in range(3):
+	for layer_index in range(TOTAL_LAYERS):
 		var layer_nodes = floor_graph.get_layer_nodes(layer_index)
 		for node in layer_nodes:
 			for target_id in node.connections:
@@ -134,7 +146,7 @@ func _draw_nodes(graph) -> void:
 	if floor_graph == null:
 		return
 	
-	for layer_index in range(3):
+	for layer_index in range(TOTAL_LAYERS):
 		var layer_nodes = floor_graph.get_layer_nodes(layer_index)
 		for node in layer_nodes:
 			_create_node_ui(node)
@@ -149,7 +161,6 @@ func _create_node_ui(node) -> void:
 
 func _update_node_states() -> void:
 	var current_node = MapManager.current_node
-	var choices = MapManager.get_current_choices()
 	
 	for node_id in _node_ui_map:
 		var node_ui: MapNodeUIScript = _node_ui_map[node_id]
@@ -190,35 +201,40 @@ func _update_node_info(node_ui: MapNodeUIScript) -> void:
 	var info_text := ""
 	
 	if node_ui != null:
-		info_text = "类型: %s\n" % node_ui.get_type_name()
-		info_text += "位置: 第%d层\n" % [node_ui.layer_index + 1]
+		info_text = Localization.t("map.screen.node_info.type", "", {"type": node_ui.get_type_name()}) + "\n"
+		info_text += Localization.t("map.screen.node_info.position", "", {"layer": node_ui.layer_index + 1}) + "\n"
 		
 		if node_ui.is_visited:
-			info_text += "状态: 已探索"
+			info_text += Localization.t("map.screen.node_info.state.visited")
 		elif node_ui.is_reachable:
-			info_text += "状态: 可到达"
+			info_text += Localization.t("map.screen.node_info.state.reachable")
 		else:
-			info_text += "状态: 未解锁"
+			info_text += Localization.t("map.screen.node_info.state.locked")
 	else:
-		info_text = "选择一个节点"
+		info_text = Localization.t("map.screen.select_node_hint")
 	
 	node_info_label.text = info_text
 
 func _update_confirm_button() -> void:
 	if _selected_node_ui == null:
 		confirm_button.disabled = true
-		confirm_button.text = "选择节点"
+		confirm_button.text = Localization.t("map.screen.confirm.select")
 		return
 	
 	var can_confirm := _selected_node_ui.is_reachable and not _selected_node_ui.is_visited
 	confirm_button.disabled = not can_confirm
 	
 	if _selected_node_ui.is_visited:
-		confirm_button.text = "已探索"
+		confirm_button.text = Localization.t("map.screen.confirm.visited")
 	elif not _selected_node_ui.is_reachable:
-		confirm_button.text = "未解锁"
+		confirm_button.text = Localization.t("map.screen.confirm.locked")
 	else:
-		confirm_button.text = "确认前往"
+		confirm_button.text = Localization.t("map.screen.confirm.go")
+
+func _apply_localization() -> void:
+	_update_layer_info()
+	_update_node_info(_selected_node_ui)
+	_update_confirm_button()
 
 func _on_confirm_pressed() -> void:
 	if _selected_node_ui == null:

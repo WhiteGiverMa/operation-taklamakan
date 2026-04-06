@@ -37,7 +37,7 @@ offset_bottom = -10.0
 
 [node name="CurrencyLabel" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
-text = "Currency: 100"
+text = ""
 horizontal_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Panel/VBoxContainer"]
@@ -51,4 +51,4 @@ size_flags_vertical = 3
 
 [node name="CloseButton" type="Button" parent="Panel/VBoxContainer"]
 layout_mode = 2
-text = "Close"
+text = ""

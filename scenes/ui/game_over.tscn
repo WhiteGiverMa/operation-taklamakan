@@ -34,16 +34,16 @@ grow_vertical = 2
 
 [node name="ResultLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
-text = "DEFEAT"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StatsLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
-text = "Kills: 0"
+text = ""
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RestartButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Restart"
+text = ""

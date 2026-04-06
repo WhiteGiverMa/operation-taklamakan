@@ -10,27 +10,35 @@ extends Control
 @onready var upgrade_button: Button = $VBoxContainer/UpgradeButton
 
 func _ready() -> void:
+	_connect_localization()
 	_update_ui()
 	mode_button.pressed.connect(_on_mode_button_pressed)
 	upgrade_button.pressed.connect(_on_upgrade_button_pressed)
 
+func _connect_localization() -> void:
+	if not Localization.language_changed.is_connected(_on_language_changed):
+		Localization.language_changed.connect(_on_language_changed)
+
+func _on_language_changed(_locale: String) -> void:
+	_update_ui()
+
 func _update_ui() -> void:
 	if not turret:
-		mode_label.text = "Mode: MANUAL"
-		mode_button.text = "Switch to AUTO"
-		upgrade_button.text = "Fire Control: LOCKED"
+		mode_label.text = Localization.t("turret_ui.mode.manual")
+		mode_button.text = Localization.t("turret_ui.switch_to_auto")
+		upgrade_button.text = Localization.t("turret_ui.fire_control_locked")
 		upgrade_button.disabled = true
 		return
 	
 	# Show manual/auto mode based on actual turret state
 	if turret.is_manual_mode:
-		mode_label.text = "Mode: MANUAL"
-		mode_button.text = "Switch to AUTO"
+		mode_label.text = Localization.t("turret_ui.mode.manual")
+		mode_button.text = Localization.t("turret_ui.switch_to_auto")
 	else:
-		mode_label.text = "Mode: AUTO"
-		mode_button.text = "Switch to MANUAL"
+		mode_label.text = Localization.t("turret_ui.mode.auto")
+		mode_button.text = Localization.t("turret_ui.switch_to_manual")
 	
-	upgrade_button.text = "Fire Control: LOCKED"
+	upgrade_button.text = Localization.t("turret_ui.fire_control_locked")
 	upgrade_button.disabled = true
 
 func _on_mode_button_pressed() -> void:

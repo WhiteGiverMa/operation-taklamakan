@@ -21,15 +21,15 @@ const NODE_COLORS := {
 	MapNodeScript.TYPE_BOSS: Color(1.0, 0.3, 0.1),        # Orange-Red
 }
 
-const TYPE_NAMES := {
-	MapNodeScript.TYPE_START: "起点",
-	MapNodeScript.TYPE_COMBAT: "战斗",
-	MapNodeScript.TYPE_ELITE: "精英",
-	MapNodeScript.TYPE_SHOP: "商店",
-	MapNodeScript.TYPE_EVENT: "事件",
-	MapNodeScript.TYPE_REST: "休息",
-	MapNodeScript.TYPE_END: "终点",
-	MapNodeScript.TYPE_BOSS: "首领",
+const TYPE_KEYS := {
+	MapNodeScript.TYPE_START: "map.node_type.start",
+	MapNodeScript.TYPE_COMBAT: "map.node_type.combat",
+	MapNodeScript.TYPE_ELITE: "map.node_type.elite",
+	MapNodeScript.TYPE_SHOP: "map.node_type.shop",
+	MapNodeScript.TYPE_EVENT: "map.node_type.event",
+	MapNodeScript.TYPE_REST: "map.node_type.rest",
+	MapNodeScript.TYPE_END: "map.node_type.end",
+	MapNodeScript.TYPE_BOSS: "map.node_type.boss",
 }
 
 # Visual state colors
@@ -91,7 +91,8 @@ func set_selected(selected: bool) -> void:
 		node_selected.emit(self)
 
 func get_type_name() -> String:
-	return TYPE_NAMES.get(node_type, "未知")
+	var type_key := str(TYPE_KEYS.get(node_type, "map.node_type.unknown"))
+	return Localization.t(type_key)
 
 func _create_circle_texture() -> void:
 	var image := Image.create(int(node_radius * 2), int(node_radius * 2), false, Image.FORMAT_RGBA8)

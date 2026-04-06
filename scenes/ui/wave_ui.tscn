@@ -41,25 +41,25 @@ theme_override_constants/separation = 20
 [node name="WaveLabel" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
-text = "Wave 1 / 5 Complete"
+text = ""
 horizontal_alignment = 1
 
 [node name="StatusLabel" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Intermission - Prepare for next wave!"
+text = ""
 horizontal_alignment = 1
 
 [node name="TimerLabel" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "Auto-continue in: 10.0 s"
+text = ""
 horizontal_alignment = 1
 
 [node name="EnemyInfoLabel" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Next Wave Enemies: 3 Tanks, 2 Dogs"
+text = ""
 horizontal_alignment = 1
 
 [node name="WaveProgressBar" type="ProgressBar" parent="Panel/VBoxContainer"]
@@ -75,14 +75,14 @@ alignment = 1
 [node name="ContinueButton" type="Button" parent="Panel/VBoxContainer/ButtonContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Continue"
+text = ""
 
 [node name="RepairButton" type="Button" parent="Panel/VBoxContainer/ButtonContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Repair"
+text = ""
 
 [node name="UpgradeButton" type="Button" parent="Panel/VBoxContainer/ButtonContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Upgrade"
+text = ""

@@ -11,26 +11,26 @@ signal shop_closed
 const SHOP_ITEMS: Array[Dictionary] = [
 	{
 		"id": "turret_damage",
-		"name": "Turret Damage +10%",
-		"description": "Increases all turret damage.",
+		"name_key": "shop.item.turret_damage.name",
+		"description_key": "shop.item.turret_damage.desc",
 		"price": 35
 	},
 	{
 		"id": "fire_control",
-		"name": "Fire Control System",
-		"description": "Unlocks auto-fire for all turrets.",
+		"name_key": "shop.item.fire_control.name",
+		"description_key": "shop.item.fire_control.desc",
 		"price": 45
 	},
 	{
 		"id": "hull_repair",
-		"name": "Hull Repair Kit",
-		"description": "Restores 50% of ship HP.",
+		"name_key": "shop.item.hull_repair.name",
+		"description_key": "shop.item.hull_repair.desc",
 		"price": 20
 	},
 	{
 		"id": "new_turret",
-		"name": "New Turret",
-		"description": "Installs turret on empty slot.",
+		"name_key": "shop.item.new_turret.name",
+		"description_key": "shop.item.new_turret.desc",
 		"price": 40
 	}
 ]
@@ -46,6 +46,15 @@ func _ready() -> void:
 	EventBus.currency_changed.connect(_on_currency_changed)
 	EventBus.game_started.connect(_on_game_started)
 	close_button.pressed.connect(_on_close_pressed)
+	_connect_localization()
+	_apply_localization()
+
+func _connect_localization() -> void:
+	if not Localization.language_changed.is_connected(_on_language_changed):
+		Localization.language_changed.connect(_on_language_changed)
+
+func _on_language_changed(_locale: String) -> void:
+	_apply_localization()
 
 func _on_shop_entered() -> void:
 	_show_shop()
@@ -75,7 +84,7 @@ func _close_requested() -> void:
 	visible = false
 
 func _update_currency_display() -> void:
-	currency_label.text = "Currency: %d" % GameState.currency
+	currency_label.text = Localization.t("shop.currency", "", {"amount": GameState.currency})
 
 func _build_item_list() -> void:
 	# Clear existing items
@@ -93,13 +102,13 @@ func _create_item_row(data: Dictionary) -> HBoxContainer:
 
 	# Name label
 	var name_label := Label.new()
-	name_label.text = data["name"]
+	name_label.text = Localization.t(data["name_key"])
 	name_label.custom_minimum_size.x = 180
 	row.add_child(name_label)
 
 	# Description label
 	var desc_label := Label.new()
-	desc_label.text = data["description"]
+	desc_label.text = Localization.t(data["description_key"])
 	desc_label.custom_minimum_size.x = 200
 	desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(desc_label)
@@ -113,7 +122,7 @@ func _create_item_row(data: Dictionary) -> HBoxContainer:
 
 	# Buy button
 	var buy_button := Button.new()
-	buy_button.text = "Buy"
+	buy_button.text = Localization.t("common.buy")
 	buy_button.custom_minimum_size.x = 80
 	buy_button.pressed.connect(_on_buy_pressed.bind(data))
 	row.add_child(buy_button)
@@ -129,12 +138,20 @@ func _update_item_row(_row: HBoxContainer, data: Dictionary, buy_button: Button,
 
 	buy_button.disabled = is_purchased or not can_afford
 	if is_purchased:
-		buy_button.text = "Owned"
+		buy_button.text = Localization.t("common.owned")
 		price_label.add_theme_color_override("font_color", Color.GRAY)
 	elif not can_afford:
+		buy_button.text = Localization.t("common.buy")
 		price_label.add_theme_color_override("font_color", Color.RED)
 	else:
+		buy_button.text = Localization.t("common.buy")
 		price_label.remove_theme_color_override("font_color")
+
+func _apply_localization() -> void:
+	close_button.text = Localization.t("common.close")
+	_update_currency_display()
+	if item_list.get_child_count() > 0:
+		_build_item_list()
 
 func _update_all_items() -> void:
 	for i in range(item_list.get_child_count()):

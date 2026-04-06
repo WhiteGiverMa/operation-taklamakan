@@ -9,14 +9,33 @@ extends Control
 func _ready() -> void:
 	EventBus.game_over.connect(_on_game_over)
 	restart_button.pressed.connect(_on_restart_pressed)
+	_connect_localization()
+	_apply_localization()
 	hide()
+
+func _connect_localization() -> void:
+	if not Localization.language_changed.is_connected(_on_language_changed):
+		Localization.language_changed.connect(_on_language_changed)
+
+func _on_language_changed(_locale: String) -> void:
+	if visible:
+		_apply_localization()
+	else:
+		restart_button.text = Localization.t("common.restart")
 
 func _on_game_over(won: bool) -> void:
 	if won:
-		result_label.text = "VICTORY"
-		stats_label.text = "Kills: %d\nLayer: %d" % [GameState.kills, GameState.current_layer]
+		_apply_localization()
 		show()
 		get_tree().paused = true
+
+func _apply_localization() -> void:
+	result_label.text = Localization.t("victory.title")
+	stats_label.text = Localization.t("victory.stats", "", {
+		"kills": GameState.kills,
+		"layer": GameState.current_layer,
+	})
+	restart_button.text = Localization.t("common.restart")
 
 func _on_restart_pressed() -> void:
 	hide()

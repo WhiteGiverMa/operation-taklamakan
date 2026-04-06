@@ -24,15 +24,15 @@ const TYPE_REST: int = NodeType.REST
 const TYPE_END: int = NodeType.END
 const TYPE_BOSS: int = NodeType.BOSS
 
-const TYPE_NAMES := {
-	NodeType.START: "START",
-	NodeType.COMBAT: "COMBAT",
-	NodeType.ELITE: "ELITE",
-	NodeType.SHOP: "SHOP",
-	NodeType.EVENT: "EVENT",
-	NodeType.REST: "REST",
-	NodeType.END: "END",
-	NodeType.BOSS: "BOSS",
+const TYPE_IDS := {
+	NodeType.START: "start",
+	NodeType.COMBAT: "combat",
+	NodeType.ELITE: "elite",
+	NodeType.SHOP: "shop",
+	NodeType.EVENT: "event",
+	NodeType.REST: "rest",
+	NodeType.END: "end",
+	NodeType.BOSS: "boss",
 }
 
 var id: String = ""
@@ -74,7 +74,10 @@ func set_visited(value: bool = true) -> void:
 	visited = value
 
 func get_type_name() -> String:
-	return TYPE_NAMES.get(type, "UNKNOWN")
+	return TYPE_IDS.get(type, "unknown")
+
+func get_type_translation_key() -> String:
+	return "map.node_type.%s" % get_type_name()
 
 func is_terminal() -> bool:
 	return type == NodeType.END or type == NodeType.BOSS

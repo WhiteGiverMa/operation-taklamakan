@@ -32,7 +32,7 @@ offset_top = 20.0
 offset_right = 300.0
 offset_bottom = 60.0
 theme_override_font_sizes/font_size = 28
-text = "第 1 层 / 共 3 层"
+text = ""
 
 [node name="CurrentLayerIndicator" type="Label" parent="MapScreen/UILayer"]
 anchors_preset = 1
@@ -44,7 +44,7 @@ offset_right = -20.0
 offset_bottom = 50.0
 grow_horizontal = 0
 theme_override_font_sizes/font_size = 20
-text = "当前: 第1层"
+text = ""
 horizontal_alignment = 2
 
 [node name="NodeInfo" type="Label" parent="MapScreen/UILayer"]
@@ -57,7 +57,7 @@ offset_right = 250.0
 offset_bottom = -20.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 18
-text = "选择一个节点"
+text = ""
 
 [node name="ConfirmButton" type="Button" parent="MapScreen/UILayer"]
 anchors_preset = 3
@@ -73,4 +73,4 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 24
 disabled = true
-text = "选择节点"
+text = ""

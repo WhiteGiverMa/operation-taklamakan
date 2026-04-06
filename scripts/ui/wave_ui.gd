@@ -20,6 +20,8 @@ func _ready() -> void:
 	_hide_ui()
 	_find_wave_manager()
 	_connect_signals()
+	_connect_localization()
+	_apply_localization()
 
 func _process(_delta: float) -> void:
 	if not _wave_manager:
@@ -45,6 +47,13 @@ func _connect_signals() -> void:
 		if not _wave_manager.intermission_ended.is_connected(_on_intermission_ended):
 			_wave_manager.intermission_ended.connect(_on_intermission_ended)
 
+func _connect_localization() -> void:
+	if not Localization.language_changed.is_connected(_on_language_changed):
+		Localization.language_changed.connect(_on_language_changed)
+
+func _on_language_changed(_locale: String) -> void:
+	_apply_localization()
+
 func _find_wave_manager() -> void:
 	_wave_manager = WaveManager
 
@@ -69,11 +78,11 @@ func _update_intermission_ui() -> void:
 	var current_wave = _wave_manager.current_wave
 	var total_waves = _wave_manager.total_waves
 	
-	wave_label.text = "Wave %d / %d Complete" % [current_wave, total_waves]
-	status_label.text = "Intermission - Prepare for next wave!"
+	wave_label.text = Localization.t("wave.ui.complete_title", "", {"wave": current_wave, "total": total_waves})
+	status_label.text = Localization.t("wave.ui.intermission_status")
 	
 	var time_remaining = _wave_manager.get_intermission_time_remaining()
-	timer_label.text = "Auto-continue in: %.1f s" % time_remaining
+	timer_label.text = Localization.t("wave.ui.auto_continue", "", {"seconds": "%.1f" % time_remaining})
 	
 	# Get next wave info
 	var next_wave_data = null
@@ -81,9 +90,13 @@ func _update_intermission_ui() -> void:
 		next_wave_data = _wave_manager.wave_set.get_wave(current_wave + 1)
 	if next_wave_data and next_wave_data.has_method("get_enemy_counts"):
 		var enemy_counts = next_wave_data.get_enemy_counts()
-		enemy_info_label.text = "Next Wave Enemies: %d Tanks, %d Dogs, %d Bosses" % [enemy_counts.get("tank", 0), enemy_counts.get("mechanical_dog", 0), enemy_counts.get("boss_tank", 0)]
+		enemy_info_label.text = Localization.t("wave.ui.next_wave_enemies", "", {
+			"tanks": enemy_counts.get("tank", 0),
+			"dogs": enemy_counts.get("mechanical_dog", 0),
+			"bosses": enemy_counts.get("boss_tank", 0),
+		})
 	else:
-		enemy_info_label.text = "Next Wave: Unknown"
+		enemy_info_label.text = Localization.t("wave.ui.next_wave_unknown")
 	
 	# Update progress bar
 	wave_progress_bar.value = float(current_wave) / float(total_waves) * 100.0
@@ -109,10 +122,17 @@ func _show_completion_ui() -> void:
 	button_container.visible = false
 	wave_progress_bar.visible = false
 	
-	wave_label.text = "All Waves Complete!"
-	status_label.text = "Combat session finished!"
+	wave_label.text = Localization.t("wave.ui.all_complete")
+	status_label.text = Localization.t("wave.ui.combat_finished")
 	timer_label.text = ""
-	enemy_info_label.text = "Victory!"
+	enemy_info_label.text = Localization.t("wave.ui.victory")
+
+func _apply_localization() -> void:
+	continue_button.text = Localization.t("common.continue")
+	repair_button.text = Localization.t("common.repair")
+	upgrade_button.text = Localization.t("common.upgrade")
+	if _wave_manager:
+		_update_ui()
 
 func _on_continue_pressed() -> void:
 	if _wave_manager:
@@ -133,16 +153,16 @@ func _on_upgrade_pressed() -> void:
 	EventBus.shop_entered.emit()
 	upgrade_button.disabled = true
 
-func _on_wave_started(wave_number: int) -> void:
+func _on_wave_started(_wave_number: int) -> void:
 	_hide_ui()
 
-func _on_wave_complete(wave_number: int) -> void:
+func _on_wave_complete(_wave_number: int) -> void:
 	_show_ui()
 
 func _on_all_waves_complete() -> void:
 	_show_completion_ui()
 
-func _on_intermission_started(duration: float) -> void:
+func _on_intermission_started(_duration: float) -> void:
 	_show_ui()
 
 func _on_intermission_ended() -> void:

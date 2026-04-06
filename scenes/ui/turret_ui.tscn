@@ -32,13 +32,13 @@ alignment = 1
 
 [node name="ModeLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
-text = "Mode: MANUAL"
+text = ""
 horizontal_alignment = 1
 
 [node name="ModeButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Switch to AUTO"
+text = ""
 
 [node name="UpgradeButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-text = "Unlock Fire Control (100G)"
+text = ""
