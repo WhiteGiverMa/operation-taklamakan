@@ -1,0 +1,76 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/map_screen.gd" id="1_map_screen"]
+
+[node name="root" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="MapScreen" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_map_screen")
+
+[node name="MapContainer" type="Control" parent="MapScreen"]
+anchors_preset = 0
+
+[node name="ConnectionsLayer" type="Control" parent="MapScreen/MapContainer"]
+anchors_preset = 0
+
+[node name="NodesLayer" type="Control" parent="MapScreen/MapContainer"]
+anchors_preset = 0
+
+[node name="UILayer" type="CanvasLayer" parent="MapScreen"]
+
+[node name="LayerInfo" type="Label" parent="MapScreen/UILayer"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 300.0
+offset_bottom = 60.0
+theme_override_font_sizes/font_size = 28
+text = "第 1 层 / 共 3 层"
+
+[node name="CurrentLayerIndicator" type="Label" parent="MapScreen/UILayer"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -280.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 50.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 20
+text = "当前: 第1层"
+horizontal_alignment = 2
+
+[node name="NodeInfo" type="Label" parent="MapScreen/UILayer"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -150.0
+offset_right = 250.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+text = "选择一个节点"
+
+[node name="ConfirmButton" type="Button" parent="MapScreen/UILayer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+disabled = true
+text = "选择节点"

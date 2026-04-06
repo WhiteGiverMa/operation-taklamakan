@@ -1,0 +1,30 @@
+# Godot 4 specific
+.godot/
+*.import
+
+# Build artifacts
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+~$*
+
+# Logs
+*.log
+
+# Export
+export/
+exports/
+
+# User settings
+*.cfg.lock

@@ -1,0 +1,88 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/wave_ui.gd" id="1_waveui"]
+
+[node name="WaveUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_waveui")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -200.0
+offset_right = 300.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="WaveLabel" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Wave 1 / 5 Complete"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Intermission - Prepare for next wave!"
+horizontal_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Auto-continue in: 10.0 s"
+horizontal_alignment = 1
+
+[node name="EnemyInfoLabel" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Next Wave Enemies: 3 Tanks, 2 Dogs"
+horizontal_alignment = 1
+
+[node name="WaveProgressBar" type="ProgressBar" parent="Panel/VBoxContainer"]
+layout_mode = 2
+max_value = 100.0
+value = 20.0
+
+[node name="ButtonContainer" type="HBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="ContinueButton" type="Button" parent="Panel/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Continue"
+
+[node name="RepairButton" type="Button" parent="Panel/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Repair"
+
+[node name="UpgradeButton" type="Button" parent="Panel/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Upgrade"

@@ -1,0 +1,37 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/turret.gd" id="1_turret"]
+[ext_resource type="Script" path="res://scripts/toughness_component.gd" id="2_toughness"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interaction"]
+radius = 150.0
+
+[node name="root" type="Node2D" unique_id="802819965"]
+script = ExtResource("1_turret")
+
+[node name="Base" type="ColorRect" parent="." unique_id="1421707311"]
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0.5, 0.5, 0.5, 1)
+
+[node name="Barrel" type="Node2D" parent="." unique_id="1292604512"]
+position = Vector2(40, 0)
+
+[node name="BarrelVisual" type="ColorRect" parent="Barrel" unique_id="1787597623"]
+offset_left = -5.0
+offset_top = -5.0
+offset_right = 50.0
+offset_bottom = 10.0
+color = Color(0.3, 0.3, 0.3, 1)
+
+[node name="InteractionArea" type="Area2D" parent="." unique_id="1564589800"]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea" unique_id="1997238683"]
+shape = SubResource("CircleShape2D_interaction")
+
+[node name="ToughnessComponent" type="Node" parent="." unique_id="2101530289"]
+script = ExtResource("2_toughness")

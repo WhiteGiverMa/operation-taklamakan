@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WaveSet" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/wave_set.gd" id="1_waveset"]
+[ext_resource type="Resource" path="res://resources/waves/wave_01.tres" id="2_wave1"]
+[ext_resource type="Resource" path="res://resources/waves/wave_02.tres" id="3_wave2"]
+[ext_resource type="Resource" path="res://resources/waves/wave_03.tres" id="4_wave3"]
+[ext_resource type="Resource" path="res://resources/waves/wave_04.tres" id="5_wave4"]
+[ext_resource type="Resource" path="res://resources/waves/wave_05.tres" id="6_wave5"]
+
+[resource]
+script = ExtResource("1_waveset")
+waves = [ExtResource("2_wave1"), ExtResource("3_wave2"), ExtResource("4_wave3"), ExtResource("5_wave4"), ExtResource("6_wave5")]

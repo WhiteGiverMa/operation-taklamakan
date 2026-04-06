@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/projectile.gd" id="1_projectile"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bullet"]
+radius = 8.0
+
+[node name="root" type="Area2D" unique_id="289605718"]
+script = ExtResource("1_projectile")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id="1911775946"]
+shape = SubResource("CircleShape2D_bullet")
+
+[node name="Visual" type="ColorRect" parent="." unique_id="363192825"]
+offset_left = -10.0
+offset_top = -6.0
+offset_right = 10.0
+offset_bottom = 6.0
+color = Color(1, 0.8, 0, 1)

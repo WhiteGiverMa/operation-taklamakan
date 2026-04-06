@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/mechanical_dog.gd" id="1_mechanicaldog"]
+[ext_resource type="Script" path="res://scripts/health_component.gd" id="2_health"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(50, 40)
+
+[node name="MechanicalDog" type="CharacterBody2D" unique_id=195162125]
+script = ExtResource("1_mechanicaldog")
+
+[node name="Visual" type="ColorRect" parent="." unique_id=1507488831]
+offset_left = -25.0
+offset_top = -20.0
+offset_right = 25.0
+offset_bottom = 20.0
+color = Color(1, 0.41960785, 0.20784314, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=863722876]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="HealthComponent" type="Node" parent="." unique_id=1587133919]
+script = ExtResource("2_health")
+max_health = 40.0
+current_health = 40.0
