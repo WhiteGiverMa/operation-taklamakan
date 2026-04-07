@@ -2,7 +2,9 @@ extends Node
 
 signal settings_changed
 
-const CONFIG_PATH := "user://settings.cfg"
+const CONFIG_DIR := "user://config"
+const CONFIG_PATH := CONFIG_DIR + "/settings.cfg"
+const LEGACY_CONFIG_PATH := "user://settings.cfg"
 
 enum WindowMode {
 	WINDOWED,
@@ -25,6 +27,9 @@ func _ready() -> void:
 	apply_settings()
 
 func load_settings() -> void:
+	_ensure_config_dir()
+	_migrate_legacy_config()
+
 	var config := ConfigFile.new()
 	var result := config.load(CONFIG_PATH)
 	if result != OK:
@@ -37,6 +42,8 @@ func load_settings() -> void:
 	vsync_enabled = bool(config.get_value("display", "vsync_enabled", DEFAULT_VSYNC_ENABLED))
 
 func save_settings() -> void:
+	_ensure_config_dir()
+
 	var config := ConfigFile.new()
 	config.set_value("general", "language", language)
 	config.set_value("audio", "master_volume", master_volume)
@@ -96,6 +103,31 @@ func _save_defaults(config: ConfigFile) -> void:
 	config.set_value("display", "window_mode", DEFAULT_WINDOW_MODE)
 	config.set_value("display", "vsync_enabled", DEFAULT_VSYNC_ENABLED)
 	config.save(CONFIG_PATH)
+
+func _ensure_config_dir() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CONFIG_DIR))
+
+func _migrate_legacy_config() -> void:
+	if FileAccess.file_exists(CONFIG_PATH):
+		return
+
+	if not FileAccess.file_exists(LEGACY_CONFIG_PATH):
+		return
+
+	var legacy_absolute_path := ProjectSettings.globalize_path(LEGACY_CONFIG_PATH)
+	var config_absolute_path := ProjectSettings.globalize_path(CONFIG_PATH)
+	var rename_result := DirAccess.rename_absolute(legacy_absolute_path, config_absolute_path)
+	if rename_result == OK:
+		return
+
+	var legacy_config := ConfigFile.new()
+	if legacy_config.load(LEGACY_CONFIG_PATH) != OK:
+		return
+
+	if legacy_config.save(CONFIG_PATH) != OK:
+		return
+
+	DirAccess.remove_absolute(legacy_absolute_path)
 
 func _linear_to_db(value: float) -> float:
 	if value <= 0.0:
