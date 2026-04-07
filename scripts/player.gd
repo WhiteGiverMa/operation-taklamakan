@@ -10,12 +10,9 @@ extends CharacterBody2D
 const SHIP_BOUNDS_X: float = 380.0
 const SHIP_BOUNDS_Y: float = 180.0
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	# Get input direction in local coordinates
-	var input_direction := Vector2(
-		Input.get_axis("move_left", "move_right"),
-		Input.get_axis("move_up", "move_down")
-	)
+	var input_direction := InputManager.move_action.value_axis_2d
 	
 	# Apply movement in local space (relative to parent ship)
 	velocity = input_direction * speed

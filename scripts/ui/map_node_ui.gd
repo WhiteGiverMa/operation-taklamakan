@@ -52,6 +52,7 @@ var _circle_texture: ImageTexture
 
 func _ready() -> void:
 	mouse_filter = MOUSE_FILTER_PASS
+	pressed.connect(_on_pressed)
 	_create_circle_texture()
 	_update_visuals()
 
@@ -143,15 +144,11 @@ func _get_display_color() -> Color:
 	else:
 		return COLOR_REACHABLE
 
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			if is_reachable and not is_visited:
-				# Click to select or confirm
-				if is_selected:
-					node_confirmed.emit(self)
-				else:
-					set_selected(true)
-			elif is_reachable and is_visited:
-				# Can click visited nodes to see info but not confirm
-				set_selected(true)
+func _on_pressed() -> void:
+	if is_reachable and not is_visited:
+		if is_selected:
+			node_confirmed.emit(self)
+		else:
+			set_selected(true)
+	elif is_reachable and is_visited:
+		set_selected(true)

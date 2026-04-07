@@ -32,14 +32,28 @@ var _node_ui_map: Dictionary = {}  # node_id -> MapNodeUI
 var _connection_lines: Array[Line2D] = []
 var _selected_node_ui: MapNodeUIScript = null
 var _is_panning: bool = false
-var _pan_start_pos: Vector2
-var _pan_start_offset: Vector2
 
 func _ready() -> void:
 	_setup_ui()
 	_connect_signals()
 	_connect_localization()
 	_refresh_map()
+
+func _process(_delta: float) -> void:
+	if not visible:
+		if _is_panning:
+			_stop_pan()
+		return
+
+	var pan_is_active := InputManager.map_pan_hold_action.is_triggered()
+	if pan_is_active:
+		if not _is_panning:
+			_start_pan()
+		var pan_delta := InputManager.map_pan_delta_action.value_axis_2d
+		if pan_delta != Vector2.ZERO:
+			_do_pan_delta(pan_delta)
+	elif _is_panning:
+		_stop_pan()
 
 func _setup_ui() -> void:
 	confirm_button.disabled = true
@@ -268,26 +282,11 @@ func _center_on_current_layer() -> void:
 	
 	map_container.position = viewport_center - layer_center
 
-func _input(event: InputEvent) -> void:
-	# Pan with middle mouse button
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_MIDDLE:
-			if event.pressed:
-				_start_pan(event.position)
-			else:
-				_stop_pan()
-	
-	elif event is InputEventMouseMotion and _is_panning:
-		_do_pan(event.position)
-
-func _start_pan(mouse_pos: Vector2) -> void:
+func _start_pan() -> void:
 	_is_panning = true
-	_pan_start_pos = mouse_pos
-	_pan_start_offset = map_container.position
 
 func _stop_pan() -> void:
 	_is_panning = false
 
-func _do_pan(mouse_pos: Vector2) -> void:
-	var delta := mouse_pos - _pan_start_pos
-	map_container.position = _pan_start_offset + delta
+func _do_pan_delta(delta: Vector2) -> void:
+	map_container.position += delta

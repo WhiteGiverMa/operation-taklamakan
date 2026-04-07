@@ -32,8 +32,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	EventBus.enemy_died.connect(_on_enemy_died)
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel") and _state == State.PLAYING:
+func _process(_delta: float) -> void:
+	if _state == State.PLAYING and InputManager.pause_toggle_action.is_triggered():
 		toggle_pause()
 
 func get_state() -> State:

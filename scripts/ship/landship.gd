@@ -69,7 +69,7 @@ func _check_repair_input(delta: float) -> void:
 		return
 	
 	# Player is nearby - check for repair input
-	if Input.is_action_pressed("repair"):
+	if InputManager.repair_action.is_triggered():
 		_is_repairing = true
 		_repair_progress += delta
 		

@@ -1,0 +1,48 @@
+[gd_resource type="Resource" script_class="GUIDEMappingContext" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
+[ext_resource type="Resource" path="res://resources/input/actions/fire.tres" id="2_fire"]
+[ext_resource type="Script" path="res://addons/guide/inputs/guide_input_key.gd" id="3_key"]
+[ext_resource type="Script" path="res://addons/guide/guide_input_mapping.gd" id="4_input_mapping"]
+[ext_resource type="Script" path="res://addons/guide/guide_action_mapping.gd" id="5_action_mapping"]
+[ext_resource type="Script" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="6_pressed"]
+
+[sub_resource type="Resource" id="SpaceKey"]
+script = ExtResource("3_key")
+key = 32
+allow_additional_modifiers = false
+
+[sub_resource type="Resource" id="PressedTrigger"]
+script = ExtResource("6_pressed")
+actuation_threshold = 0.5
+
+[sub_resource type="Resource" id="FireSpace"]
+script = ExtResource("4_input_mapping")
+input = SubResource("SpaceKey")
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
+triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PressedTrigger")])
+
+[sub_resource type="Resource" id="EnterKey"]
+script = ExtResource("3_key")
+key = 4194309
+allow_additional_modifiers = false
+
+[sub_resource type="Resource" id="PressedTriggerEnter"]
+script = ExtResource("6_pressed")
+actuation_threshold = 0.5
+
+[sub_resource type="Resource" id="FireEnter"]
+script = ExtResource("4_input_mapping")
+input = SubResource("EnterKey")
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
+triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PressedTriggerEnter")])
+
+[sub_resource type="Resource" id="FireActionMapping"]
+script = ExtResource("5_action_mapping")
+action = ExtResource("2_fire")
+input_mappings = Array[ExtResource("4_input_mapping")]([SubResource("FireSpace"), SubResource("FireEnter")])
+
+[resource]
+script = ExtResource("1_context")
+display_name = "Turret Manual"
+mappings = Array[ExtResource("5_action_mapping")]([SubResource("FireActionMapping")])

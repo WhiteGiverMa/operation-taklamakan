@@ -5,6 +5,8 @@
 ## 先看
 
 - 产品预期：`docs/what-expected-behavior.md`
+- GUIDE 接入：`docs/guide-integration.md`
+- GUT 接入：`docs/gut-integration.md`
 - 项目知识基线：`AGENTS.md`
 - 运行入口：`project.godot` → `scenes/main.tscn`
 - 主要逻辑：`scripts/`

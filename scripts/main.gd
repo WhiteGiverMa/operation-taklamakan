@@ -87,6 +87,7 @@ func _on_game_started() -> void:
 
 func _on_game_over(_won: bool) -> void:
 	_flow_state = FlowState.TRANSITION
+	InputManager.activate_menu()
 	_hide_menu_overlays()
 	_set_combat_visibility(true)
 	if _map_screen_root:
@@ -98,6 +99,7 @@ func _on_game_state_changed(state: int) -> void:
 	match state:
 		GameState.State.PAUSED:
 			if GameState.has_active_run and not _settings_menu.visible and not _main_menu.visible:
+				InputManager.activate_pause()
 				_pause_menu.visible = true
 		GameState.State.PLAYING:
 			if _pause_menu:
@@ -137,6 +139,7 @@ func _slot_has_turret(slot: Node2D) -> bool:
 
 func _show_map_screen() -> void:
 	_flow_state = FlowState.MAP
+	InputManager.activate_map()
 	_hide_menu_overlays()
 	_set_combat_visibility(false)
 	if _shop_screen:
@@ -146,6 +149,7 @@ func _show_map_screen() -> void:
 
 func _start_combat_for_current_layer() -> void:
 	_flow_state = FlowState.COMBAT
+	InputManager.activate_combat()
 	_hide_menu_overlays()
 	if _map_screen_root:
 		_map_screen_root.visible = false
@@ -176,6 +180,7 @@ func _on_current_node_changed(node) -> void:
 
 func _on_shop_entered() -> void:
 	_flow_state = FlowState.SHOP
+	InputManager.activate_shop()
 	_hide_menu_overlays()
 	_set_combat_visibility(false)
 	if _map_screen_root:
@@ -209,6 +214,7 @@ func _clear_runtime_enemies() -> void:
 func _show_main_menu(preserve_run: bool) -> void:
 	if _main_menu == null:
 		return
+	InputManager.activate_menu()
 	_hide_gameplay_flow()
 	_hide_menu_overlays()
 	if preserve_run and GameState.has_active_run:
@@ -264,6 +270,7 @@ func _on_main_menu_new_game_requested() -> void:
 
 func _on_main_menu_settings_requested() -> void:
 	_settings_return_target = SettingsReturnTarget.MAIN_MENU
+	InputManager.activate_settings()
 	if _main_menu:
 		_main_menu.visible = false
 	if _settings_menu:
@@ -272,10 +279,12 @@ func _on_main_menu_settings_requested() -> void:
 func _on_pause_resume_requested() -> void:
 	_hide_menu_overlays()
 	GameState.resume_game()
+	InputManager.restore_flow_context()
 	_restore_current_flow()
 
 func _on_pause_settings_requested() -> void:
 	_settings_return_target = SettingsReturnTarget.PAUSE_MENU
+	InputManager.activate_settings()
 	if _pause_menu:
 		_pause_menu.visible = false
 	if _settings_menu:
@@ -289,9 +298,11 @@ func _on_settings_back_requested() -> void:
 		_settings_menu.visible = false
 	match _settings_return_target:
 		SettingsReturnTarget.PAUSE_MENU:
+			InputManager.activate_pause()
 			if _pause_menu:
 				_pause_menu.visible = true
 		_:
+			InputManager.activate_menu()
 			if _main_menu:
 				_main_menu.visible = true
 				_main_menu.refresh_state()

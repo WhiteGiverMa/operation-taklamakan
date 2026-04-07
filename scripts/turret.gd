@@ -34,7 +34,6 @@ func _ready() -> void:
 
 	interaction_area.body_entered.connect(_on_player_entered)
 	interaction_area.body_exited.connect(_on_player_exited)
-	interaction_area.input_event.connect(_on_interaction_area_input)
 	EventBus.ship_damaged.connect(_on_ship_damaged)
 	toughness_component.toughness_changed.connect(_on_toughness_changed)
 	toughness_component.paralysis_started.connect(_on_paralysis_started)
@@ -48,6 +47,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	_handle_repair(delta)
 	_handle_fire_cooldown(delta)
+	_handle_interact_input()
 
 	if is_manual_mode:
 		if toughness_component.is_paralyzed():
@@ -72,7 +72,7 @@ func _handle_fire_cooldown(delta: float) -> void:
 
 
 func _handle_manual_fire_input() -> void:
-	if Input.is_action_just_pressed("ui_accept") and _can_fire and not toughness_component.is_paralyzed():
+	if InputManager.fire_action.is_triggered() and _can_fire and not toughness_component.is_paralyzed():
 		_fire_at_position(get_global_mouse_position())
 
 func _handle_auto_fire() -> void:
@@ -126,11 +126,13 @@ func enter_manual_mode() -> void:
 	if toughness_component.is_paralyzed():
 		return
 	is_manual_mode = true
+	InputManager.activate_turret_manual()
 	_update_visual_state()
 
 
 func exit_manual_mode() -> void:
 	is_manual_mode = false
+	InputManager.deactivate_turret_manual()
 	_update_visual_state()
 
 
@@ -154,13 +156,16 @@ func _on_player_exited(body: Node2D) -> void:
 			_update_visual_state()
 
 
-func _on_interaction_area_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
-	if event.is_action_pressed("ui_accept") and _player_in_range and not is_manual_mode and not toughness_component.is_paralyzed():
-		enter_manual_mode()
-
-
 func _is_player(body: Node2D) -> bool:
 	return body.is_in_group("player") or body.has_method("is_player") or body.name == "Player" or body.name == "PlayerCharacter"
+
+
+func _handle_interact_input() -> void:
+	if not _player_in_range or is_manual_mode or toughness_component.is_paralyzed():
+		return
+
+	if InputManager.interact_action.is_triggered():
+		enter_manual_mode()
 
 
 func _handle_repair(delta: float) -> void:
@@ -168,7 +173,7 @@ func _handle_repair(delta: float) -> void:
 		_repair_timer = 0.0
 		return
 
-	if Input.is_action_pressed("repair"):
+	if InputManager.repair_action.is_triggered():
 		_repair_timer += delta
 		if _repair_timer >= repair_duration:
 			toughness_component.repair_full()

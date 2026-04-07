@@ -18,10 +18,9 @@ func _ready() -> void:
 		Localization.language_changed.connect(_on_language_changed)
 	_apply_localization()
 
-func _input(event: InputEvent) -> void:
-	if visible and event.is_action_pressed("ui_cancel"):
+func _process(_delta: float) -> void:
+	if visible and InputManager.ui_back_action.is_triggered():
 		resume_requested.emit()
-		get_viewport().set_input_as_handled()
 
 func _on_language_changed(_locale: String) -> void:
 	_apply_localization()
