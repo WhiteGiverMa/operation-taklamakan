@@ -35,7 +35,12 @@ window/size/viewport_height=1080
 
 project/assembly_name="operation-taklamakan"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/guide/plugin.cfg", "res://addons/godot_mcp/plugin.cfg")
+
 [global_script_classes]
+
 list=[{
 "base": &"RefCounted",
 "class": &"DamageData",
@@ -781,4 +786,3 @@ list=[{
 "language": &"GDScript",
 "path": "res://scripts/resources/wave_set.gd"
 }]
-
