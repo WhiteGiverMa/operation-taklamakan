@@ -10,6 +10,12 @@ extends CharacterBody2D
 const SHIP_BOUNDS_X: float = 380.0
 const SHIP_BOUNDS_Y: float = 180.0
 
+func _ready() -> void:
+	# 玩家站在舰体内部移动，不应与舰体 hull 自身发生物理碰撞，
+	# 否则 CharacterBody2D 会被父节点 StaticBody2D 的碰撞解算限制移动。
+	collision_layer = 0
+	collision_mask = 0
+
 func _physics_process(_delta: float) -> void:
 	# Get input direction in local coordinates
 	var input_direction := InputManager.move_action.value_axis_2d
