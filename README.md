@@ -17,7 +17,7 @@
 - `scripts/`：核心玩法、UI、资源脚本
 - `scenes/`：Godot 场景文件
 - `resources/`：波次等 `.tres` 数据资源
-- `addons/godot_mcp/`：Godot MCP 运行时控制插件
+- `addons/godot_mcp/`：Godot MCP 运行时控制插件（vendor 自统一 fork）
 - `docs/`：产品行为与项目说明文档
 
 ## 当前状态
@@ -31,3 +31,4 @@
 - `scripts/README.md`
 - `scenes/README.md`
 - `addons/godot_mcp/AGENTS.md`
+- `addons/godot_mcp/README.md`
