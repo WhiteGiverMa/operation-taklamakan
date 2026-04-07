@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.6")
 [autoload]
 
 Localization="*res://scripts/localization.gd"
+SettingsManager="*res://scripts/settings_manager.gd"
 MapManager="*res://scripts/map_manager.gd"
 
 EventBus="*res://scripts/event_bus.gd"
