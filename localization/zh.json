@@ -38,6 +38,15 @@
   "settings.audio_section": "音量",
   "settings.master_volume": "主音量",
 
+  "hud.input_hints.title": "输入提示",
+  "hud.input_hints.move": "移动",
+  "hud.input_hints.repair": "维修",
+  "hud.input_hints.interact": "交互",
+  "hud.input_hints.fire": "开火",
+  "hud.input_hints.pause": "暂停",
+  "hud.input_hints.toggle": "显示/隐藏提示",
+  "hud.input_hints.unbound": "未绑定",
+
   "map.screen.layer_info": "第 {layer} 层 / 共 {total_layers} 层",
   "map.screen.current_layer": "当前: 第{layer}层",
   "map.screen.select_node_hint": "选择一个节点",

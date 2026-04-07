@@ -38,6 +38,15 @@
   "settings.audio_section": "Audio",
   "settings.master_volume": "Master Volume",
 
+  "hud.input_hints.title": "Input Hints",
+  "hud.input_hints.move": "Move",
+  "hud.input_hints.repair": "Repair",
+  "hud.input_hints.interact": "Interact",
+  "hud.input_hints.fire": "Fire",
+  "hud.input_hints.pause": "Pause",
+  "hud.input_hints.toggle": "Show/Hide Hints",
+  "hud.input_hints.unbound": "Unbound",
+
   "map.screen.layer_info": "Layer {layer} / {total_layers}",
   "map.screen.current_layer": "Current: Layer {layer}",
   "map.screen.select_node_hint": "Select a node",

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="GUIDEMappingContext" load_steps=42 format=3]
+[gd_resource type="Resource" script_class="GUIDEMappingContext" load_steps=47 format=3]
 
 [ext_resource type="Script" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
 [ext_resource type="Resource" path="res://resources/input/actions/move.tres" id="2_move"]
@@ -11,6 +11,7 @@
 [ext_resource type="Resource" path="res://resources/input/actions/interact.tres" id="9_interact"]
 [ext_resource type="Resource" path="res://resources/input/actions/pause_toggle.tres" id="10_pause"]
 [ext_resource type="Script" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="11_pressed"]
+[ext_resource type="Resource" path="res://resources/input/actions/input_hints_toggle.tres" id="12_input_hints"]
 
 [sub_resource type="Resource" id="WKey"]
 script = ExtResource("3_key")
@@ -190,7 +191,27 @@ script = ExtResource("7_action_mapping")
 action = ExtResource("10_pause")
 input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("PauseMapping")])
 
+[sub_resource type="Resource" id="InputHintsToggleKey"]
+script = ExtResource("3_key")
+key = 79
+allow_additional_modifiers = false
+
+[sub_resource type="Resource" id="PressedTriggerInputHints"]
+script = ExtResource("11_pressed")
+actuation_threshold = 0.5
+
+[sub_resource type="Resource" id="InputHintsMapping"]
+script = ExtResource("6_input_mapping")
+input = SubResource("InputHintsToggleKey")
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
+triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PressedTriggerInputHints")])
+
+[sub_resource type="Resource" id="InputHintsActionMapping"]
+script = ExtResource("7_action_mapping")
+action = ExtResource("12_input_hints")
+input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("InputHintsMapping")])
+
 [resource]
 script = ExtResource("1_context")
 display_name = "Combat"
-mappings = Array[ExtResource("7_action_mapping")]([SubResource("MoveActionMapping"), SubResource("RepairActionMapping"), SubResource("InteractActionMapping"), SubResource("PauseActionMapping")])
+mappings = Array[ExtResource("7_action_mapping")]([SubResource("MoveActionMapping"), SubResource("RepairActionMapping"), SubResource("InteractActionMapping"), SubResource("PauseActionMapping"), SubResource("InputHintsActionMapping")])

@@ -21,3 +21,126 @@ offset_bottom = 46.0
 max_value = 100.0
 value = 100.0
 show_percentage = false
+
+[node name="InputHintsPanel" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = -420.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 336.0
+grow_horizontal = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="InputHintsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBoxContainer" type="VBoxContainer" parent="InputHintsPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = ""
+
+[node name="Rows" type="VBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MovementRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/MovementRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 0)
+text = ""
+
+[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/MovementRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = ""
+
+[node name="RepairRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/RepairRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 0)
+text = ""
+
+[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/RepairRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = ""
+
+[node name="InteractRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/InteractRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 0)
+text = ""
+
+[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/InteractRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = ""
+
+[node name="FireRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/FireRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 0)
+text = ""
+
+[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/FireRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = ""
+
+[node name="PauseRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/PauseRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 0)
+text = ""
+
+[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/PauseRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = ""
+
+[node name="ToggleRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/ToggleRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(160, 0)
+text = ""
+
+[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/ToggleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = ""

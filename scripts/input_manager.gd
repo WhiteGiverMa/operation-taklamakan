@@ -21,6 +21,7 @@ const REPAIR_ACTION := preload("res://resources/input/actions/repair.tres")
 const INTERACT_ACTION := preload("res://resources/input/actions/interact.tres")
 const FIRE_ACTION := preload("res://resources/input/actions/fire.tres")
 const PAUSE_TOGGLE_ACTION := preload("res://resources/input/actions/pause_toggle.tres")
+const INPUT_HINTS_TOGGLE_ACTION := preload("res://resources/input/actions/input_hints_toggle.tres")
 const UI_BACK_ACTION := preload("res://resources/input/actions/ui_back.tres")
 const MAP_PAN_HOLD_ACTION := preload("res://resources/input/actions/map_pan_hold.tres")
 const MAP_PAN_DELTA_ACTION := preload("res://resources/input/actions/map_pan_delta.tres")
@@ -53,6 +54,10 @@ var fire_action: GUIDEAction:
 var pause_toggle_action: GUIDEAction:
 	get:
 		return PAUSE_TOGGLE_ACTION
+
+var input_hints_toggle_action: GUIDEAction:
+	get:
+		return INPUT_HINTS_TOGGLE_ACTION
 
 var ui_back_action: GUIDEAction:
 	get:
