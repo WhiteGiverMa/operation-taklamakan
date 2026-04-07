@@ -1,0 +1,107 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_main_menu"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main_menu")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0470588, 0.054902, 0.0901961, 1)
+
+[node name="Accent" type="ColorRect" parent="Backdrop"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 220.0
+grow_horizontal = 2
+color = Color(0.27451, 0.470588, 0.690196, 0.18)
+
+[node name="ContentPanel" type="PanelContainer" parent="Backdrop"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -270.0
+offset_top = -250.0
+offset_right = 270.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Backdrop/ContentPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 36
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 36
+theme_override_constants/margin_bottom = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Backdrop/ContentPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TitleLabel" type="Label" parent="Backdrop/ContentPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 44
+horizontal_alignment = 1
+text = ""
+
+[node name="SubtitleLabel" type="Label" parent="Backdrop/ContentPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+horizontal_alignment = 1
+text = ""
+
+[node name="StatusLabel" type="Label" parent="Backdrop/ContentPanel/MarginContainer/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+text = ""
+
+[node name="ButtonContainer" type="VBoxContainer" parent="Backdrop/ContentPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ContinueButton" type="Button" parent="Backdrop/ContentPanel/MarginContainer/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 52)
+theme_override_font_sizes/font_size = 22
+text = ""
+
+[node name="NewGameButton" type="Button" parent="Backdrop/ContentPanel/MarginContainer/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 52)
+theme_override_font_sizes/font_size = 22
+text = ""
+
+[node name="SettingsButton" type="Button" parent="Backdrop/ContentPanel/MarginContainer/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 52)
+theme_override_font_sizes/font_size = 22
+text = ""
+
+[node name="QuitButton" type="Button" parent="Backdrop/ContentPanel/MarginContainer/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 52)
+theme_override_font_sizes/font_size = 22
+text = ""
+
+[node name="NewGameDialog" type="ConfirmationDialog" parent="."]
+title = ""
+ok_button_text = ""
+dialog_text = ""
