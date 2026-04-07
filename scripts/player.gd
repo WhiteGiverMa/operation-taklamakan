@@ -18,9 +18,10 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	# Get input direction in local coordinates
-	var input_direction := InputManager.move_action.value_axis_2d
+	var input_direction := InputManager.move_action.value_axis_2d.normalized()
 	
-	# Apply movement in local space (relative to parent ship)
+	# Apply movement in local space (relative to parent ship).
+	# Normalize to keep diagonal movement speed consistent across contexts and future input devices.
 	velocity = input_direction * speed
 	
 	# Move using move_and_slide() - handles physics automatically

@@ -18,20 +18,26 @@ script = ExtResource("3_key")
 key = 87
 allow_additional_modifiers = false
 
-[sub_resource type="Resource" id="Negate"]
+[sub_resource type="Resource" id="NegateY"]
 script = ExtResource("4_negate")
-x = true
+x = false
 y = true
-z = true
+z = false
 
-[sub_resource type="Resource" id="SwizzleY"]
+[sub_resource type="Resource" id="SwizzleToY"]
 script = ExtResource("5_swizzle")
 order = 0
+
+[sub_resource type="Resource" id="NegateX"]
+script = ExtResource("4_negate")
+x = true
+y = false
+z = false
 
 [sub_resource type="Resource" id="MoveUpW"]
 script = ExtResource("6_input_mapping")
 input = SubResource("WKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("Negate"), SubResource("SwizzleY")])
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleToY"), SubResource("NegateY")])
 triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="UpArrowKey"]
@@ -42,7 +48,7 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveUpArrow"]
 script = ExtResource("6_input_mapping")
 input = SubResource("UpArrowKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("Negate"), SubResource("SwizzleY")])
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleToY"), SubResource("NegateY")])
 triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="SKey"]
@@ -50,14 +56,10 @@ script = ExtResource("3_key")
 key = 83
 allow_additional_modifiers = false
 
-[sub_resource type="Resource" id="SwizzleYPositive"]
-script = ExtResource("5_swizzle")
-order = 0
-
 [sub_resource type="Resource" id="MoveDownS"]
 script = ExtResource("6_input_mapping")
 input = SubResource("SKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleYPositive")])
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleToY")])
 triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="DownArrowKey"]
@@ -68,7 +70,7 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveDownArrow"]
 script = ExtResource("6_input_mapping")
 input = SubResource("DownArrowKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleYPositive")])
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleToY")])
 triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="AKey"]
@@ -79,7 +81,7 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveLeftA"]
 script = ExtResource("6_input_mapping")
 input = SubResource("AKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("Negate")])
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("NegateX")])
 triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="LeftArrowKey"]
@@ -90,7 +92,7 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveLeftArrow"]
 script = ExtResource("6_input_mapping")
 input = SubResource("LeftArrowKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("Negate")])
+modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("NegateX")])
 triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="DKey"]
