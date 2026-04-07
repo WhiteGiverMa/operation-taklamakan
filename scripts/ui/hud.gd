@@ -5,6 +5,7 @@ extends Control
 @onready var hp_bar: ProgressBar = $HPBar
 @onready var input_hints_panel: PanelContainer = $InputHintsPanel
 @onready var input_hints_title: Label = $InputHintsPanel/MarginContainer/VBoxContainer/TitleLabel
+@onready var input_hints_hint: Label = $InputHintsPanel/MarginContainer/VBoxContainer/HintLabel
 @onready var input_hints_rows: VBoxContainer = $InputHintsPanel/MarginContainer/VBoxContainer/Rows
 @onready var movement_row: HBoxContainer = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/MovementRow
 @onready var movement_action_label: Label = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/MovementRow/ActionLabel
@@ -26,6 +27,7 @@ extends Control
 @onready var toggle_input_label: Label = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/ToggleRow/InputLabel
 
 var _input_formatter: GUIDEInputFormatter = null
+var _input_hints_enabled := false
 
 const HINT_ACTIONS := [
 	{
@@ -81,7 +83,7 @@ func _ready() -> void:
 	_refresh_input_hints()
 
 func _process(_delta: float) -> void:
-	if not visible:
+	if not visible or not _input_hints_enabled:
 		return
 
 	if InputManager.input_hints_toggle_action.is_triggered():
@@ -89,6 +91,13 @@ func _process(_delta: float) -> void:
 
 	if input_hints_panel.visible:
 		_refresh_input_hints()
+
+func set_input_hints_enabled(enabled: bool) -> void:
+	_input_hints_enabled = enabled
+	if not enabled:
+		input_hints_panel.visible = false
+		return
+	_refresh_input_hints()
 
 func _on_ship_health_changed(current: float, maximum: float) -> void:
 	hp_bar.max_value = maximum
@@ -101,6 +110,11 @@ func _on_language_changed(_locale: String) -> void:
 
 func _apply_localization() -> void:
 	input_hints_title.text = Localization.t("hud.input_hints.title")
+	input_hints_hint.text = Localization.t(
+		"hud.input_hints.hint",
+		"",
+		{"key": _get_action_text(InputManager.input_hints_toggle_action)}
+	)
 	for config in HINT_ACTIONS:
 		var action_label := input_hints_rows.get_node(config.action_label) as Label
 		action_label.text = Localization.t(config.key)
@@ -111,7 +125,17 @@ func _refresh_input_hints() -> void:
 		var row := input_hints_rows.get_node(config.row) as HBoxContainer
 		var input_label := input_hints_rows.get_node(config.input_label) as Label
 		var action: GUIDEAction = InputManager.get(config.action)
-		var input_text := _input_formatter.action_as_text(action)
+		var input_text := _get_action_text(action)
 		var has_binding := not input_text.is_empty()
 		row.visible = has_binding
 		input_label.text = input_text if has_binding else Localization.t("hud.input_hints.unbound")
+	input_hints_hint.text = Localization.t(
+		"hud.input_hints.hint",
+		"",
+		{"key": _get_action_text(InputManager.input_hints_toggle_action)}
+	)
+
+func _get_action_text(action: GUIDEAction) -> String:
+	if _input_formatter == null:
+		_input_formatter = GUIDEInputFormatter.for_active_contexts()
+	return _input_formatter.action_as_text(action)

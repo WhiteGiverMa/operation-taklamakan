@@ -39,6 +39,7 @@
   "settings.master_volume": "主音量",
 
   "hud.input_hints.title": "输入提示",
+  "hud.input_hints.hint": "按 {key} 显示或关闭此面板",
   "hud.input_hints.move": "移动",
   "hud.input_hints.repair": "维修",
   "hud.input_hints.interact": "交互",

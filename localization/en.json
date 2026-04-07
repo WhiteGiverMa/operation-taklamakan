@@ -39,6 +39,7 @@
   "settings.master_volume": "Master Volume",
 
   "hud.input_hints.title": "Input Hints",
+  "hud.input_hints.hint": "Press {key} to show or hide this panel",
   "hud.input_hints.move": "Move",
   "hud.input_hints.repair": "Repair",
   "hud.input_hints.interact": "Interact",

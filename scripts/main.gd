@@ -161,6 +161,7 @@ func _set_combat_visibility(should_show: bool) -> void:
 	landship.visible = should_show
 	landship.process_mode = Node.PROCESS_MODE_INHERIT if should_show else Node.PROCESS_MODE_DISABLED
 	hud.visible = should_show
+	hud.call("set_input_hints_enabled", should_show)
 	wave_ui.visible = should_show
 
 func _on_current_node_changed(node) -> void:
