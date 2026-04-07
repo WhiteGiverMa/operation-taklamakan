@@ -24,6 +24,7 @@ enum State { MENU, PLAYING, PAUSED, GAME_OVER }
 # Shop upgrade state
 var turret_damage_multiplier: float = 1.0
 var auto_fire_unlocked: bool = false
+var has_active_run: bool = false
 
 var _state: State = State.MENU
 
@@ -44,12 +45,12 @@ func set_state(new_state: State) -> void:
 	EventBus.game_paused.emit(_state == State.PAUSED)
 
 func start_game() -> void:
-	currency = 50
-	current_layer = 1
-	kills = 0
-	level = 1
-	turret_damage_multiplier = 1.0
-	auto_fire_unlocked = false
+	_reset_run_values()
+	MapManager.reset_map()
+	WaveManager.end_combat_session()
+	_restore_ship_health()
+	has_active_run = true
+	get_tree().paused = false
 	set_state(State.PLAYING)
 	EventBus.game_started.emit()
 
@@ -62,41 +63,43 @@ func toggle_pause() -> void:
 		get_tree().paused = false
 
 func end_game(won: bool) -> void:
+	has_active_run = false
 	set_state(State.GAME_OVER)
 	get_tree().paused = true
 	EventBus.game_over.emit(won)
 
 func reset_game() -> void:
-	# Reset currency and upgrades
+	start_game()
+
+func return_to_menu(preserve_run: bool = true) -> void:
+	has_active_run = has_active_run and preserve_run
+	set_state(State.MENU)
+	get_tree().paused = preserve_run and has_active_run
+
+func resume_game() -> void:
+	if not has_active_run:
+		return
+	set_state(State.PLAYING)
+	get_tree().paused = false
+
+func _reset_run_values() -> void:
 	currency = 50
 	turret_damage_multiplier = 1.0
 	auto_fire_unlocked = false
 	kills = 0
 	current_layer = 1
 	level = 1
-	
-	# Reset map to layer 1
-	MapManager.reset_map()
-	
-	# Reset wave system
-	WaveManager.end_combat_session()
-	
-	# Reset ship HP
+
+func _restore_ship_health() -> void:
 	var ship = get_tree().get_first_node_in_group("ship")
 	if ship and ship.has_node("HealthComponent"):
 		var health_comp = ship.get_node("HealthComponent") as HealthComponent
 		if health_comp:
 			health_comp.current_health = health_comp.max_health
 			EventBus.ship_health_changed.emit(health_comp.max_health, health_comp.max_health)
-	
-	# Resume game and start
-	get_tree().paused = false
-	set_state(State.PLAYING)
-	EventBus.game_started.emit()
 
 func reset_to_menu() -> void:
-	set_state(State.MENU)
-	get_tree().paused = false
+	return_to_menu(false)
 
 func add_currency(amount: int) -> void:
 	currency += amount
