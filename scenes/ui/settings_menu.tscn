@@ -1,0 +1,131 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="1_settings_menu"]
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_settings_menu")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Panel" type="PanelContainer" parent="Backdrop"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="Backdrop/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Header" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 32
+text = ""
+
+[node name="Content" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="LanguageRow" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LanguageLabel" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/LanguageRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 0)
+text = ""
+
+[node name="LanguageOption" type="OptionButton" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/LanguageRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DisplaySectionLabel" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = ""
+
+[node name="WindowModeRow" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="WindowModeLabel" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/WindowModeRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 0)
+text = ""
+
+[node name="WindowModeOption" type="OptionButton" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/WindowModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VSyncRow" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+
+[node name="VSyncToggle" type="CheckButton" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/VSyncRow"]
+layout_mode = 2
+text = ""
+
+[node name="AudioSectionLabel" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = ""
+
+[node name="MasterVolumeRow" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MasterVolumeLabel" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/MasterVolumeRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 0)
+text = ""
+
+[node name="MasterVolumeSlider" type="HSlider" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/MasterVolumeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MasterVolumeValue" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/MasterVolumeRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(60, 0)
+horizontal_alignment = 2
+text = ""
+
+[node name="Footer" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="BackButton" type="Button" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Footer"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 44)
+theme_override_font_sizes/font_size = 20
+text = ""
