@@ -14,6 +14,7 @@ enum FlowState { MAP, COMBAT, SHOP, TRANSITION }
 enum SettingsReturnTarget { MAIN_MENU, PAUSE_MENU }
 
 var _flow_state: FlowState = FlowState.TRANSITION
+var _shop_return_flow_state: FlowState = FlowState.MAP
 var _map_screen_root: Control = null
 var _map_screen: Control = null
 var _shop_screen: Control = null
@@ -180,6 +181,7 @@ func _on_current_node_changed(node) -> void:
 			_show_map_screen()
 
 func _on_shop_entered() -> void:
+	_shop_return_flow_state = _flow_state
 	_flow_state = FlowState.SHOP
 	InputManager.activate_shop()
 	_hide_menu_overlays()
@@ -193,7 +195,20 @@ func _on_shop_entered() -> void:
 func _on_shop_closed() -> void:
 	if GameState.get_state() == GameState.State.GAME_OVER:
 		return
-	_show_map_screen()
+	match _shop_return_flow_state:
+		FlowState.COMBAT:
+			_flow_state = FlowState.COMBAT
+			InputManager.activate_combat()
+			_hide_menu_overlays()
+			_set_combat_visibility(true)
+			if _map_screen_root:
+				_map_screen_root.visible = false
+			if _shop_screen:
+				_shop_screen.visible = false
+		FlowState.MAP:
+			_show_map_screen()
+		_:
+			_show_map_screen()
 
 func _apply_rest_heal() -> void:
 	if landship and landship.health_component:
