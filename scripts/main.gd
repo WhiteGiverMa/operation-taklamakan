@@ -9,6 +9,7 @@ const TURRET_SCENE := preload("res://scenes/turret/turret.tscn")
 const MAIN_MENU_SCENE := preload("res://scenes/ui/main_menu.tscn")
 const SETTINGS_MENU_SCENE := preload("res://scenes/ui/settings_menu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
+const ENCOUNTER_OVERLAY_SCENE := preload("res://scenes/ui/encounter_overlay.tscn")
 
 enum FlowState { MAP, COMBAT, SHOP, TRANSITION }
 enum SettingsReturnTarget { MAIN_MENU, PAUSE_MENU }
@@ -21,6 +22,7 @@ var _shop_screen: Control = null
 var _main_menu: Control = null
 var _settings_menu: Control = null
 var _pause_menu: Control = null
+var _encounter_overlay: Control = null
 var _settings_return_target: SettingsReturnTarget = SettingsReturnTarget.MAIN_MENU
 
 @onready var landship: Landship = $Landship
@@ -73,6 +75,12 @@ func _setup_overlay_screens() -> void:
 	_settings_menu.visible = false
 	_settings_menu.back_requested.connect(_on_settings_back_requested)
 
+	_encounter_overlay = ENCOUNTER_OVERLAY_SCENE.instantiate() as Control
+	ui_layer.add_child(_encounter_overlay)
+	_encounter_overlay.visible = false
+	if _encounter_overlay.has_signal("completed"):
+		_encounter_overlay.completed.connect(_on_encounter_overlay_completed)
+
 func _connect_signals() -> void:
 	MapManager.current_node_changed.connect(_on_current_node_changed)
 	EventBus.wave_all_complete.connect(_on_wave_all_complete)
@@ -100,6 +108,7 @@ func _on_game_over(_won: bool) -> void:
 		_map_screen_root.visible = false
 	if _shop_screen:
 		_shop_screen.visible = false
+	_hide_encounter_overlay()
 
 func _on_game_over_main_menu_requested() -> void:
 	_show_main_menu(false)
@@ -173,9 +182,10 @@ func _on_current_node_changed(node) -> void:
 			_start_combat_for_current_layer()
 		MapNode.TYPE_SHOP:
 			_on_shop_entered()
+		MapNode.TYPE_EVENT:
+			_show_event_placeholder()
 		MapNode.TYPE_REST:
-			_apply_rest_heal()
-			_show_map_screen()
+			_show_rest_notice(_apply_rest_heal())
 		_:
 			_show_map_screen()
 
@@ -198,9 +208,35 @@ func _on_shop_closed() -> void:
 		return
 	_apply_flow_state(_shop_return_flow_state)
 
-func _apply_rest_heal() -> void:
+func _apply_rest_heal() -> float:
 	if landship and landship.health_component:
-		landship.health_component.heal(landship.max_health * 0.3)
+		return landship.health_component.heal(landship.max_health * 0.3)
+	return 0.0
+
+func _show_event_placeholder() -> void:
+	_apply_flow_state(FlowState.TRANSITION)
+	InputManager.activate_menu()
+	if _encounter_overlay and _encounter_overlay.has_method("show_event_placeholder"):
+		_encounter_overlay.call("show_event_placeholder")
+
+func _show_rest_notice(restored_amount: float) -> void:
+	_apply_flow_state(FlowState.TRANSITION)
+	InputManager.activate_menu()
+	if _encounter_overlay and _encounter_overlay.has_method("show_rest_notice"):
+		_encounter_overlay.call("show_rest_notice", restored_amount)
+
+func _hide_encounter_overlay() -> void:
+	if _encounter_overlay and _encounter_overlay.has_method("hide_overlay"):
+		_encounter_overlay.call("hide_overlay")
+	elif _encounter_overlay:
+		_encounter_overlay.visible = false
+
+func _on_encounter_overlay_completed() -> void:
+	if GameState.get_state() == GameState.State.GAME_OVER:
+		return
+	if not GameState.has_active_run:
+		return
+	_show_map_screen()
 
 func _on_wave_all_complete() -> void:
 	WaveManager.end_combat_session()
@@ -234,6 +270,7 @@ func _hide_gameplay_flow() -> void:
 		_map_screen_root.visible = false
 	if _shop_screen:
 		_shop_screen.visible = false
+	_hide_encounter_overlay()
 
 func _hide_menu_overlays() -> void:
 	if _main_menu:
@@ -250,6 +287,7 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 		FlowState.COMBAT:
 			InputManager.activate_combat()
 			_set_combat_visibility(true)
+			_hide_encounter_overlay()
 			if _map_screen_root:
 				_map_screen_root.visible = false
 			if _shop_screen:
@@ -257,6 +295,7 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 		FlowState.SHOP:
 			InputManager.activate_shop()
 			_set_combat_visibility(false)
+			_hide_encounter_overlay()
 			if _map_screen_root:
 				_map_screen_root.visible = false
 			if _shop_screen:
@@ -264,6 +303,7 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 		FlowState.MAP:
 			InputManager.activate_map()
 			_set_combat_visibility(false)
+			_hide_encounter_overlay()
 			if _shop_screen:
 				_shop_screen.visible = false
 			if _map_screen_root:
@@ -273,6 +313,7 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 		_:
 			InputManager.restore_flow_context()
 			_set_combat_visibility(false)
+			_hide_encounter_overlay()
 			if _shop_screen:
 				_shop_screen.visible = false
 			if _map_screen_root:

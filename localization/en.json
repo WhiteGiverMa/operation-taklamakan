@@ -71,6 +71,17 @@
   "map.node_type.boss": "Boss",
   "map.node_type.unknown": "Unknown",
 
+  "encounter.event.title": "Event",
+  "encounter.event.body": "This is a placeholder event. Choose an option before continuing.",
+  "encounter.event.option_a": "Option A",
+  "encounter.event.option_b": "Option B",
+  "encounter.event.unselected": "No event option selected yet.",
+  "encounter.event.selected": "Selected: {option}",
+  "encounter.event.continue": "Continue Forward",
+  "encounter.rest.title": "Rest",
+  "encounter.rest.body": "Restored 30% max HP ({amount}).",
+  "encounter.rest.continue": "Continue",
+
   "wave.ui.complete_title": "Wave {wave} / {total} Complete",
   "wave.ui.intermission_status": "Intermission - Prepare for the next wave!",
   "wave.ui.auto_continue": "Auto-continue in: {seconds} s",
