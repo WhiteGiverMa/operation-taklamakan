@@ -4,11 +4,11 @@
 
 统一项目内 2D 物理碰撞层（collision layer）与碰撞掩码（collision mask）的语义，避免继续用裸数字在脚本和场景里各自约定，导致敌我命中、交互检测和后续扩展互相污染。
 
-本规范基于当前项目已落地实现收敛，不额外引入新的玩法层。
+本规范基于当前项目已落地实现收敛，并包含玩家受击击退所需的独立层语义。
 
 ## 当前落地结论
 
-项目当前实际使用了 5 个 2D 物理层：
+项目当前实际使用了 6 个 2D 物理层：
 
 | 层号 | 名称 | 当前承担职责 | 典型节点 |
 |---|---|---|---|
@@ -17,8 +17,9 @@
 | 3 | `enemy` | 敌方单位实体碰撞 | `Tank`、`MechanicalDog`、Boss |
 | 4 | `player_projectile` | 我方投射物命中层 | `Projectile` |
 | 5 | `enemy_projectile` | 敌方投射物命中层 | `EnemyProjectile` |
+| 6 | `player` | 玩家实体碰撞 / 击退接收 | `PlayerCharacter` |
 
-另外，玩家角色当前明确设置为 `collision_layer = 0`、`collision_mask = 0`，即**不参与物理碰撞体系**；炮塔交互范围使用 `Area2D`，但自身不占用独立物理层，只通过 mask 监听玩家进入。
+玩家角色当前使用独立的 `player` 层参与物理碰撞，但**不承担血量与死亡职责**；敌人和敌弹可对其施加击退，炮塔交互范围通过 mask 监听玩家进入。
 
 ## 标准层表
 
@@ -30,7 +31,8 @@
 | 2 | `turret` | 炮塔承伤实体 | `enemy`、`enemy_projectile` |
 | 3 | `enemy` | 敌方单位本体 | `ship`、`turret` |
 | 4 | `player_projectile` | 我方所有投射物 | `enemy` |
-| 5 | `enemy_projectile` | 敌方所有投射物 | `ship`、`turret` |
+| 5 | `enemy_projectile` | 敌方所有投射物 | `ship`、`turret`、`player` |
+| 6 | `player` | 玩家角色本体 | `enemy`、`enemy_projectile` |
 
 ## 交互规则
 
@@ -38,19 +40,19 @@
 
 - `ship` 只承担“被敌人本体撞击”和“被敌方弹体命中”的目标角色。
 - `turret` 只承担“被敌人本体撞击”和“被敌方弹体命中”的目标角色。
-- `enemy` 只承担“撞击舰船/炮塔”和“被我方弹体命中”的角色。
+- `enemy` 只承担“撞击舰船/炮塔/玩家”和“被我方弹体命中”的角色；敌人移动目标仍应保持为舰船，而不是主动索敌玩家。
 
 ### 2. 投射物
 
 - 我方投射物固定放在 `player_projectile`，mask 只开 `enemy`。
-- 敌方投射物固定放在 `enemy_projectile`，mask 只开 `ship` 与 `turret`。
+- 敌方投射物固定放在 `enemy_projectile`，mask 开 `ship`、`turret` 与 `player`。
 - 投射物不互相碰撞，也不与发射者阵营本体碰撞。
 
 ### 3. 玩家与交互区
 
-- 玩家角色当前是舰内移动辅助角色，不承担物理解算职责，保持 `layer = 0 / mask = 0`。
-- 炮塔交互范围属于**玩法触发区**，不是承伤/阻挡实体；应保持 `Area2D.collision_layer = 0`，仅通过 `collision_mask` 监听玩家。
-- 如果后续确实要让玩家参与物理碰撞，必须新增独立规范，不允许直接复用现有 1~5 层语义。
+- 玩家角色当前占用 `player` 层，只监听 `enemy` 与 `enemy_projectile`，用于接收实体阻挡与击退。
+- 玩家当前不承受血量伤害；敌人本体和敌方弹体命中玩家时，只应触发击退与动作打断，不应引入玩家血条。
+- 炮塔交互范围属于**玩法触发区**，不是承伤/阻挡实体；应保持 `Area2D.collision_layer = 0`，仅通过 `collision_mask` 监听 `player`。
 
 ## 使用约束
 
@@ -77,7 +79,7 @@
 | 坦克 / Boss / 机械狗 | `scripts/tank.gd`、`scripts/mechanical_dog.gd` | `enemy` |
 | 我方投射物 | `scripts/projectile.gd` | `player_projectile` |
 | 敌方投射物 | `scripts/enemy_projectile.gd` | `enemy_projectile` |
-| 玩家 | `scripts/player.gd` | 不参与物理碰撞 |
+| 玩家 | `scripts/player.gd` | `player` |
 
 ## 变更流程
 
