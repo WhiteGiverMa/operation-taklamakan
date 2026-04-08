@@ -63,6 +63,9 @@ func toggle_pause() -> void:
 		get_tree().paused = false
 
 func end_game(won: bool) -> void:
+	if _state == State.GAME_OVER:
+		return
+	WaveManager.end_combat_session()
 	has_active_run = false
 	set_state(State.GAME_OVER)
 	get_tree().paused = true

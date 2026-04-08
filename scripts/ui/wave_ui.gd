@@ -39,6 +39,7 @@ func _connect_signals() -> void:
 	EventBus.wave_started.connect(_on_wave_started)
 	EventBus.wave_complete.connect(_on_wave_complete)
 	EventBus.wave_all_complete.connect(_on_all_waves_complete)
+	EventBus.game_over.connect(_on_game_over)
 	
 	# Connect to WaveManager if available
 	if _wave_manager:
@@ -116,6 +117,12 @@ func _hide_ui() -> void:
 	visible = false
 	_is_visible = false
 
+func set_combat_visibility(should_show: bool) -> void:
+	if not should_show:
+		_hide_ui()
+		return
+	_update_ui()
+
 func _show_completion_ui() -> void:
 	visible = true
 	_is_visible = true
@@ -166,4 +173,7 @@ func _on_intermission_started(_duration: float) -> void:
 	_show_ui()
 
 func _on_intermission_ended() -> void:
+	_hide_ui()
+
+func _on_game_over(_won: bool) -> void:
 	_hide_ui()

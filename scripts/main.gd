@@ -92,7 +92,7 @@ func _on_game_over(_won: bool) -> void:
 	_shop_return_flow_state = FlowState.MAP
 	InputManager.activate_menu()
 	_hide_menu_overlays()
-	_set_combat_visibility(true)
+	_set_combat_visibility(false)
 	if _map_screen_root:
 		_map_screen_root.visible = false
 	if _shop_screen:
@@ -153,7 +153,10 @@ func _set_combat_visibility(should_show: bool) -> void:
 	landship.process_mode = Node.PROCESS_MODE_INHERIT if should_show else Node.PROCESS_MODE_DISABLED
 	hud.visible = should_show
 	hud.call("set_input_hints_enabled", should_show)
-	wave_ui.visible = should_show
+	if wave_ui and wave_ui.has_method("set_combat_visibility"):
+		wave_ui.call("set_combat_visibility", should_show)
+	elif wave_ui:
+		wave_ui.visible = should_show
 
 func _on_current_node_changed(node) -> void:
 	if node == null:
