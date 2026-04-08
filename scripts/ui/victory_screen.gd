@@ -7,6 +7,7 @@ extends Control
 @onready var restart_button: Button = $VBoxContainer/RestartButton
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	EventBus.game_over.connect(_on_game_over)
 	restart_button.pressed.connect(_on_restart_pressed)
 	_connect_localization()

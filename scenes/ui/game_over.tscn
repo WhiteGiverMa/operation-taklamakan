@@ -26,9 +26,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -150.0
-offset_top = -60.0
+offset_top = -76.0
 offset_right = 150.0
-offset_bottom = 60.0
+offset_bottom = 76.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -45,5 +45,9 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RestartButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = ""
+
+[node name="MainMenuButton" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 text = ""

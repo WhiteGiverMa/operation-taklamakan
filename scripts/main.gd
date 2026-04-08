@@ -26,6 +26,7 @@ var _settings_return_target: SettingsReturnTarget = SettingsReturnTarget.MAIN_ME
 @onready var landship: Landship = $Landship
 @onready var ui_layer: CanvasLayer = $UILayer
 @onready var hud: Control = $UILayer/HUD
+@onready var game_over_screen: Control = $UILayer/GameOver
 @onready var wave_ui: Control = $UILayer/WaveUI
 
 func _ready() -> void:
@@ -79,6 +80,8 @@ func _connect_signals() -> void:
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_over.connect(_on_game_over)
 	GameState.game_state_changed.connect(_on_game_state_changed)
+	if game_over_screen and game_over_screen.has_signal("main_menu_requested"):
+		game_over_screen.main_menu_requested.connect(_on_game_over_main_menu_requested)
 
 func _on_game_started() -> void:
 	_shop_return_flow_state = FlowState.MAP
@@ -97,6 +100,9 @@ func _on_game_over(_won: bool) -> void:
 		_map_screen_root.visible = false
 	if _shop_screen:
 		_shop_screen.visible = false
+
+func _on_game_over_main_menu_requested() -> void:
+	_show_main_menu(false)
 
 func _on_game_state_changed(state: int) -> void:
 	match state:
