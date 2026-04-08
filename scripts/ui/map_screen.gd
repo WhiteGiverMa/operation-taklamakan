@@ -211,6 +211,9 @@ func _on_node_selected(node_ui: MapNodeUIScript) -> void:
 	# Enable confirm button if this is a reachable, unvisited node
 	_update_confirm_button()
 
+func refresh_view() -> void:
+	_refresh_map()
+
 func _update_node_info(node_ui: MapNodeUIScript) -> void:
 	var info_text := ""
 	
@@ -235,10 +238,12 @@ func _update_confirm_button() -> void:
 		confirm_button.text = Localization.t("map.screen.confirm.select")
 		return
 	
-	var can_confirm := _selected_node_ui.is_reachable and not _selected_node_ui.is_visited
+	var can_confirm := _can_enter_node(_selected_node_ui)
 	confirm_button.disabled = not can_confirm
 	
-	if _selected_node_ui.is_visited:
+	if can_confirm:
+		confirm_button.text = Localization.t("map.screen.confirm.go")
+	elif _selected_node_ui.is_visited:
 		confirm_button.text = Localization.t("map.screen.confirm.visited")
 	elif not _selected_node_ui.is_reachable:
 		confirm_button.text = Localization.t("map.screen.confirm.locked")
@@ -254,7 +259,7 @@ func _on_confirm_pressed() -> void:
 	if _selected_node_ui == null:
 		return
 	
-	if _selected_node_ui.is_reachable and not _selected_node_ui.is_visited:
+	if _can_enter_node(_selected_node_ui):
 		_visit_selected_node()
 
 func _visit_selected_node() -> void:
@@ -269,8 +274,20 @@ func _visit_selected_node() -> void:
 
 func _on_node_confirmed(node_ui: MapNodeUIScript) -> void:
 	# Double-click or re-click to confirm
-	if node_ui.is_reachable and not node_ui.is_visited:
+	if _can_enter_node(node_ui):
 		_visit_selected_node()
+
+func _can_enter_node(node_ui: MapNodeUIScript) -> bool:
+	if node_ui == null or not node_ui.is_reachable:
+		return false
+	if not node_ui.is_visited:
+		return true
+
+	var current_node = MapManager.current_node
+	if current_node == null:
+		return false
+
+	return current_node.type == MapNodeScript.TYPE_SHOP and node_ui.node_id == current_node.id
 
 func _center_on_current_layer() -> void:
 	var current_layer := MapManager.current_layer

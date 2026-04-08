@@ -145,10 +145,17 @@ func _get_display_color() -> Color:
 		return COLOR_REACHABLE
 
 func _on_pressed() -> void:
-	if is_reachable and not is_visited:
+	if _can_confirm():
 		if is_selected:
 			node_confirmed.emit(self)
 		else:
 			set_selected(true)
 	elif is_reachable and is_visited:
 		set_selected(true)
+
+func _can_confirm() -> bool:
+	if not is_reachable:
+		return false
+	if not is_visited:
+		return true
+	return node_type == MapNodeScript.TYPE_SHOP

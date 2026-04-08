@@ -268,6 +268,8 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 				_shop_screen.visible = false
 			if _map_screen_root:
 				_map_screen_root.visible = true
+			if _map_screen and _map_screen.has_method("refresh_view"):
+				_map_screen.call("refresh_view")
 		_:
 			InputManager.restore_flow_context()
 			_set_combat_visibility(false)
