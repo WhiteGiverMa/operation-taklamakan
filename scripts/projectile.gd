@@ -12,6 +12,8 @@ var _source: Node = null
 @onready var visual: ColorRect = $Visual
 
 func _ready() -> void:
+	collision_layer = 0
+	collision_mask = 0
 	# Projectile: layer 4
 	set_collision_layer_value(4, true)
 	# Collide with: layer 3 (enemies)
@@ -36,11 +38,14 @@ func _physics_process(delta: float) -> void:
 	pass
 
 func _on_body_entered(body: Node2D) -> void:
-	# Apply damage to enemy
-	if body.has_method("take_damage"):
-		var dmg_data := DamageData.new(damage, _source)
-		body.take_damage(dmg_data)
-		EventBus.projectile_hit.emit(self, body)
-	
-	# Destroy projectile on any hit
+	if not _is_enemy_target(body):
+		return
+
+	var dmg_data := DamageData.new(damage, _source)
+	body.take_damage(dmg_data)
+	EventBus.projectile_hit.emit(self, body)
 	queue_free()
+
+
+func _is_enemy_target(body: Node2D) -> bool:
+	return body.is_in_group("enemies") and body.has_method("take_damage")

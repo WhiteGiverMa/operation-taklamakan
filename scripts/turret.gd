@@ -7,6 +7,7 @@ signal turret_fired(target: Vector2)
 
 const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn")
 const TOUGHNESS_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
+const MUZZLE_OFFSET: float = 18.0
 
 @export var interaction_range: float = 150.0
 @export var projectile_speed: float = 600.0
@@ -149,7 +150,7 @@ func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
 	var direction := Vector2.RIGHT.rotated(firing_angle)
 
 	var projectile := PROJECTILE_SCENE.instantiate() as Node2D
-	projectile.global_position = barrel.global_position
+	projectile.global_position = barrel.global_position + direction * MUZZLE_OFFSET
 	projectile.setup(direction, projectile_speed, projectile_damage * GameState.turret_damage_multiplier, self)
 	get_tree().root.add_child(projectile)
 
