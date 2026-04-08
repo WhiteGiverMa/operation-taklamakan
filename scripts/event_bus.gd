@@ -36,6 +36,7 @@ signal shop_entered()
 # Player events
 signal player_died()
 signal player_respawned()
+signal player_knockback_started(player: Node2D, source: Node)
 
 # Game state events
 signal game_paused(is_paused: bool)

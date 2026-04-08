@@ -27,6 +27,7 @@ func _ready() -> void:
 	health_component.health_changed.connect(_on_health_changed)
 	health_component.died.connect(_on_ship_destroyed)
 	health_component.damaged.connect(_on_ship_damaged)
+	EventBus.player_knockback_started.connect(_on_player_knockback_started)
 	
 	# Collision: layer 1 (ship hull)
 	collision_layer = 0
@@ -88,6 +89,13 @@ func _repair_ship() -> void:
 	var healed := health_component.heal(REPAIR_AMOUNT)
 	if healed > 0.0:
 		EventBus.ship_health_changed.emit(health_component.current_health, max_health)
+
+func _on_player_knockback_started(player: Node2D, _source: Node) -> void:
+	if player != get_node_or_null("PlayerCharacter"):
+		return
+
+	_repair_progress = 0.0
+	_is_repairing = false
 
 func take_damage(data: DamageData) -> void:
 	health_component.take_damage(data)

@@ -8,7 +8,7 @@ size = Vector2(60, 40)
 
 [node name="Tank" type="CharacterBody2D"]
 collision_layer = 4
-collision_mask = 3
+collision_mask = 35
 script = ExtResource("1_tank")
 
 [node name="Visual" type="ColorRect" parent="."]

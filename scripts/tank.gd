@@ -7,6 +7,7 @@ extends CharacterBody2D
 @export var damage: float = 10.0
 @export var currency_reward: int = 10
 @export var collision_damage_cooldown: float = 0.5
+@export var player_knockback_force: float = 420.0
 @export var is_boss: bool = false
 
 var _target: Node2D = null
@@ -16,9 +17,13 @@ var _collision_damage_timer: float = 0.0
 func _ready() -> void:
 	_health_component = $HealthComponent
 	
-	# Set collision layer to 3 (enemy) and mask to 1 (ship), 2 (turret)
-	collision_layer = 4  # Layer 3 = bit 2 = value 4
-	collision_mask = 3   # Layer 1 + 2 = bit 0 + bit 1 = value 1 + 2 = 3
+	# Enemy: layer 3, mask 1 (ship), 2 (turret), 6 (player)
+	collision_layer = 0
+	collision_mask = 0
+	set_collision_layer_value(3, true)
+	set_collision_mask_value(1, true)
+	set_collision_mask_value(2, true)
+	set_collision_mask_value(6, true)
 	
 	# Connect HealthComponent signals
 	if _health_component:
@@ -57,11 +62,31 @@ func _physics_process(delta: float) -> void:
 			var collision := get_slide_collision(i)
 			var collider := collision.get_collider()
 			
-			if collider.has_method(&"take_damage"):
+			if collider != null and collider.has_method(&"receive_impact"):
+				if _apply_player_impact(collider):
+					_collision_damage_timer = collision_damage_cooldown
+					break
+			if collider != null and collider.has_method(&"take_damage"):
 				var damage_data := DamageData.physical(damage, self)
 				collider.take_damage(damage_data)
 				_collision_damage_timer = collision_damage_cooldown
 				break  # Only damage one target per cooldown
+
+func _apply_player_impact(collider: Object) -> bool:
+	var player := collider as Node2D
+	if player == null:
+		return false
+
+	var push_direction := player.global_position - global_position
+	if push_direction.length_squared() <= 0.001:
+		push_direction = velocity
+	if push_direction.length_squared() <= 0.001:
+		push_direction = Vector2.RIGHT
+
+	var impact_data := DamageData.new(0.0, self)
+	impact_data.damage_type = "impact"
+	impact_data.knockback = push_direction.normalized() * player_knockback_force
+	return player.receive_impact(impact_data)
 
 func _get_target_position() -> Vector2:
 	if _target:

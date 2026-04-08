@@ -33,7 +33,8 @@ var _skip_manual_exit_once: bool = false
 
 func _ready() -> void:
 	interaction_area.collision_layer = 0
-	interaction_area.set_collision_mask_value(1, true)
+	interaction_area.collision_mask = 0
+	interaction_area.set_collision_mask_value(6, true)
 	interaction_area.input_pickable = true
 
 	interaction_area.body_entered.connect(_on_player_entered)
@@ -41,6 +42,7 @@ func _ready() -> void:
 	if not InputManager.fire_action.just_triggered.is_connected(_on_fire_action_just_triggered):
 		InputManager.fire_action.just_triggered.connect(_on_fire_action_just_triggered)
 	EventBus.ship_damaged.connect(_on_ship_damaged)
+	EventBus.player_knockback_started.connect(_on_player_knockback_started)
 	toughness_component.toughness_changed.connect(_on_toughness_changed)
 	toughness_component.paralysis_started.connect(_on_paralysis_started)
 	toughness_component.paralysis_ended.connect(_on_paralysis_ended)
@@ -189,6 +191,16 @@ func _on_player_exited(body: Node2D) -> void:
 		_repair_timer = 0.0
 		if is_manual_mode:
 			exit_manual_mode()
+
+
+func _on_player_knockback_started(player: Node2D, _source: Node) -> void:
+	if not _is_player(player):
+		return
+
+	_player = player
+	_repair_timer = 0.0
+	if is_manual_mode:
+		exit_manual_mode()
 
 
 func _is_player(body: Node2D) -> bool:
