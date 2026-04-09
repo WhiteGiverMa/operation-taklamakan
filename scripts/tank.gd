@@ -195,7 +195,7 @@ func _spawn_damage_number(amount: float) -> void:
 		add_child(popup)
 
 	# 飘字动画：向上飘动 + 渐隐
-	var tween := create_tween()
+	var tween := popup.create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(popup, "position:y", popup.position.y - 40.0, 0.6)
 	tween.tween_property(popup, "modulate:a", 0.0, 0.6)

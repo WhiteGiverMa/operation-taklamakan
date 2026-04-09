@@ -108,7 +108,7 @@ func _find_swept_target(from_position: Vector2, to_position: Vector2) -> Node2D:
 
 func _build_query_excludes() -> Array[RID]:
 	var excludes: Array[RID] = [get_rid()]
-	if _source is CollisionObject2D:
+	if is_instance_valid(_source) and _source is CollisionObject2D:
 		excludes.append((_source as CollisionObject2D).get_rid())
 	return excludes
 
