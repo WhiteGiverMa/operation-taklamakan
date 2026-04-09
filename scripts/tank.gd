@@ -16,7 +16,10 @@ var _target: Node2D = null
 var _health_component: HealthComponent
 var _collision_damage_timer: float = 0.0
 var _health_bar: ProgressBar
+var _health_bar_hide_timer: float = 0.0
 var _last_feedback_physics_frame: int = -1
+
+const HEALTH_BAR_DISPLAY_DURATION: float = 1.5
 
 @onready var visual: ColorRect = $Visual
 
@@ -59,6 +62,12 @@ func _physics_process(delta: float) -> void:
 	# Update collision damage cooldown
 	if _collision_damage_timer > 0:
 		_collision_damage_timer -= delta
+	
+	# Update health bar hide timer
+	if _health_bar_hide_timer > 0:
+		_health_bar_hide_timer -= delta
+		if _health_bar_hide_timer <= 0 and _health_bar:
+			_health_bar.visible = false
 	
 	# Move toward target (ship)
 	var target_pos := _get_target_position()
@@ -133,6 +142,7 @@ func _on_projectile_hit(_projectile: Node2D, target: Node2D, damage_amount: floa
 func _on_damaged(amount: float, _source) -> void:
 	if amount <= 0.0:
 		return
+	_show_health_bar()
 	_show_damage_flash()
 	_spawn_damage_number(amount)
 
@@ -147,6 +157,13 @@ func _spawn_health_bar() -> void:
 	add_child(_health_bar)
 	_health_bar.z_index = 10
 	_health_bar.modulate = Color(1.0, 0.35, 0.35)
+	_health_bar.visible = false  # 初始隐藏
+
+func _show_health_bar() -> void:
+	if _health_bar == null:
+		return
+	_health_bar.visible = true
+	_health_bar_hide_timer = HEALTH_BAR_DISPLAY_DURATION
 
 func _update_health_bar() -> void:
 	if _health_bar == null or _health_component == null:
@@ -163,7 +180,9 @@ func _show_damage_flash() -> void:
 func _spawn_damage_number(amount: float) -> void:
 	var popup := Label.new()
 	popup.text = str(int(round(amount)))
-	popup.position = global_position + Vector2(-40.0, -110.0)
+	# 添加随机X偏移避免重叠
+	var random_offset_x := randf_range(-20.0, 20.0)
+	popup.position = global_position + Vector2(-40.0 + random_offset_x, -110.0)
 	popup.size = Vector2(80.0, 36.0)
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -181,10 +200,11 @@ func _spawn_damage_number(amount: float) -> void:
 	else:
 		add_child(popup)
 
+	# 飘字动画：向上飘动 + 渐隐
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(popup, "position:y", popup.position.y - 28.0, 0.45)
-	tween.tween_property(popup, "modulate:a", 0.0, 0.45)
+	tween.tween_property(popup, "position:y", popup.position.y - 40.0, 0.6)
+	tween.tween_property(popup, "modulate:a", 0.0, 0.6)
 	tween.finished.connect(popup.queue_free)
 
 func _on_died() -> void:
