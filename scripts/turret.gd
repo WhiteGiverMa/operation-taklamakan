@@ -8,8 +8,6 @@ signal turret_fired(target: Vector2)
 
 const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn")
 const TOUGHNESS_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
-const MUZZLE_SPAWN_LOCAL_X: float = 58.0
-
 # Preload TurretDefinition to ensure type is available
 const _TurretDefinitionScript := preload("res://scripts/resources/turret_definition.gd")
 
@@ -82,6 +80,7 @@ var _manual_arc_center_angle: float = 0.0
 var _skip_manual_exit_once: bool = false
 
 @onready var barrel: Node2D = $Barrel
+@onready var muzzle: Marker2D = $Barrel/Muzzle
 @onready var base: ColorRect = $Base
 @onready var interaction_area: Area2D = $InteractionArea
 @onready var toughness_component: ToughnessComponent = $ToughnessComponent
@@ -216,7 +215,7 @@ func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
 	var direction := Vector2.RIGHT.rotated(firing_angle)
 
 	var projectile := PROJECTILE_SCENE.instantiate() as Node2D
-	projectile.global_position = barrel.to_global(Vector2(MUZZLE_SPAWN_LOCAL_X, 0.0))
+	projectile.global_position = muzzle.global_position
 	projectile.setup(direction, projectile_speed, projectile_damage, self)
 	get_tree().root.add_child(projectile)
 
