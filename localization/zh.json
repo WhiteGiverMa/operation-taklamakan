@@ -35,6 +35,8 @@
   "settings.display_section": "画面",
   "settings.window_mode": "显示模式",
   "settings.vsync": "垂直同步",
+  "settings.gameplay_section": "游戏玩法",
+  "settings.manual_fire_full_auto": "手动开火：全自动（按住连发）",
   "settings.audio_section": "音量",
   "settings.master_volume": "主音量",
 

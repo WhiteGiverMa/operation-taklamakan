@@ -35,6 +35,8 @@
   "settings.display_section": "Display",
   "settings.window_mode": "Window Mode",
   "settings.vsync": "VSync",
+  "settings.gameplay_section": "Gameplay",
+  "settings.manual_fire_full_auto": "Manual Fire: Full-Auto (Hold to Fire)",
   "settings.audio_section": "Audio",
   "settings.master_volume": "Master Volume",
 
