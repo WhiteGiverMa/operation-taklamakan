@@ -14,6 +14,8 @@
 [ext_resource type="Resource" path="res://resources/input/actions/pause_toggle.tres" id="10_pause"]
 [ext_resource type="Script" uid="uid://b52rqq28tuqpg" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="11_pressed"]
 [ext_resource type="Resource" path="res://resources/input/actions/input_hints_toggle.tres" id="12_input_hints"]
+[ext_resource type="Resource" path="res://resources/input/actions/fire.tres" id="13_fire"]
+[ext_resource type="Script" uid="uid://vgjlx6p007lp" path="res://addons/guide/inputs/guide_input_mouse_button.gd" id="14_mouse_button"]
 
 [sub_resource type="Resource" id="WKey"]
 script = ExtResource("3_key")
@@ -192,7 +194,23 @@ script = ExtResource("7_action_mapping")
 action = ExtResource("12_input_hints")
 input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("InputHintsMapping")])
 
+[sub_resource type="Resource" id="FireMouseButton"]
+script = ExtResource("14_mouse_button")
+
+[sub_resource type="Resource" id="PressedTriggerFire"]
+script = ExtResource("11_pressed")
+
+[sub_resource type="Resource" id="FireLeftMouse"]
+script = ExtResource("6_input_mapping")
+input = SubResource("FireMouseButton")
+triggers = Array[ExtResource("8_ldkpb")]([SubResource("PressedTriggerFire")])
+
+[sub_resource type="Resource" id="FireActionMapping"]
+script = ExtResource("7_action_mapping")
+action = ExtResource("13_fire")
+input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("FireLeftMouse")])
+
 [resource]
 script = ExtResource("1_context")
 display_name = "Combat"
-mappings = Array[ExtResource("7_action_mapping")]([SubResource("MoveActionMapping"), SubResource("RepairActionMapping"), SubResource("InteractActionMapping"), SubResource("PauseActionMapping"), SubResource("InputHintsActionMapping")])
+mappings = Array[ExtResource("7_action_mapping")]([SubResource("MoveActionMapping"), SubResource("RepairActionMapping"), SubResource("InteractActionMapping"), SubResource("PauseActionMapping"), SubResource("InputHintsActionMapping"), SubResource("FireActionMapping")])
