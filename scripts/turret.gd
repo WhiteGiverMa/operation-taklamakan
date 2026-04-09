@@ -119,6 +119,9 @@ func _physics_process(delta: float) -> void:
 	_handle_repair(delta)
 	_handle_fire_cooldown(delta)
 
+	if is_manual_mode and SettingsManager.manual_fire_full_auto:
+		_handle_manual_full_auto_fire()
+
 	if not is_manual_mode and GameState.auto_fire_unlocked and not toughness_component.is_paralyzed():
 		_handle_auto_fire()
 
@@ -147,13 +150,22 @@ func _handle_fire_cooldown(delta: float) -> void:
 			_can_fire = true
 
 
-func _handle_manual_fire_input() -> void:
-	if InputManager.fire_action.is_triggered() and _can_fire and not toughness_component.is_paralyzed() and _is_position_within_manual_arc(get_global_mouse_position()):
-		_fire_at_position(get_global_mouse_position())
+func _handle_manual_full_auto_fire() -> void:
+	if not _can_fire or toughness_component.is_paralyzed():
+		return
+	# Use value_bool to check raw input state (held down), not is_triggered() which only fires once
+	if not InputManager.fire_action.value_bool:
+		return
+	var mouse_position := get_global_mouse_position()
+	if not _is_position_within_manual_arc(mouse_position):
+		return
+	_fire_at_position(mouse_position)
 
 
 func _on_fire_action_just_triggered() -> void:
 	if not is_manual_mode:
+		return
+	if SettingsManager.manual_fire_full_auto:
 		return
 	if not _can_fire or toughness_component.is_paralyzed():
 		return
