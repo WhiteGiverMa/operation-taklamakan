@@ -102,7 +102,7 @@ func _handle_weapon_cooldown(delta: float) -> void:
 
 func _is_any_turret_in_manual_mode() -> bool:
 	# 使用类名发现所有炮塔
-	var turrets := get_tree().get_nodes_in_group("turrets")
+	var turrets: Array[Node] = get_tree().get_nodes_in_group("turrets")
 	if turrets.is_empty():
 		# 备用方案：遍历场景树查找 Turret 类节点
 		turrets = _find_all_turrets()
@@ -111,13 +111,13 @@ func _is_any_turret_in_manual_mode() -> bool:
 			return true
 	return false
 
-func _find_all_turrets() -> Array:
+func _find_all_turrets() -> Array[Node]:
 	# 递归查找所有 Turret 节点
-	var result := []
+	var result: Array[Node] = []
 	_find_turrets_recursive(get_tree().root, result)
 	return result
 
-func _find_turrets_recursive(node: Node, result: Array) -> void:
+func _find_turrets_recursive(node: Node, result: Array[Node]) -> void:
 	if node is Turret:
 		result.append(node)
 	for child in node.get_children():
