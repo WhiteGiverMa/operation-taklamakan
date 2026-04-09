@@ -139,7 +139,7 @@ func _process(_delta: float) -> void:
 
 func _rotate_barrel_toward_mouse() -> void:
 	var mouse_pos := get_global_mouse_position()
-	var angle := global_position.angle_to_point(mouse_pos)
+	var angle := barrel.global_position.angle_to_point(mouse_pos)
 	barrel.rotation = _clamp_angle_to_manual_arc(angle)
 
 
