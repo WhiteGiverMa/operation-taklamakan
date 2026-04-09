@@ -3,6 +3,8 @@ extends CharacterBody2D
 
 ## Tank enemy that moves toward the ship and deals damage on collision.
 
+const FLOATING_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
+
 @export var speed: float = 100.0
 @export var damage: float = 10.0
 @export var currency_reward: int = 10
@@ -13,6 +15,10 @@ extends CharacterBody2D
 var _target: Node2D = null
 var _health_component: HealthComponent
 var _collision_damage_timer: float = 0.0
+var _health_bar: ProgressBar
+var _last_feedback_physics_frame: int = -1
+
+@onready var visual: ColorRect = $Visual
 
 func _ready() -> void:
 	_health_component = $HealthComponent
@@ -27,8 +33,13 @@ func _ready() -> void:
 	
 	# Connect HealthComponent signals
 	if _health_component:
+		_health_component.health_changed.connect(_on_health_changed)
 		_health_component.died.connect(_on_died)
+	if not EventBus.projectile_hit.is_connected(_on_projectile_hit):
+		EventBus.projectile_hit.connect(_on_projectile_hit)
 	add_to_group("enemies")
+	_spawn_health_bar()
+	_update_health_bar()
 	
 	# Find the ship (Landship) in the scene
 	_find_target()
@@ -93,6 +104,88 @@ func _get_target_position() -> Vector2:
 		return _target.global_position
 	# Fallback: return center of screen
 	return Vector2(960, 540)
+
+func take_damage(data: DamageData) -> float:
+	if _health_component == null:
+		return 0.0
+	var actual_damage := _health_component.take_damage(data)
+	if actual_damage > 0.0:
+		show_damage_feedback(actual_damage)
+	return actual_damage
+
+func show_damage_feedback(amount: float) -> void:
+	if amount <= 0.0:
+		return
+
+	var physics_frame := Engine.get_physics_frames()
+	if _last_feedback_physics_frame == physics_frame:
+		return
+	_last_feedback_physics_frame = physics_frame
+	_on_damaged(amount, null)
+
+func _on_health_changed(_old_health: float, _new_health: float) -> void:
+	_update_health_bar()
+
+func _on_projectile_hit(_projectile: Node2D, target: Node2D, damage_amount: float) -> void:
+	if target == self:
+		show_damage_feedback(damage_amount)
+
+func _on_damaged(amount: float, _source) -> void:
+	if amount <= 0.0:
+		return
+	_show_damage_flash()
+	_spawn_damage_number(amount)
+
+func _spawn_health_bar() -> void:
+	if FLOATING_BAR_SCENE == null or _health_bar != null:
+		return
+
+	_health_bar = FLOATING_BAR_SCENE.instantiate() as ProgressBar
+	if _health_bar == null:
+		return
+
+	add_child(_health_bar)
+	_health_bar.z_index = 10
+	_health_bar.modulate = Color(1.0, 0.35, 0.35)
+
+func _update_health_bar() -> void:
+	if _health_bar == null or _health_component == null:
+		return
+
+	_health_bar.max_value = _health_component.max_health
+	_health_bar.value = _health_component.current_health
+
+func _show_damage_flash() -> void:
+	visual.modulate = Color(1.0, 0.45, 0.45)
+	var tween := create_tween()
+	tween.tween_property(visual, "modulate", Color.WHITE, 0.18)
+
+func _spawn_damage_number(amount: float) -> void:
+	var popup := Label.new()
+	popup.text = str(int(round(amount)))
+	popup.position = global_position + Vector2(-40.0, -110.0)
+	popup.size = Vector2(80.0, 36.0)
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.z_index = 20
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.modulate = Color(1.0, 0.92, 0.4, 1.0)
+	popup.add_theme_font_size_override("font_size", 28)
+	popup.add_theme_color_override("font_color", Color(1.0, 0.97, 0.7))
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.02, 0.02, 0.95))
+	popup.add_theme_constant_override("outline_size", 6)
+
+	var popup_parent := get_tree().root.get_node_or_null("Main/UILayer")
+	if popup_parent != null:
+		popup_parent.add_child(popup)
+	else:
+		add_child(popup)
+
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(popup, "position:y", popup.position.y - 28.0, 0.45)
+	tween.tween_property(popup, "modulate:a", 0.0, 0.45)
+	tween.finished.connect(popup.queue_free)
 
 func _on_died() -> void:
 	# Emit enemy_died signal for currency drop

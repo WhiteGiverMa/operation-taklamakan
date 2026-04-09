@@ -1,16 +1,18 @@
-[gd_resource type="Resource" script_class="GUIDEMappingContext" load_steps=47 format=3]
+[gd_resource type="Resource" script_class="GUIDEMappingContext" format=3 uid="uid://brtbmighiokr3"]
 
-[ext_resource type="Script" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
+[ext_resource type="Script" uid="uid://dsa1dnifd6w32" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
 [ext_resource type="Resource" path="res://resources/input/actions/move.tres" id="2_move"]
-[ext_resource type="Script" path="res://addons/guide/inputs/guide_input_key.gd" id="3_key"]
-[ext_resource type="Script" path="res://addons/guide/modifiers/guide_modifier_negate.gd" id="4_negate"]
-[ext_resource type="Script" path="res://addons/guide/modifiers/guide_modifier_input_swizzle.gd" id="5_swizzle"]
-[ext_resource type="Script" path="res://addons/guide/guide_input_mapping.gd" id="6_input_mapping"]
-[ext_resource type="Script" path="res://addons/guide/guide_action_mapping.gd" id="7_action_mapping"]
+[ext_resource type="Script" uid="uid://cw71o87tvdx3q" path="res://addons/guide/inputs/guide_input_key.gd" id="3_key"]
+[ext_resource type="Script" uid="uid://ckggy40lm0vjc" path="res://addons/guide/modifiers/guide_modifier_negate.gd" id="4_negate"]
+[ext_resource type="Script" uid="uid://bl8rjl4oaldje" path="res://addons/guide/modifiers/guide_modifier.gd" id="5_dqyu4"]
+[ext_resource type="Script" uid="uid://bm5gjgadon6hb" path="res://addons/guide/modifiers/guide_modifier_input_swizzle.gd" id="5_swizzle"]
+[ext_resource type="Script" uid="uid://mtx1unc2aqn7" path="res://addons/guide/guide_input_mapping.gd" id="6_input_mapping"]
+[ext_resource type="Script" uid="uid://cpplm41b5bt6m" path="res://addons/guide/guide_action_mapping.gd" id="7_action_mapping"]
+[ext_resource type="Script" uid="uid://x74mnwgr08a7" path="res://addons/guide/triggers/guide_trigger.gd" id="8_ldkpb"]
 [ext_resource type="Resource" path="res://resources/input/actions/repair.tres" id="8_repair"]
 [ext_resource type="Resource" path="res://resources/input/actions/interact.tres" id="9_interact"]
 [ext_resource type="Resource" path="res://resources/input/actions/pause_toggle.tres" id="10_pause"]
-[ext_resource type="Script" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="11_pressed"]
+[ext_resource type="Script" uid="uid://b52rqq28tuqpg" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="11_pressed"]
 [ext_resource type="Resource" path="res://resources/input/actions/input_hints_toggle.tres" id="12_input_hints"]
 
 [sub_resource type="Resource" id="WKey"]
@@ -18,27 +20,18 @@ script = ExtResource("3_key")
 key = 87
 allow_additional_modifiers = false
 
+[sub_resource type="Resource" id="SwizzleToY"]
+script = ExtResource("5_swizzle")
+
 [sub_resource type="Resource" id="NegateY"]
 script = ExtResource("4_negate")
 x = false
-y = true
-z = false
-
-[sub_resource type="Resource" id="SwizzleToY"]
-script = ExtResource("5_swizzle")
-order = 0
-
-[sub_resource type="Resource" id="NegateX"]
-script = ExtResource("4_negate")
-x = true
-y = false
 z = false
 
 [sub_resource type="Resource" id="MoveUpW"]
 script = ExtResource("6_input_mapping")
 input = SubResource("WKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleToY"), SubResource("NegateY")])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
+modifiers = Array[ExtResource("5_dqyu4")]([SubResource("SwizzleToY"), SubResource("NegateY")])
 
 [sub_resource type="Resource" id="UpArrowKey"]
 script = ExtResource("3_key")
@@ -48,8 +41,7 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveUpArrow"]
 script = ExtResource("6_input_mapping")
 input = SubResource("UpArrowKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleToY"), SubResource("NegateY")])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
+modifiers = Array[ExtResource("5_dqyu4")]([SubResource("SwizzleToY"), SubResource("NegateY")])
 
 [sub_resource type="Resource" id="SKey"]
 script = ExtResource("3_key")
@@ -59,8 +51,7 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveDownS"]
 script = ExtResource("6_input_mapping")
 input = SubResource("SKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleToY")])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
+modifiers = Array[ExtResource("5_dqyu4")]([SubResource("SwizzleToY")])
 
 [sub_resource type="Resource" id="DownArrowKey"]
 script = ExtResource("3_key")
@@ -70,19 +61,22 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveDownArrow"]
 script = ExtResource("6_input_mapping")
 input = SubResource("DownArrowKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("SwizzleToY")])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
+modifiers = Array[ExtResource("5_dqyu4")]([SubResource("SwizzleToY")])
 
 [sub_resource type="Resource" id="AKey"]
 script = ExtResource("3_key")
 key = 65
 allow_additional_modifiers = false
 
+[sub_resource type="Resource" id="NegateX"]
+script = ExtResource("4_negate")
+y = false
+z = false
+
 [sub_resource type="Resource" id="MoveLeftA"]
 script = ExtResource("6_input_mapping")
 input = SubResource("AKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("NegateX")])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
+modifiers = Array[ExtResource("5_dqyu4")]([SubResource("NegateX")])
 
 [sub_resource type="Resource" id="LeftArrowKey"]
 script = ExtResource("3_key")
@@ -92,8 +86,7 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveLeftArrow"]
 script = ExtResource("6_input_mapping")
 input = SubResource("LeftArrowKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([SubResource("NegateX")])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
+modifiers = Array[ExtResource("5_dqyu4")]([SubResource("NegateX")])
 
 [sub_resource type="Resource" id="DKey"]
 script = ExtResource("3_key")
@@ -103,8 +96,6 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveRightD"]
 script = ExtResource("6_input_mapping")
 input = SubResource("DKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="RightArrowKey"]
 script = ExtResource("3_key")
@@ -114,8 +105,6 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="MoveRightArrow"]
 script = ExtResource("6_input_mapping")
 input = SubResource("RightArrowKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="MoveActionMapping"]
 script = ExtResource("7_action_mapping")
@@ -130,8 +119,6 @@ allow_additional_modifiers = false
 [sub_resource type="Resource" id="RepairMapping"]
 script = ExtResource("6_input_mapping")
 input = SubResource("RepairKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="RepairActionMapping"]
 script = ExtResource("7_action_mapping")
@@ -145,13 +132,11 @@ allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="PressedTrigger"]
 script = ExtResource("11_pressed")
-actuation_threshold = 0.5
 
 [sub_resource type="Resource" id="InteractSpace"]
 script = ExtResource("6_input_mapping")
 input = SubResource("SpaceKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PressedTrigger")])
+triggers = Array[ExtResource("8_ldkpb")]([SubResource("PressedTrigger")])
 
 [sub_resource type="Resource" id="EnterKey"]
 script = ExtResource("3_key")
@@ -160,13 +145,11 @@ allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="PressedTriggerInteractEnter"]
 script = ExtResource("11_pressed")
-actuation_threshold = 0.5
 
 [sub_resource type="Resource" id="InteractEnter"]
 script = ExtResource("6_input_mapping")
 input = SubResource("EnterKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PressedTriggerInteractEnter")])
+triggers = Array[ExtResource("8_ldkpb")]([SubResource("PressedTriggerInteractEnter")])
 
 [sub_resource type="Resource" id="InteractActionMapping"]
 script = ExtResource("7_action_mapping")
@@ -180,13 +163,11 @@ allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="PressedTriggerPause"]
 script = ExtResource("11_pressed")
-actuation_threshold = 0.5
 
 [sub_resource type="Resource" id="PauseMapping"]
 script = ExtResource("6_input_mapping")
 input = SubResource("EscapeKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PressedTriggerPause")])
+triggers = Array[ExtResource("8_ldkpb")]([SubResource("PressedTriggerPause")])
 
 [sub_resource type="Resource" id="PauseActionMapping"]
 script = ExtResource("7_action_mapping")
@@ -200,13 +181,11 @@ allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="PressedTriggerInputHints"]
 script = ExtResource("11_pressed")
-actuation_threshold = 0.5
 
 [sub_resource type="Resource" id="InputHintsMapping"]
 script = ExtResource("6_input_mapping")
 input = SubResource("InputHintsToggleKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PressedTriggerInputHints")])
+triggers = Array[ExtResource("8_ldkpb")]([SubResource("PressedTriggerInputHints")])
 
 [sub_resource type="Resource" id="InputHintsActionMapping"]
 script = ExtResource("7_action_mapping")

@@ -1,15 +1,17 @@
-[gd_resource type="Resource" script_class="GUIDEMappingContext" load_steps=16 format=3]
+[gd_resource type="Resource" script_class="GUIDEMappingContext" format=3 uid="uid://0dncum2xjupa"]
 
-[ext_resource type="Script" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
+[ext_resource type="Script" uid="uid://dsa1dnifd6w32" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
 [ext_resource type="Resource" path="res://resources/input/actions/pause_toggle.tres" id="2_pause"]
 [ext_resource type="Resource" path="res://resources/input/actions/map_pan_hold.tres" id="3_pan_hold"]
 [ext_resource type="Resource" path="res://resources/input/actions/map_pan_delta.tres" id="4_pan_delta"]
-[ext_resource type="Script" path="res://addons/guide/inputs/guide_input_key.gd" id="5_key"]
-[ext_resource type="Script" path="res://addons/guide/inputs/guide_input_mouse_button.gd" id="6_mouse_button"]
-[ext_resource type="Script" path="res://addons/guide/inputs/guide_input_mouse_axis_2d.gd" id="7_mouse_axis"]
-[ext_resource type="Script" path="res://addons/guide/guide_input_mapping.gd" id="8_input_mapping"]
-[ext_resource type="Script" path="res://addons/guide/guide_action_mapping.gd" id="9_action_mapping"]
-[ext_resource type="Script" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="10_pressed"]
+[ext_resource type="Script" uid="uid://bl8rjl4oaldje" path="res://addons/guide/modifiers/guide_modifier.gd" id="5_cljis"]
+[ext_resource type="Script" uid="uid://cw71o87tvdx3q" path="res://addons/guide/inputs/guide_input_key.gd" id="5_key"]
+[ext_resource type="Script" uid="uid://vgjlx6p007lp" path="res://addons/guide/inputs/guide_input_mouse_button.gd" id="6_mouse_button"]
+[ext_resource type="Script" uid="uid://x74mnwgr08a7" path="res://addons/guide/triggers/guide_trigger.gd" id="6_y2efa"]
+[ext_resource type="Script" uid="uid://dh0hf08e0yit5" path="res://addons/guide/inputs/guide_input_mouse_axis_2d.gd" id="7_mouse_axis"]
+[ext_resource type="Script" uid="uid://mtx1unc2aqn7" path="res://addons/guide/guide_input_mapping.gd" id="8_input_mapping"]
+[ext_resource type="Script" uid="uid://cpplm41b5bt6m" path="res://addons/guide/guide_action_mapping.gd" id="9_action_mapping"]
+[ext_resource type="Script" uid="uid://b52rqq28tuqpg" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="10_pressed"]
 
 [sub_resource type="Resource" id="EscapeKey"]
 script = ExtResource("5_key")
@@ -18,13 +20,11 @@ allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="PauseTrigger"]
 script = ExtResource("10_pressed")
-actuation_threshold = 0.5
 
 [sub_resource type="Resource" id="PauseMapping"]
 script = ExtResource("8_input_mapping")
 input = SubResource("EscapeKey")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PauseTrigger")])
+triggers = Array[ExtResource("6_y2efa")]([SubResource("PauseTrigger")])
 
 [sub_resource type="Resource" id="PauseActionMapping"]
 script = ExtResource("9_action_mapping")
@@ -38,8 +38,6 @@ button = 3
 [sub_resource type="Resource" id="PanHoldMapping"]
 script = ExtResource("8_input_mapping")
 input = SubResource("MiddleMouse")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="PanHoldActionMapping"]
 script = ExtResource("9_action_mapping")
@@ -52,8 +50,6 @@ script = ExtResource("7_mouse_axis")
 [sub_resource type="Resource" id="PanDeltaMapping"]
 script = ExtResource("8_input_mapping")
 input = SubResource("MouseDelta")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([])
 
 [sub_resource type="Resource" id="PanDeltaActionMapping"]
 script = ExtResource("9_action_mapping")

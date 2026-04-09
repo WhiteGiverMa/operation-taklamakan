@@ -1,18 +1,6 @@
-[gd_resource type="Resource" script_class="TurretDefinition" format=3]
+[gd_resource type="Resource" script_class="TurretDefinition" format=3 uid="uid://crrdc5qcwhdcm"]
 
-[ext_resource type="Script" path="res://scripts/resources/turret_definition.gd" id="1_def"]
+[ext_resource type="Script" uid="uid://vh02q1abr2h0" path="res://scripts/resources/turret_definition.gd" id="1_def"]
 
 [resource]
 script = ExtResource("1_def")
-id = &"standard"
-display_name = "Standard Turret"
-description = "Balanced turret with average damage and fire rate."
-base_damage = 15.0
-base_fire_rate = 0.5
-projectile_speed = 600.0
-interaction_range = 150.0
-toughness_damage_radius = 180.0
-repair_duration = 2.0
-manual_fire_arc_half_angle = 90.0
-price = 40
-visual_color = Color(1, 1, 1, 1)

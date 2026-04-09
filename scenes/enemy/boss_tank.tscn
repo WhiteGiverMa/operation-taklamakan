@@ -9,7 +9,7 @@ size = Vector2(90, 60)
 [node name="BossTank" type="CharacterBody2D"]
 scale = Vector2(1.5, 1.5)
 collision_layer = 4
-collision_mask = 3
+collision_mask = 35
 script = ExtResource("1_tank")
 damage = 20.0
 currency_reward = 30

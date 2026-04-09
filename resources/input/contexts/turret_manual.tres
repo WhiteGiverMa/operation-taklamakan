@@ -1,25 +1,24 @@
-[gd_resource type="Resource" script_class="GUIDEMappingContext" load_steps=12 format=3]
+[gd_resource type="Resource" script_class="GUIDEMappingContext" format=3 uid="uid://dm15o0qgqusof"]
 
-[ext_resource type="Script" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
+[ext_resource type="Script" uid="uid://dsa1dnifd6w32" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
 [ext_resource type="Resource" path="res://resources/input/actions/fire.tres" id="2_fire"]
-[ext_resource type="Script" path="res://addons/guide/inputs/guide_input_mouse_button.gd" id="3_mouse_button"]
-[ext_resource type="Script" path="res://addons/guide/guide_input_mapping.gd" id="4_input_mapping"]
-[ext_resource type="Script" path="res://addons/guide/guide_action_mapping.gd" id="5_action_mapping"]
-[ext_resource type="Script" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="6_pressed"]
+[ext_resource type="Script" uid="uid://vgjlx6p007lp" path="res://addons/guide/inputs/guide_input_mouse_button.gd" id="3_mouse_button"]
+[ext_resource type="Script" uid="uid://mtx1unc2aqn7" path="res://addons/guide/guide_input_mapping.gd" id="4_input_mapping"]
+[ext_resource type="Script" uid="uid://bl8rjl4oaldje" path="res://addons/guide/modifiers/guide_modifier.gd" id="5_6b5k6"]
+[ext_resource type="Script" uid="uid://cpplm41b5bt6m" path="res://addons/guide/guide_action_mapping.gd" id="5_action_mapping"]
+[ext_resource type="Script" uid="uid://b52rqq28tuqpg" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="6_pressed"]
+[ext_resource type="Script" uid="uid://x74mnwgr08a7" path="res://addons/guide/triggers/guide_trigger.gd" id="6_t6171"]
 
 [sub_resource type="Resource" id="LeftMouseButton"]
 script = ExtResource("3_mouse_button")
-button = 1
 
 [sub_resource type="Resource" id="PressedTrigger"]
 script = ExtResource("6_pressed")
-actuation_threshold = 0.5
 
 [sub_resource type="Resource" id="FireLeftMouse"]
 script = ExtResource("4_input_mapping")
 input = SubResource("LeftMouseButton")
-modifiers = Array[Resource("res://addons/guide/modifiers/guide_modifier.gd")]([])
-triggers = Array[Resource("res://addons/guide/triggers/guide_trigger.gd")]([SubResource("PressedTrigger")])
+triggers = Array[ExtResource("6_t6171")]([SubResource("PressedTrigger")])
 
 [sub_resource type="Resource" id="FireActionMapping"]
 script = ExtResource("5_action_mapping")

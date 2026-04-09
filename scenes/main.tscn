@@ -1,38 +1,38 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://csa200fsp48jp"]
 
-[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://oe2ebcfvdii3" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/ship/landship.tscn" id="2_landship"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="3_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/game_over.tscn" id="4_gameover"]
 [ext_resource type="PackedScene" path="res://scenes/ui/wave_ui.tscn" id="5_waveui"]
 [ext_resource type="PackedScene" path="res://scenes/ui/victory_screen.tscn" id="6_victory"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=841355766]
 script = ExtResource("1_main")
 
-[node name="Landship" parent="." instance=ExtResource("2_landship")]
+[node name="Landship" parent="." unique_id=473777804 instance=ExtResource("2_landship")]
 position = Vector2(960, 540)
 
-[node name="UILayer" type="CanvasLayer" parent="."]
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=1768761374]
 
-[node name="HUD" parent="UILayer" instance=ExtResource("3_hud")]
+[node name="HUD" parent="UILayer" unique_id=51642622 instance=ExtResource("3_hud")]
 
-[node name="GameOver" parent="UILayer" instance=ExtResource("4_gameover")]
+[node name="GameOver" parent="UILayer" unique_id=154110694 instance=ExtResource("4_gameover")]
 
-[node name="VictoryScreen" parent="UILayer" instance=ExtResource("6_victory")]
+[node name="VictoryScreen" parent="UILayer" unique_id=213928420 instance=ExtResource("6_victory")]
 
-[node name="WaveUI" parent="UILayer" instance=ExtResource("5_waveui")]
+[node name="WaveUI" parent="UILayer" unique_id=1365793206 instance=ExtResource("5_waveui")]
 
-[node name="SpawnPoints" type="Node2D" parent="."]
+[node name="SpawnPoints" type="Node2D" parent="." unique_id=87048796]
 
-[node name="SpawnPoint1" type="Marker2D" parent="SpawnPoints"]
+[node name="SpawnPoint1" type="Marker2D" parent="SpawnPoints" unique_id=1914328278]
 position = Vector2(100, 540)
 
-[node name="SpawnPoint2" type="Marker2D" parent="SpawnPoints"]
+[node name="SpawnPoint2" type="Marker2D" parent="SpawnPoints" unique_id=962433402]
 position = Vector2(1820, 540)
 
-[node name="SpawnPoint3" type="Marker2D" parent="SpawnPoints"]
+[node name="SpawnPoint3" type="Marker2D" parent="SpawnPoints" unique_id=733469691]
 position = Vector2(960, 100)
 
-[node name="SpawnPoint4" type="Marker2D" parent="SpawnPoints"]
+[node name="SpawnPoint4" type="Marker2D" parent="SpawnPoints" unique_id=451639415]
 position = Vector2(960, 980)

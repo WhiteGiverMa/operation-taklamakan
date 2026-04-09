@@ -7,7 +7,7 @@ extends Node
 signal health_changed(old_health: float, new_health: float)
 signal died()
 signal healed(amount: float)
-signal damaged(amount: float, source: Node)
+signal damaged(amount: float, source)
 
 @export var max_health: float = 100.0
 @export var current_health: float = 100.0

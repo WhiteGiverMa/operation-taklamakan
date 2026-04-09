@@ -41,7 +41,7 @@ extends Resource
 ## === 手动模式参数 ===
 
 ## 手动开火半弧角度
-@export_range(0.0, 180.0, 1.0) var manual_fire_arc_half_angle: float = 90.0
+@export_range(0.0, 180.0, 1.0) var manual_fire_arc_half_angle: float = 120.0
 
 ## === 经济参数 ===
 
