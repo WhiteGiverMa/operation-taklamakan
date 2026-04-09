@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="TurretDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/turret_definition.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"sniper"
+display_name = "Sniper Turret"
+description = "Slow but powerful long-range turret."
+base_damage = 40.0
+base_fire_rate = 1.5
+projectile_speed = 900.0
+interaction_range = 250.0
+toughness_damage_radius = 200.0
+repair_duration = 2.5
+manual_fire_arc_half_angle = 60.0
+price = 55
+visual_color = Color(1, 0.5, 0.2, 1)

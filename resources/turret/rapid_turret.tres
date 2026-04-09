@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="TurretDefinition" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/turret_definition.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"rapid"
+display_name = "Rapid Turret"
+description = "Fast-firing turret with lower damage per shot."
+base_damage = 8.0
+base_fire_rate = 0.2
+projectile_speed = 700.0
+interaction_range = 130.0
+toughness_damage_radius = 160.0
+repair_duration = 2.0
+manual_fire_arc_half_angle = 100.0
+price = 35
+visual_color = Color(0.4, 0.8, 1, 1)

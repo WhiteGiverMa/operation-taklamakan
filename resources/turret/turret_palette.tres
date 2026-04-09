@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TurretPalette" format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/turret_palette.gd" id="1_palette"]
+[ext_resource type="Resource" path="res://resources/turret/standard_turret.tres" id="2_standard"]
+[ext_resource type="Resource" path="res://resources/turret/rapid_turret.tres" id="3_rapid"]
+[ext_resource type="Resource" path="res://resources/turret/sniper_turret.tres" id="4_sniper"]
+
+[resource]
+script = ExtResource("1_palette")
+turrets = [ExtResource("2_standard"), ExtResource("3_rapid"), ExtResource("4_sniper")]

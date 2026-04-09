@@ -100,6 +100,7 @@
   "shop.item.hull_repair.desc": "恢复舰船 50% 生命值。",
   "shop.item.new_turret.name": "新炮塔",
   "shop.item.new_turret.desc": "在空槽位安装炮塔。",
+  "shop.turret.full": "已满",
 
   "game_over.victory": "胜利",
   "game_over.defeat": "失败",

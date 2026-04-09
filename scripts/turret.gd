@@ -2,20 +2,74 @@ class_name Turret
 extends Node2D
 
 ## Manual-fire turret. Player approaches → clicks → enters manual mode → mouse aim + click to fire.
+## Supports multiple turret types via TurretDefinition resource.
 
 signal turret_fired(target: Vector2)
 
 const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn")
 const TOUGHNESS_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
-const MUZZLE_OFFSET: float = 18.0
+const MUZZLE_SPAWN_LOCAL_X: float = 58.0
 
-@export var interaction_range: float = 150.0
-@export var projectile_speed: float = 600.0
-@export var projectile_damage: float = 15.0
-@export var fire_rate: float = 0.5
-@export var toughness_damage_radius: float = 180.0
-@export var repair_duration: float = 2.0
-@export_range(0.0, 180.0, 1.0) var manual_fire_arc_half_angle_degrees: float = 90.0
+# Preload TurretDefinition to ensure type is available
+const _TurretDefinitionScript := preload("res://scripts/resources/turret_definition.gd")
+
+## 炮塔类型定义（设置后自动应用）
+@export var definition: Resource:
+	set(value):
+		definition = value
+		if value and is_inside_tree():
+			_apply_definition()
+
+## 运行时属性（由definition填充，或使用@export默认值）
+var turret_id: StringName = &"standard"
+var _base_damage: float = 15.0
+var _base_fire_rate: float = 0.5
+var _base_projectile_speed: float = 600.0
+var _base_interaction_range: float = 150.0
+var _base_toughness_damage_radius: float = 180.0
+var _base_repair_duration: float = 2.0
+var _base_manual_arc_half_angle: float = 90.0
+
+## 最终计算后的属性（受全局倍率和类型专精影响）
+var projectile_damage: float = 15.0
+var fire_rate: float = 0.5
+var projectile_speed: float = 600.0
+var interaction_range: float = 150.0
+var toughness_damage_radius: float = 180.0
+var repair_duration: float = 2.0
+var manual_fire_arc_half_angle_degrees: float = 90.0
+var _visual_color: Color = Color.WHITE
+
+# @export 保留用于编辑器调试，但运行时通过definition设置
+@export var _debug_interaction_range: float = 150.0:
+	set(value):
+		_debug_interaction_range = value
+		interaction_range = value
+@export var _debug_projectile_speed: float = 600.0:
+	set(value):
+		_debug_projectile_speed = value
+		projectile_speed = value
+@export var _debug_projectile_damage: float = 15.0:
+	set(value):
+		_debug_projectile_damage = value
+		_base_damage = value
+		projectile_damage = value
+@export var _debug_fire_rate: float = 0.5:
+	set(value):
+		_debug_fire_rate = value
+		fire_rate = value
+@export var _debug_toughness_damage_radius: float = 180.0:
+	set(value):
+		_debug_toughness_damage_radius = value
+		toughness_damage_radius = value
+@export var _debug_repair_duration: float = 2.0:
+	set(value):
+		_debug_repair_duration = value
+		repair_duration = value
+@export_range(0.0, 180.0, 1.0) var _debug_manual_fire_arc_half_angle_degrees: float = 90.0:
+	set(value):
+		_debug_manual_fire_arc_half_angle_degrees = value
+		manual_fire_arc_half_angle_degrees = value
 
 var is_manual_mode: bool = false
 var _can_fire: bool = true
@@ -33,6 +87,10 @@ var _skip_manual_exit_once: bool = false
 @onready var toughness_component: ToughnessComponent = $ToughnessComponent
 
 func _ready() -> void:
+	# 如果有定义，先应用
+	if definition:
+		_apply_definition()
+	
 	interaction_area.collision_layer = 0
 	interaction_area.collision_mask = 0
 	interaction_area.set_collision_mask_value(6, true)
@@ -44,6 +102,7 @@ func _ready() -> void:
 		InputManager.fire_action.just_triggered.connect(_on_fire_action_just_triggered)
 	EventBus.ship_damaged.connect(_on_ship_damaged)
 	EventBus.player_knockback_started.connect(_on_player_knockback_started)
+	EventBus.turret_stats_refresh_requested.connect(_update_final_stats)
 	toughness_component.toughness_changed.connect(_on_toughness_changed)
 	toughness_component.paralysis_started.connect(_on_paralysis_started)
 	toughness_component.paralysis_ended.connect(_on_paralysis_ended)
@@ -127,6 +186,9 @@ func _find_auto_target() -> Node2D:
 			continue
 		var enemy := candidate as Node2D
 		var distance := global_position.distance_to(enemy.global_position)
+		# 只索敌射程内的敌人
+		if distance > interaction_range:
+			continue
 		if distance < closest_distance:
 			closest_distance = distance
 			closest = enemy
@@ -150,8 +212,8 @@ func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
 	var direction := Vector2.RIGHT.rotated(firing_angle)
 
 	var projectile := PROJECTILE_SCENE.instantiate() as Node2D
-	projectile.global_position = barrel.global_position + direction * MUZZLE_OFFSET
-	projectile.setup(direction, projectile_speed, projectile_damage * GameState.turret_damage_multiplier, self)
+	projectile.global_position = barrel.to_global(Vector2(MUZZLE_SPAWN_LOCAL_X, 0.0))
+	projectile.setup(direction, projectile_speed, projectile_damage, self)
 	get_tree().root.add_child(projectile)
 
 	turret_fired.emit(target_position)
@@ -289,7 +351,51 @@ func _update_visual_state() -> void:
 	elif _player_in_range:
 		base.modulate = Color.YELLOW
 	else:
-		base.modulate = Color.WHITE
+		base.modulate = _visual_color
+
+
+## 从 TurretDefinition 应用属性
+func _apply_definition() -> void:
+	if definition == null:
+		return
+	
+	# 使用动态属性访问（Resource 支持通过 .get() 访问导出属性）
+	turret_id = definition.get("id")
+	_base_damage = definition.get("base_damage")
+	_base_fire_rate = definition.get("base_fire_rate")
+	_base_projectile_speed = definition.get("projectile_speed")
+	_base_interaction_range = definition.get("interaction_range")
+	_base_toughness_damage_radius = definition.get("toughness_damage_radius")
+	_base_repair_duration = definition.get("repair_duration")
+	_base_manual_arc_half_angle = definition.get("manual_fire_arc_half_angle")
+	_visual_color = definition.get("visual_color")
+	
+	_update_final_stats()
+
+
+## 更新最终属性（应用全局倍率和类型专精）
+func _update_final_stats() -> void:
+	var global_mult := GameState.turret_damage_multiplier
+	var type_mult := GameState.get_turret_type_multiplier(turret_id)
+	
+	# 伤害 = 基础 × 全局倍率 × 类型专精
+	projectile_damage = _base_damage * global_mult * type_mult
+	
+	# 其他属性直接使用基础值
+	fire_rate = _base_fire_rate
+	projectile_speed = _base_projectile_speed
+	interaction_range = _base_interaction_range
+	toughness_damage_radius = _base_toughness_damage_radius
+	repair_duration = _base_repair_duration
+	manual_fire_arc_half_angle_degrees = _base_manual_arc_half_angle
+	
+	# 更新视觉状态以应用颜色
+	_update_visual_state()
+
+
+## 获取炮塔类型ID
+func get_turret_id() -> StringName:
+	return turret_id
 
 
 func _update_player_in_range() -> void:

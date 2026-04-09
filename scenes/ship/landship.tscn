@@ -8,6 +8,8 @@
 size = Vector2(800, 400)
 
 [node name="Landship" type="StaticBody2D" groups=["ship"]]
+collision_layer = 1
+collision_mask = 20
 script = ExtResource("1_ship")
 
 [node name="Visual" type="ColorRect" parent="."]

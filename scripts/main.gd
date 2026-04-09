@@ -6,6 +6,7 @@ const BOSS_TANK_SCENE := preload("res://scenes/enemy/boss_tank.tscn")
 const MAP_SCREEN_SCENE := preload("res://scenes/ui/map_screen.tscn")
 const SHOP_SCREEN_SCENE := preload("res://scenes/map/shop_screen.tscn")
 const TURRET_SCENE := preload("res://scenes/turret/turret.tscn")
+const STANDARD_TURRET_DEF := preload("res://resources/turret/standard_turret.tres")
 const MAIN_MENU_SCENE := preload("res://scenes/ui/main_menu.tscn")
 const SETTINGS_MENU_SCENE := preload("res://scenes/ui/settings_menu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
@@ -137,7 +138,9 @@ func _ensure_starting_turrets() -> void:
 		var slot := slots[index]
 		if _slot_has_turret(slot):
 			continue
-		var turret := TURRET_SCENE.instantiate() as Node2D
+		var turret := TURRET_SCENE.instantiate() as Turret
+		if STANDARD_TURRET_DEF:
+			turret.definition = STANDARD_TURRET_DEF
 		slot.add_child(turret)
 		EventBus.turret_placed.emit(turret, index)
 

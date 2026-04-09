@@ -100,6 +100,7 @@
   "shop.item.hull_repair.desc": "Restores 50% of ship HP.",
   "shop.item.new_turret.name": "New Turret",
   "shop.item.new_turret.desc": "Installs a turret on an empty slot.",
+  "shop.turret.full": "Full",
 
   "game_over.victory": "VICTORY",
   "game_over.defeat": "DEFEAT",

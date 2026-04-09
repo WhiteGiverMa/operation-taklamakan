@@ -21,6 +21,7 @@ signal ship_destroyed()
 signal turret_placed(turret: Node2D, slot_index: int)
 signal turret_destroyed(turret: Node2D, slot_index: int)
 signal turret_fired(turret: Node2D, target: Node2D)
+signal turret_stats_refresh_requested()  # 请求所有炮塔刷新属性（全局升级后）
 
 # Projectile events
 signal projectile_hit(projectile: Node2D, target: Node2D)

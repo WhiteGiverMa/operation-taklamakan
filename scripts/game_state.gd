@@ -26,6 +26,10 @@ var turret_damage_multiplier: float = 1.0
 var auto_fire_unlocked: bool = false
 var has_active_run: bool = false
 
+# 炮塔类型专精倍率：{StringName: float}
+# 每购买某类型炮塔，该类型伤害+5%
+var turret_type_multipliers: Dictionary = {}
+
 var _state: State = State.MENU
 
 func _ready() -> void:
@@ -89,6 +93,7 @@ func _reset_run_values() -> void:
 	currency = 50
 	turret_damage_multiplier = 1.0
 	auto_fire_unlocked = false
+	turret_type_multipliers.clear()
 	kills = 0
 	current_layer = 1
 	level = 1
@@ -115,6 +120,17 @@ func spend_currency(amount: int) -> bool:
 
 func can_afford(amount: int) -> bool:
 	return currency >= amount
+
+## 获取指定炮塔类型的专精倍率
+func get_turret_type_multiplier(type_id: StringName) -> float:
+	return turret_type_multipliers.get(type_id, 1.0)
+
+## 提升指定炮塔类型的专精倍率
+func upgrade_turret_type(type_id: StringName, amount: float = 0.05) -> void:
+	var current := get_turret_type_multiplier(type_id)
+	turret_type_multipliers[type_id] = current + amount
+	# 通知所有炮塔刷新属性
+	EventBus.turret_stats_refresh_requested.emit()
 
 func advance_layer() -> void:
 	current_layer += 1
