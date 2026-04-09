@@ -139,8 +139,7 @@ func _process(_delta: float) -> void:
 
 func _rotate_barrel_toward_mouse() -> void:
 	var mouse_pos := get_global_mouse_position()
-	var angle := barrel.global_position.angle_to_point(mouse_pos)
-	barrel.rotation = _clamp_angle_to_manual_arc(angle)
+	barrel.rotation = _resolve_manual_fire_solution(mouse_pos).get("clamped_angle", barrel.rotation)
 
 
 func _handle_fire_cooldown(delta: float) -> void:
@@ -157,8 +156,6 @@ func _handle_manual_full_auto_fire() -> void:
 	if not InputManager.fire_action.value_bool:
 		return
 	var mouse_position := get_global_mouse_position()
-	if not _is_position_within_manual_arc(mouse_position):
-		return
 	_fire_at_position(mouse_position)
 
 
@@ -171,9 +168,6 @@ func _on_fire_action_just_triggered() -> void:
 		return
 
 	var mouse_position := get_global_mouse_position()
-	if not _is_position_within_manual_arc(mouse_position):
-		return
-
 	_fire_at_position(mouse_position)
 
 func _handle_auto_fire() -> void:
@@ -211,15 +205,13 @@ func _find_auto_target() -> Node2D:
 func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
 	if toughness_component.is_paralyzed():
 		return
-	if is_manual_mode and not _is_position_within_manual_arc(target_position):
-		return
 
 	_can_fire = false
 	_fire_timer = fire_rate
 
-	var firing_angle := barrel.global_position.angle_to_point(target_position)
+	var firing_angle := global_position.angle_to_point(target_position)
 	if is_manual_mode:
-		firing_angle = _clamp_angle_to_manual_arc(firing_angle)
+		firing_angle = _resolve_manual_fire_solution(target_position).get("clamped_angle", firing_angle)
 	barrel.rotation = firing_angle
 	var direction := Vector2.RIGHT.rotated(firing_angle)
 
@@ -455,18 +447,13 @@ func _resolve_manual_arc_center_angle() -> float:
 
 	return outward.angle()
 
-
-func _is_position_within_manual_arc(target_position: Vector2) -> bool:
-	return _is_angle_within_manual_arc(barrel.global_position.angle_to_point(target_position))
-
-
-func _is_angle_within_manual_arc(angle: float) -> bool:
-	var relative_angle := wrapf(angle - _manual_arc_center_angle, -PI, PI)
+func _resolve_manual_fire_solution(target_position: Vector2) -> Dictionary:
+	var raw_angle := global_position.angle_to_point(target_position)
+	var relative_angle := wrapf(raw_angle - _manual_arc_center_angle, -PI, PI)
 	var half_arc := deg_to_rad(manual_fire_arc_half_angle_degrees)
-	return absf(relative_angle) <= half_arc
-
-
-func _clamp_angle_to_manual_arc(angle: float) -> float:
-	var relative_angle := wrapf(angle - _manual_arc_center_angle, -PI, PI)
-	var half_arc := deg_to_rad(manual_fire_arc_half_angle_degrees)
-	return _manual_arc_center_angle + clampf(relative_angle, -half_arc, half_arc)
+	var clamped_relative_angle := clampf(relative_angle, -half_arc, half_arc)
+	return {
+		"raw_angle": raw_angle,
+		"within_arc": absf(relative_angle) <= half_arc,
+		"clamped_angle": _manual_arc_center_angle + clamped_relative_angle,
+	}

@@ -13,6 +13,7 @@ collision_mask = 20
 script = ExtResource("1_ship")
 
 [node name="Visual" type="ColorRect" parent="."]
+mouse_filter = 2
 offset_left = -400.0
 offset_top = -200.0
 offset_right = 400.0
@@ -52,6 +53,7 @@ position = Vector2(400, 0)
 [node name="PlayerCharacter" parent="." instance=ExtResource("3_player")]
 
 [node name="DamageIndicator" type="ColorRect" parent="."]
+mouse_filter = 2
 offset_left = -400.0
 offset_top = -200.0
 offset_right = 400.0
