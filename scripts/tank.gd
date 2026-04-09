@@ -38,8 +38,6 @@ func _ready() -> void:
 	if _health_component:
 		_health_component.health_changed.connect(_on_health_changed)
 		_health_component.died.connect(_on_died)
-	if not EventBus.projectile_hit.is_connected(_on_projectile_hit):
-		EventBus.projectile_hit.connect(_on_projectile_hit)
 	add_to_group("enemies")
 	_spawn_health_bar()
 	_update_health_bar()
@@ -134,10 +132,6 @@ func show_damage_feedback(amount: float) -> void:
 
 func _on_health_changed(_old_health: float, _new_health: float) -> void:
 	_update_health_bar()
-
-func _on_projectile_hit(_projectile: Node2D, target: Node2D, damage_amount: float) -> void:
-	if target == self:
-		show_damage_feedback(damage_amount)
 
 func _on_damaged(amount: float, _source) -> void:
 	if amount <= 0.0:
