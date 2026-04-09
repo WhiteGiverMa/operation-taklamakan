@@ -96,6 +96,18 @@ layout_mode = 2
 layout_mode = 2
 text = ""
 
+[node name="GameplaySectionLabel" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = ""
+
+[node name="ManualFireModeRow" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
+layout_mode = 2
+
+[node name="ManualFireModeToggle" type="CheckButton" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content/ManualFireModeRow"]
+layout_mode = 2
+text = ""
+
 [node name="AudioSectionLabel" type="Label" parent="Backdrop/Panel/MarginContainer/VBoxContainer/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
