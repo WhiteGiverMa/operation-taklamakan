@@ -94,7 +94,7 @@ func _ready() -> void:
 	interaction_area.collision_layer = 0
 	interaction_area.collision_mask = 0
 	interaction_area.set_collision_mask_value(6, true)
-	interaction_area.input_pickable = true
+	interaction_area.input_pickable = false
 
 	interaction_area.body_entered.connect(_on_player_entered)
 	interaction_area.body_exited.connect(_on_player_exited)
