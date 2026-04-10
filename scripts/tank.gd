@@ -176,7 +176,16 @@ func _spawn_damage_number(amount: float) -> void:
 	popup.text = str(int(round(amount)))
 	# 添加随机X偏移避免重叠
 	var random_offset_x := randf_range(-20.0, 20.0)
-	popup.position = global_position + Vector2(-40.0 + random_offset_x, -110.0)
+	
+	# 使用相机将世界坐标正确转换为屏幕坐标，以支持相机缩放
+	var camera := get_viewport().get_camera_2d()
+	var screen_pos: Vector2
+	if camera != null:
+		screen_pos = camera.unproject_position(global_position)
+	else:
+		screen_pos = global_position
+	
+	popup.position = screen_pos + Vector2(-40.0 + random_offset_x, -110.0)
 	popup.size = Vector2(80.0, 36.0)
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
