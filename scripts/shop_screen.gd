@@ -44,6 +44,7 @@ var _current_turret_offers: Array[Resource] = []
 var _current_shop_items: Array[Dictionary] = []
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_close_requested()
 	visible = false
 	# 注意：不再直接监听 shop_entered，由 main.gd 统一管理商店显示
@@ -52,6 +53,10 @@ func _ready() -> void:
 	close_button.pressed.connect(_on_close_pressed)
 	_connect_localization()
 	_apply_localization()
+
+func _process(_delta: float) -> void:
+	if visible and InputManager.ui_back_action.is_triggered():
+		_close_shop()
 
 func _connect_localization() -> void:
 	if not Localization.language_changed.is_connected(_on_language_changed):
@@ -129,7 +134,9 @@ func _build_item_list() -> void:
 
 func _create_item_row(data: Dictionary) -> HBoxContainer:
 	var row := HBoxContainer.new()
-	row.custom_minimum_size.y = 50
+	row.custom_minimum_size.y = 56
+	row.alignment = BoxContainer.ALIGNMENT_BEGIN
+	row.add_theme_constant_override("separation", 12)
 
 	# Name label
 	var name_label := Label.new()
@@ -139,7 +146,7 @@ func _create_item_row(data: Dictionary) -> HBoxContainer:
 		name_label.text = data["name"]
 	else:
 		name_label.text = data.get("id", "Unknown")
-	name_label.custom_minimum_size.x = 120
+	name_label.custom_minimum_size.x = 110
 	row.add_child(name_label)
 
 	# Description / Stats label
@@ -174,21 +181,21 @@ func _create_item_row(data: Dictionary) -> HBoxContainer:
 			desc_text = stats_text
 	
 	desc_label.text = desc_text
-	desc_label.custom_minimum_size.x = 250
+	desc_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(desc_label)
 
 	# Price label
 	var price_label := Label.new()
 	price_label.text = "%d" % data["price"]
-	price_label.custom_minimum_size.x = 60
+	price_label.custom_minimum_size.x = 52
 	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	row.add_child(price_label)
 
 	# Buy button
 	var buy_button := Button.new()
 	buy_button.text = Localization.t("common.buy")
-	buy_button.custom_minimum_size.x = 80
+	buy_button.custom_minimum_size.x = 96
 	buy_button.pressed.connect(_on_buy_pressed.bind(data))
 	row.add_child(buy_button)
 
