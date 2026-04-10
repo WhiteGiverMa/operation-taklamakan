@@ -16,6 +16,7 @@ currency_reward = 30
 is_boss = true
 
 [node name="Visual" type="ColorRect" parent="."]
+mouse_filter = 2
 offset_left = -30.0
 offset_top = -20.0
 offset_right = 30.0

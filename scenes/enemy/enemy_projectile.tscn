@@ -9,6 +9,7 @@ size = Vector2(16, 8)
 script = ExtResource("1_enemyproj")
 
 [node name="Visual" type="ColorRect" parent="." unique_id=50466959]
+mouse_filter = 2
 offset_left = -8.0
 offset_top = -4.0
 offset_right = 8.0

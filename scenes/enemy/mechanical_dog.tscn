@@ -10,6 +10,7 @@ size = Vector2(50, 40)
 script = ExtResource("1_mechanicaldog")
 
 [node name="Visual" type="ColorRect" parent="." unique_id=1507488831]
+mouse_filter = 2
 offset_left = -25.0
 offset_top = -20.0
 offset_right = 25.0
