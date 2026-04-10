@@ -6,6 +6,7 @@ extends Node
 # Enemy events
 signal enemy_spawned(enemy: Node2D)
 signal enemy_died(enemy: Node2D, position: Vector2, reward: int)
+signal damage_dealt(amount: float, position: Vector2, source: Node, is_critical: bool)
 
 # Wave events
 signal wave_started(wave_number: int)
