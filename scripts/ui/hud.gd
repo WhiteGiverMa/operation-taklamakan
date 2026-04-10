@@ -2,7 +2,14 @@ extends Control
 
 ## Simple HUD showing ship HP bar at top-left.
 
+const ENEMY_ARROW_TEXTURE_PATH := "res://assets/ui/arrows/arrow_IsosRt_red.png"
+const ENEMY_INDICATOR_SIZE := Vector2(28.0, 28.0)
+const ENEMY_INDICATOR_EDGE_MARGIN: float = 48.0
+const ENEMY_INDICATOR_SAFE_MARGIN: float = 32.0
+const MAX_ENEMY_INDICATORS: int = 8
+
 @onready var hp_bar: ProgressBar = $HPBar
+@onready var enemy_indicators: Control = $EnemyIndicators
 @onready var input_hints_panel: PanelContainer = $InputHintsPanel
 @onready var input_hints_title: Label = $InputHintsPanel/MarginContainer/VBoxContainer/TitleLabel
 @onready var input_hints_hint: Label = $InputHintsPanel/MarginContainer/VBoxContainer/HintLabel
@@ -28,6 +35,8 @@ extends Control
 
 var _input_formatter: GUIDEInputFormatter = null
 var _input_hints_enabled := false
+var _enemy_arrow_texture: Texture2D = null
+var _enemy_indicator_pool: Array[TextureRect] = []
 
 const HINT_ACTIONS := [
 	{
@@ -78,12 +87,19 @@ func _ready() -> void:
 	EventBus.ship_health_changed.connect(_on_ship_health_changed)
 	if not Localization.language_changed.is_connected(_on_language_changed):
 		Localization.language_changed.connect(_on_language_changed)
+	_load_enemy_arrow_texture()
 	input_hints_panel.visible = false
 	_apply_localization()
 	_refresh_input_hints()
 
 func _process(_delta: float) -> void:
-	if not visible or not _input_hints_enabled:
+	if not visible:
+		_hide_enemy_indicators()
+		return
+
+	_update_enemy_indicators()
+
+	if not _input_hints_enabled:
 		return
 
 	if InputManager.input_hints_toggle_action.is_triggered():
@@ -139,3 +155,100 @@ func _get_action_text(action: GUIDEAction) -> String:
 	if _input_formatter == null:
 		_input_formatter = GUIDEInputFormatter.for_active_contexts()
 	return _input_formatter.action_as_text(action)
+
+func _update_enemy_indicators() -> void:
+	if _enemy_arrow_texture == null:
+		_hide_enemy_indicators()
+		return
+
+	var viewport_size := get_viewport_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		_hide_enemy_indicators()
+		return
+
+	var safe_rect := Rect2(
+		Vector2.ONE * ENEMY_INDICATOR_SAFE_MARGIN,
+		viewport_size - Vector2.ONE * ENEMY_INDICATOR_SAFE_MARGIN * 2.0
+	)
+	var screen_center := viewport_size * 0.5
+	var offscreen_targets: Array[Dictionary] = []
+
+	for enemy_node in get_tree().get_nodes_in_group("enemies"):
+		var enemy := enemy_node as Node2D
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+
+		var screen_position := enemy.get_global_transform_with_canvas().origin
+		if safe_rect.has_point(screen_position):
+			continue
+
+		offscreen_targets.append({
+			"screen_position": screen_position,
+			"distance_sq": screen_center.distance_squared_to(screen_position),
+		})
+
+	offscreen_targets.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return a["distance_sq"] < b["distance_sq"]
+	)
+
+	var indicator_count := mini(offscreen_targets.size(), MAX_ENEMY_INDICATORS)
+	_ensure_enemy_indicator_pool(indicator_count)
+
+	for i in range(_enemy_indicator_pool.size()):
+		var indicator := _enemy_indicator_pool[i]
+		if i >= indicator_count:
+			indicator.visible = false
+			continue
+		_place_enemy_indicator(indicator, offscreen_targets[i]["screen_position"], viewport_size)
+
+func _ensure_enemy_indicator_pool(required_count: int) -> void:
+	if _enemy_arrow_texture == null:
+		return
+
+	while _enemy_indicator_pool.size() < required_count:
+		var indicator := TextureRect.new()
+		indicator.texture = _enemy_arrow_texture
+		indicator.custom_minimum_size = ENEMY_INDICATOR_SIZE
+		indicator.size = ENEMY_INDICATOR_SIZE
+		indicator.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		indicator.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		indicator.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		indicator.pivot_offset = ENEMY_INDICATOR_SIZE * 0.5
+		indicator.z_index = 20
+		indicator.visible = false
+		enemy_indicators.add_child(indicator)
+		_enemy_indicator_pool.append(indicator)
+
+func _place_enemy_indicator(indicator: TextureRect, enemy_screen_position: Vector2, viewport_size: Vector2) -> void:
+	var screen_center := viewport_size * 0.5
+	var direction := enemy_screen_position - screen_center
+	if direction.length_squared() <= 0.001:
+		indicator.visible = false
+		return
+
+	var normalized_direction := direction.normalized()
+	var half_extents := viewport_size * 0.5 - Vector2.ONE * ENEMY_INDICATOR_EDGE_MARGIN
+	var scale_to_edge := INF
+
+	if absf(normalized_direction.x) > 0.001:
+		scale_to_edge = minf(scale_to_edge, half_extents.x / absf(normalized_direction.x))
+	if absf(normalized_direction.y) > 0.001:
+		scale_to_edge = minf(scale_to_edge, half_extents.y / absf(normalized_direction.y))
+	if scale_to_edge == INF:
+		indicator.visible = false
+		return
+
+	indicator.position = screen_center + normalized_direction * scale_to_edge - ENEMY_INDICATOR_SIZE * 0.5
+	indicator.rotation = normalized_direction.angle() - PI * 0.5
+	indicator.visible = true
+
+func _hide_enemy_indicators() -> void:
+	for indicator in _enemy_indicator_pool:
+		indicator.visible = false
+
+func _load_enemy_arrow_texture() -> void:
+	var image := Image.load_from_file(ENEMY_ARROW_TEXTURE_PATH)
+	if image == null or image.is_empty():
+		push_warning("HUD: 无法读取屏外敌人箭头贴图: %s" % ENEMY_ARROW_TEXTURE_PATH)
+		return
+	_enemy_arrow_texture = ImageTexture.create_from_image(image)

@@ -27,6 +27,11 @@ enum State {
 @export var spawn_interval: float = 2.0
 @export var intermission_duration: float = 10.0
 @export var use_wave_set: bool = true
+
+@export_category("Spawn Area")
+@export var offscreen_spawn_margin: float = 260.0
+@export var offscreen_spawn_jitter: float = 120.0
+@export var minimum_spawn_distance: float = 1180.0
 # WaveSet resource - using Resource type to avoid parse order issues
 @export var wave_set: Resource
 
@@ -375,7 +380,7 @@ func _spawn_next_enemy() -> void:
 	
 	# Clamp spawn point index
 	spawn_point_idx = clamp(spawn_point_idx, 0, _spawn_points.size() - 1)
-	var spawn_position: Vector2 = _spawn_points[spawn_point_idx].global_position
+	var spawn_position: Vector2 = _get_spawn_position(_spawn_points[spawn_point_idx])
 	
 	# Instantiate enemy
 	var enemy = scene.instantiate() as Node2D
@@ -390,6 +395,43 @@ func _spawn_next_enemy() -> void:
 	
 	print("WaveManager: Spawned ", enemy_type, " at spawn point ", spawn_point_idx)
 
+func _get_spawn_position(spawn_marker: Marker2D) -> Vector2:
+	var anchor := _get_spawn_anchor()
+	var lane_direction := spawn_marker.global_position - anchor
+	if lane_direction.length_squared() <= 0.001:
+		lane_direction = Vector2.RIGHT.rotated(randf() * TAU)
+
+	var direction := lane_direction.normalized()
+	var distance_to_screen_edge := _get_distance_to_screen_edge(anchor, direction)
+	var desired_distance := maxf(
+		distance_to_screen_edge + offscreen_spawn_margin + randf_range(0.0, offscreen_spawn_jitter),
+		minimum_spawn_distance
+	)
+	return anchor + direction * desired_distance
+
+func _get_spawn_anchor() -> Vector2:
+	var ship := get_tree().get_first_node_in_group("ship") as Node2D
+	if ship != null:
+		return ship.global_position
+	return get_viewport().get_visible_rect().size * 0.5
+
+func _get_distance_to_screen_edge(anchor: Vector2, direction: Vector2) -> float:
+	var visible_rect := get_viewport().get_visible_rect()
+	var half_extents := visible_rect.size * 0.5
+	var safe_direction := direction.normalized()
+	var scale_to_edge := INF
+
+	if absf(safe_direction.x) > 0.001:
+		scale_to_edge = minf(scale_to_edge, half_extents.x / absf(safe_direction.x))
+	if absf(safe_direction.y) > 0.001:
+		scale_to_edge = minf(scale_to_edge, half_extents.y / absf(safe_direction.y))
+	if scale_to_edge == INF:
+		return minimum_spawn_distance
+
+	var screen_center := visible_rect.position + half_extents
+	var anchor_offset := anchor - screen_center
+	return maxf(scale_to_edge - anchor_offset.dot(safe_direction), 0.0)
+
 # Signal Handlers
 
 func _connect_signals() -> void:
@@ -397,7 +439,7 @@ func _connect_signals() -> void:
 	if not EventBus.enemy_died.is_connected(_on_enemy_died):
 		EventBus.enemy_died.connect(_on_enemy_died)
 
-func _on_enemy_died(enemy: Node2D, _position: Vector2, _reward: int) -> void:
+func _on_enemy_died(_enemy: Node2D, _position: Vector2, _reward: int) -> void:
 	if _state != State.ACTIVE_WAVE:
 		return
 	
