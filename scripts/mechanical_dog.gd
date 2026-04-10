@@ -3,7 +3,8 @@ extends CharacterBody2D
 
 ## MechanicalDog enemy that moves toward the ship and shoots projectiles.
 
-const ENEMY_PROJECTILE_SCENE := preload("res://scenes/enemy/enemy_projectile.tscn")
+# 使用 ProjectileSpawner 代替直接实例化
+# const ENEMY_PROJECTILE_SCENE := preload("res://scenes/enemy/enemy_projectile.tscn")
 const FLOATING_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
 
 @export var speed: float = 150.0
@@ -127,9 +128,21 @@ func _fire_at_target(target_pos: Vector2) -> void:
 	
 	var direction := (target_pos - global_position).normalized()
 	
-	# Spawn enemy projectile
-	if ENEMY_PROJECTILE_SCENE:
-		var projectile := ENEMY_PROJECTILE_SCENE.instantiate() as Node2D
+	# 使用 ProjectileSpawner 生成敌方投射物
+	var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
+	if spawner and spawner.has_method("spawn_enemy_projectile"):
+		spawner.spawn_enemy_projectile(
+			global_position,
+			direction,
+			projectile_speed,
+			projectile_damage,
+			self
+		)
+	else:
+		# 回退：直接实例化（兼容旧逻辑）
+		push_warning("[MechanicalDog] ProjectileSpawner 不可用，使用回退逻辑")
+		var projectile_scene := preload("res://scenes/enemy/enemy_projectile.tscn")
+		var projectile := projectile_scene.instantiate() as Node2D
 		projectile.global_position = global_position
 		projectile.setup(direction, projectile_speed, projectile_damage, self)
 		get_tree().root.add_child(projectile)

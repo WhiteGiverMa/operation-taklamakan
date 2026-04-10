@@ -253,6 +253,16 @@ func _clear_runtime_enemies() -> void:
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if is_instance_valid(enemy):
 			enemy.queue_free()
+	
+	# 同时清理所有投射物
+	_clear_runtime_projectiles()
+
+
+## 清理所有投射物（场景切换时调用）
+func _clear_runtime_projectiles() -> void:
+	var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
+	if spawner and spawner.has_method("clear_all_projectiles"):
+		spawner.clear_all_projectiles()
 
 func _show_main_menu(preserve_run: bool) -> void:
 	if _main_menu == null:
@@ -260,6 +270,11 @@ func _show_main_menu(preserve_run: bool) -> void:
 	InputManager.activate_menu()
 	_hide_gameplay_flow()
 	_hide_menu_overlays()
+	
+	# 清理所有投射物和敌人（返回主菜单时）
+	_clear_runtime_projectiles()
+	_clear_runtime_enemies()
+	
 	if preserve_run and GameState.has_active_run:
 		GameState.return_to_menu(true)
 	else:

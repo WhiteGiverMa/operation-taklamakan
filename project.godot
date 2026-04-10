@@ -24,6 +24,7 @@ MapManager="*res://scripts/map_manager.gd"
 EventBus="*res://scripts/event_bus.gd"
 GameState="*res://scripts/game_state.gd"
 WaveManager="*res://scripts/wave_manager.gd"
+ProjectileSpawner="*res://scripts/projectile_spawner.gd"
 McpInteractionServer="*res://addons/godot_mcp/mcp_interaction_server.gd"
 
 [display]

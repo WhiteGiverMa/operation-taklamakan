@@ -6,7 +6,8 @@ extends Node2D
 
 signal turret_fired(target: Vector2)
 
-const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn")
+# 使用 ProjectileSpawner 代替直接实例化
+# const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn")
 const TOUGHNESS_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
 # Preload TurretDefinition to ensure type is available
 const _TurretDefinitionScript := preload("res://scripts/resources/turret_definition.gd")
@@ -214,10 +215,24 @@ func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
 	barrel.rotation = firing_angle
 	var direction := Vector2.RIGHT.rotated(firing_angle)
 
-	var projectile := PROJECTILE_SCENE.instantiate() as Node2D
-	projectile.global_position = muzzle.global_position
-	projectile.setup(direction, projectile_speed, projectile_damage, self)
-	get_tree().root.add_child(projectile)
+	# 使用 ProjectileSpawner 生成投射物
+	var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
+	if spawner and spawner.has_method("spawn_projectile"):
+		spawner.spawn_projectile(
+			muzzle.global_position,
+			direction,
+			projectile_speed,
+			projectile_damage,
+			self
+		)
+	else:
+		# 回退：直接实例化（兼容旧逻辑）
+		push_warning("[Turret] ProjectileSpawner 不可用，使用回退逻辑")
+		var projectile_scene := preload("res://scenes/projectile.tscn")
+		var projectile := projectile_scene.instantiate() as Node2D
+		projectile.global_position = muzzle.global_position
+		projectile.setup(direction, projectile_speed, projectile_damage, self)
+		get_tree().root.add_child(projectile)
 
 	turret_fired.emit(target_position)
 	EventBus.turret_fired.emit(self, target)

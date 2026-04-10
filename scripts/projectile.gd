@@ -2,12 +2,14 @@ class_name Projectile
 extends Area2D
 
 ## Player projectile. Moves in a straight line and damages enemies on contact.
+## 支持对象池模式，通过 ProjectileSpawner 管理生命周期
 
 var velocity: Vector2 = Vector2.ZERO
 var speed: float = 600.0
 var damage: float = 15.0
 var _source: Node = null
 var _has_hit: bool = false
+var _is_pool_active: bool = false
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var visual: ColorRect = $Visual
@@ -27,6 +29,8 @@ func setup(dir: Vector2, spd: float, dmg: float, source: Node = null) -> void:
 	speed = spd
 	damage = dmg
 	_source = source
+	_has_hit = false
+	_is_pool_active = true
 	
 	# Rotate visual to face direction of travel
 	rotation = dir.angle()
@@ -64,6 +68,7 @@ func _apply_hit(body: Node2D) -> void:
 	if _has_hit:
 		return
 	_has_hit = true
+	_is_pool_active = false
 
 	var dmg_data := DamageData.new(damage, _source)
 	var actual_damage = body.take_damage(dmg_data)
@@ -71,7 +76,7 @@ func _apply_hit(body: Node2D) -> void:
 	if actual_damage is float:
 		emitted_damage = actual_damage
 	EventBus.projectile_hit.emit(self, body, emitted_damage)
-	queue_free()
+	_recycle_to_pool()
 
 
 func _find_overlap_target(check_position: Vector2) -> Node2D:
@@ -131,3 +136,28 @@ func _pick_closest_target(results: Array[Dictionary], origin: Vector2) -> Node2D
 
 func _is_enemy_target(body: Node2D) -> bool:
 	return body.is_in_group("enemies") and body.has_method("take_damage")
+
+
+## 对象池支持：检查是否可用于池复用
+func is_available_for_pool() -> bool:
+	return not _is_pool_active and not _has_hit
+
+
+## 对象池支持：检查是否处于激活状态
+func is_pool_active() -> bool:
+	return _is_pool_active
+
+
+## 回收到对象池
+func _recycle_to_pool() -> void:
+	_is_pool_active = false
+	
+	# 尝试通过 ProjectileSpawner 回收
+	if is_inside_tree():
+		var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
+		if spawner and spawner.has_method("return_to_pool"):
+			spawner.return_to_pool(self, false)
+			return
+	
+	# 回退：直接销毁
+	queue_free()

@@ -2,12 +2,15 @@ class_name EnemyProjectile
 extends Area2D
 
 ## Enemy projectile that damages the ship on contact.
+## 支持对象池模式，通过 ProjectileSpawner 管理生命周期
 
 var velocity: Vector2 = Vector2.ZERO
 var speed: float = 400.0
 var damage: float = 15.0
 @export var player_knockback_force: float = 360.0
 var _source: Node = null
+var _is_pool_active: bool = false
+var _lifetime_timer: SceneTreeTimer = null
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var visual: ColorRect = $Visual
@@ -23,19 +26,23 @@ func _ready() -> void:
 	set_collision_mask_value(6, true)
 	
 	body_entered.connect(_on_body_entered)
-	
-	# Auto-destroy after 5 seconds to prevent memory leaks
-	var timer := get_tree().create_timer(5.0)
-	timer.timeout.connect(queue_free)
 
 func setup(dir: Vector2, spd: float, dmg: float, source: Node = null) -> void:
 	velocity = dir.normalized() * spd
 	speed = spd
 	damage = dmg
 	_source = source
+	_is_pool_active = true
 	
 	# Rotate visual to face direction of travel
 	rotation = dir.angle()
+	
+	# Auto-recycle after 5 seconds to prevent memory leaks
+	# 取消之前的定时器（如果存在）
+	if _lifetime_timer and _lifetime_timer.timeout.is_connected(_on_lifetime_timeout):
+		_lifetime_timer.timeout.disconnect(_on_lifetime_timeout)
+	_lifetime_timer = get_tree().create_timer(5.0)
+	_lifetime_timer.timeout.connect(_on_lifetime_timeout)
 
 func _physics_process(delta: float) -> void:
 	position += velocity * delta
@@ -46,7 +53,7 @@ func _on_body_entered(body: Node2D) -> void:
 		impact_data.damage_type = "impact"
 		impact_data.knockback = velocity.normalized() * player_knockback_force
 		body.receive_impact(impact_data)
-		queue_free()
+		_recycle_to_pool()
 		return
 
 	# Apply damage to ship or turret
@@ -55,4 +62,39 @@ func _on_body_entered(body: Node2D) -> void:
 		body.take_damage(dmg_data)
 	
 	# Destroy projectile on any hit
+	_recycle_to_pool()
+
+
+## 生命周期超时回调
+func _on_lifetime_timeout() -> void:
+	_recycle_to_pool()
+
+
+## 对象池支持：检查是否可用于池复用
+func is_available_for_pool() -> bool:
+	return not _is_pool_active
+
+
+## 对象池支持：检查是否处于激活状态
+func is_pool_active() -> bool:
+	return _is_pool_active
+
+
+## 回收到对象池
+func _recycle_to_pool() -> void:
+	_is_pool_active = false
+	
+	# 取消生命周期定时器
+	if _lifetime_timer and _lifetime_timer.timeout.is_connected(_on_lifetime_timeout):
+		_lifetime_timer.timeout.disconnect(_on_lifetime_timeout)
+	_lifetime_timer = null
+	
+	# 尝试通过 ProjectileSpawner 回收
+	if is_inside_tree():
+		var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
+		if spawner and spawner.has_method("return_to_pool"):
+			spawner.return_to_pool(self, true)
+			return
+	
+	# 回退：直接销毁
 	queue_free()
