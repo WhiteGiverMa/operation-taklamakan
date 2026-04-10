@@ -76,11 +76,16 @@ func _spawn_popup(amount: float, world_position: Vector2, is_critical: bool) -> 
 	if popup == null:
 		popup = _create_popup_node()
 	
-	# Get camera and convert world position to screen position
-	var camera := get_viewport().get_camera_2d()
+	# Convert world position to screen position for Camera2D
+	# Formula: screen_pos = (world_pos - camera_pos) * zoom + viewport_center
+	var viewport := get_viewport()
+	var camera := viewport.get_camera_2d()
 	var screen_pos: Vector2
 	if camera != null:
-		screen_pos = camera.unproject_position(world_position)
+		var viewport_center := viewport.get_visible_rect().size * 0.5
+		var camera_pos := camera.global_position
+		var camera_zoom := camera.zoom
+		screen_pos = (world_position - camera_pos) * camera_zoom + viewport_center
 	else:
 		screen_pos = world_position
 	
