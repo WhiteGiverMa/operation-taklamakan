@@ -15,6 +15,11 @@ var _is_pool_active: bool = false
 @onready var visual: ColorRect = $Visual
 
 func _ready() -> void:
+	# 投射物由 ProjectileSpawner（Autoload 根节点）管理，
+	# 场景树绘制顺序在陆行舰之前，需要显式提高 z_index
+	# 以确保投射物可见于舰体之上
+	z_index = 10
+
 	collision_layer = 0
 	collision_mask = 0
 	# Projectile: layer 4
