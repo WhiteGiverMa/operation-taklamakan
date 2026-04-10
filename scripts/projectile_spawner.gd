@@ -179,7 +179,8 @@ func return_to_pool(projectile: Node, is_enemy: bool = false) -> void:
 	
 	var scene_path := ENEMY_PROJECTILE_SCENE_PATH if is_enemy else PROJECTILE_SCENE_PATH
 	
-	_deactivate_projectile(projectile)
+	# 延迟调用，避免在物理回调中直接修改 CollisionObject 状态
+	call_deferred("_deactivate_projectile", projectile)
 	
 	# 确保在池中
 	if not scene_path in _projectile_pools:
