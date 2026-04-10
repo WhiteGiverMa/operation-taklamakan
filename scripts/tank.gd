@@ -133,12 +133,14 @@ func show_damage_feedback(amount: float) -> void:
 func _on_health_changed(_old_health: float, _new_health: float) -> void:
 	_update_health_bar()
 
-func _on_damaged(amount: float, _source) -> void:
+func _on_damaged(amount: float, source) -> void:
 	if amount <= 0.0:
 		return
 	_show_health_bar()
 	_show_damage_flash()
-	_spawn_damage_number(amount)
+	# Emit damage_dealt signal for DamagePopupManager to display
+	var is_critical := false  # TODO: Get from DamageData when critical hit support is added
+	EventBus.damage_dealt.emit(amount, global_position, source, is_critical)
 
 func _spawn_health_bar() -> void:
 	if FLOATING_BAR_SCENE == null or _health_bar != null:
@@ -170,45 +172,6 @@ func _show_damage_flash() -> void:
 	visual.modulate = Color(1.0, 0.45, 0.45)
 	var tween := create_tween()
 	tween.tween_property(visual, "modulate", Color.WHITE, 0.18)
-
-func _spawn_damage_number(amount: float) -> void:
-	var popup := Label.new()
-	popup.text = str(int(round(amount)))
-	# 添加随机X偏移避免重叠
-	var random_offset_x := randf_range(-20.0, 20.0)
-	
-	# 使用相机将世界坐标正确转换为屏幕坐标，以支持相机缩放
-	var camera := get_viewport().get_camera_2d()
-	var screen_pos: Vector2
-	if camera != null:
-		screen_pos = camera.unproject_position(global_position)
-	else:
-		screen_pos = global_position
-	
-	popup.position = screen_pos + Vector2(-40.0 + random_offset_x, -110.0)
-	popup.size = Vector2(80.0, 36.0)
-	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	popup.z_index = 20
-	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.modulate = Color(1.0, 0.92, 0.4, 1.0)
-	popup.add_theme_font_size_override("font_size", 28)
-	popup.add_theme_color_override("font_color", Color(1.0, 0.97, 0.7))
-	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.02, 0.02, 0.95))
-	popup.add_theme_constant_override("outline_size", 6)
-
-	var popup_parent := get_tree().root.get_node_or_null("Main/UILayer")
-	if popup_parent != null:
-		popup_parent.add_child(popup)
-	else:
-		add_child(popup)
-
-	# 飘字动画：向上飘动 + 渐隐
-	var tween := popup.create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(popup, "position:y", popup.position.y - 40.0, 0.6)
-	tween.tween_property(popup, "modulate:a", 0.0, 0.6)
-	tween.finished.connect(popup.queue_free)
 
 func _on_died() -> void:
 	# Emit enemy_died signal for currency drop
