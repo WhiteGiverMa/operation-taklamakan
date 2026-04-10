@@ -73,7 +73,7 @@ func _on_language_changed(_locale: String) -> void:
 	_apply_localization()
 
 func _on_map_generated(_seed: int, _graph) -> void:
-	_refresh_map()
+	refresh_view()
 
 func _on_current_node_changed(_node) -> void:
 	_refresh_map()
@@ -212,6 +212,7 @@ func _on_node_selected(node_ui: MapNodeUIScript) -> void:
 	_update_confirm_button()
 
 func refresh_view() -> void:
+	_update_layer_info()
 	_refresh_map()
 
 func _update_node_info(node_ui: MapNodeUIScript) -> void:

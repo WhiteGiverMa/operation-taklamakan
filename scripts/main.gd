@@ -245,8 +245,18 @@ func _on_wave_all_complete() -> void:
 	WaveManager.end_combat_session()
 	_clear_runtime_enemies()
 
-	MapManager.go_to_layer_start(MapManager.current_layer + 1)
-	GameState.advance_layer()
+	var current_node = MapManager.current_node
+	if current_node == null:
+		_show_map_screen()
+		return
+
+	if current_node.type == MapNode.TYPE_BOSS:
+		return
+
+	if current_node.is_terminal():
+		MapManager.advance_to_next_layer()
+		GameState.advance_layer()
+
 	_show_map_screen()
 
 func _clear_runtime_enemies() -> void:
