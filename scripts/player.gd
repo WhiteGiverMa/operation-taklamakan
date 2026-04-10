@@ -14,10 +14,12 @@ const SHIP_BOUNDS_X: float = 380.0
 const SHIP_BOUNDS_Y: float = 180.0
 
 # 武器相关常量
-const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn")
+# 使用 ProjectileSpawner 代替直接实例化
+# const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn")
 const WEAPON_DAMAGE := 8.0
 const WEAPON_FIRE_RATE := 0.2
 const WEAPON_PROJECTILE_SPEED := 600.0
+const FIRE_INPUT_BUFFER := 0.12
 
 var _knockback_velocity: Vector2 = Vector2.ZERO
 var _impact_cooldown_timer: float = 0.0
@@ -25,6 +27,7 @@ var _impact_cooldown_timer: float = 0.0
 # 武器冷却
 var _can_fire: bool = true
 var _fire_timer: float = 0.0
+var _fire_buffer_timer: float = 0.0
 
 func _ready() -> void:
 	# 玩家站在舰体内部移动，不应与舰体 hull 自身发生物理碰撞，
@@ -35,6 +38,8 @@ func _ready() -> void:
 	set_collision_layer_value(6, true)
 	set_collision_mask_value(3, true)
 	set_collision_mask_value(5, true)
+	if not InputManager.fire_action.just_triggered.is_connected(_on_fire_action_just_triggered):
+		InputManager.fire_action.just_triggered.connect(_on_fire_action_just_triggered)
 
 func _physics_process(delta: float) -> void:
 	if _impact_cooldown_timer > 0.0:
@@ -53,6 +58,7 @@ func _physics_process(delta: float) -> void:
 	
 	# 武器系统
 	_handle_weapon_cooldown(delta)
+	_handle_fire_buffer(delta)
 	_handle_player_shooting()
 	
 	# Constrain to ship bounds after movement
@@ -100,6 +106,14 @@ func _handle_weapon_cooldown(delta: float) -> void:
 		if _fire_timer <= 0.0:
 			_can_fire = true
 
+func _handle_fire_buffer(delta: float) -> void:
+	if _fire_buffer_timer <= 0.0:
+		return
+	_fire_buffer_timer = maxf(_fire_buffer_timer - delta, 0.0)
+
+func _on_fire_action_just_triggered() -> void:
+	_fire_buffer_timer = FIRE_INPUT_BUFFER
+
 func _is_any_turret_in_manual_mode() -> bool:
 	# 使用类名发现所有炮塔
 	var turrets: Array[Node] = get_tree().get_nodes_in_group("turrets")
@@ -124,12 +138,19 @@ func _find_turrets_recursive(node: Node, result: Array[Node]) -> void:
 		_find_turrets_recursive(child, result)
 
 func _handle_player_shooting() -> void:
-	if not _can_fire:
-		return
 	# 检查炮塔手动模式优先级
 	if _is_any_turret_in_manual_mode():
 		return
-	if not InputManager.fire_action.is_triggered():
+
+	var wants_to_fire := false
+	if SettingsManager.manual_fire_full_auto:
+		wants_to_fire = InputManager.fire_action.value_bool
+	else:
+		wants_to_fire = _fire_buffer_timer > 0.0
+
+	if not wants_to_fire:
+		return
+	if not _can_fire:
 		return
 	
 	var mouse_pos := get_global_mouse_position()
@@ -140,11 +161,26 @@ func _handle_player_shooting() -> void:
 		return
 	
 	_fire_projectile(direction)
+	_fire_buffer_timer = 0.0
 	_can_fire = false
 	_fire_timer = WEAPON_FIRE_RATE
 
 func _fire_projectile(direction: Vector2) -> void:
-	var projectile := PROJECTILE_SCENE.instantiate() as Node2D
-	projectile.global_position = global_position
-	projectile.setup(direction, WEAPON_PROJECTILE_SPEED, WEAPON_DAMAGE, self)
-	get_tree().root.add_child(projectile)
+	# 使用 ProjectileSpawner 生成投射物
+	var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
+	if spawner and spawner.has_method("spawn_projectile"):
+		spawner.spawn_projectile(
+			global_position,
+			direction,
+			WEAPON_PROJECTILE_SPEED,
+			WEAPON_DAMAGE,
+			self
+		)
+	else:
+		# 回退：直接实例化（兼容旧逻辑）
+		push_warning("[Player] ProjectileSpawner 不可用，使用回退逻辑")
+		var projectile_scene := preload("res://scenes/projectile.tscn")
+		var projectile := projectile_scene.instantiate() as Node2D
+		projectile.global_position = global_position
+		projectile.setup(direction, WEAPON_PROJECTILE_SPEED, WEAPON_DAMAGE, self)
+		get_tree().root.add_child(projectile)
