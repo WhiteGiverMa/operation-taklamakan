@@ -52,21 +52,26 @@ func _physics_process(delta: float) -> void:
 	position += velocity * delta
 
 func _on_body_entered(body: Node2D) -> void:
+	# 检查 source 是否仍然有效，避免传入已释放的对象
+	var valid_source: Node = null
+	if is_instance_valid(_source):
+		valid_source = _source
+	
 	if body.has_method(&"receive_impact"):
-		var impact_data := DamageData.new(0.0, _source)
+		var impact_data := DamageData.new(0.0, valid_source)
 		impact_data.damage_type = "impact"
 		impact_data.knockback = velocity.normalized() * player_knockback_force
 		body.receive_impact(impact_data)
-		_recycle_to_pool()
+		call_deferred(&"_recycle_to_pool")
 		return
 
 	# Apply damage to ship or turret
 	if body.has_method("take_damage"):
-		var dmg_data := DamageData.new(damage, _source)
+		var dmg_data := DamageData.new(damage, valid_source)
 		body.take_damage(dmg_data)
 	
-	# Destroy projectile on any hit
-	_recycle_to_pool()
+	# Destroy projectile on any hit - 使用 call_deferred 避免在物理回调中禁用碰撞体
+	call_deferred(&"_recycle_to_pool")
 
 
 ## 生命周期超时回调
