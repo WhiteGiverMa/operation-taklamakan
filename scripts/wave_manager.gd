@@ -416,8 +416,8 @@ func _get_spawn_anchor() -> Vector2:
 	return get_viewport().get_visible_rect().size * 0.5
 
 func _get_distance_to_screen_edge(anchor: Vector2, direction: Vector2) -> float:
-	var visible_rect := get_viewport().get_visible_rect()
-	var half_extents := visible_rect.size * 0.5
+	var camera := get_viewport().get_camera_2d()
+	var half_extents := _get_camera_world_half_extents(camera)
 	var safe_direction := direction.normalized()
 	var scale_to_edge := INF
 
@@ -428,9 +428,14 @@ func _get_distance_to_screen_edge(anchor: Vector2, direction: Vector2) -> float:
 	if scale_to_edge == INF:
 		return minimum_spawn_distance
 
-	var screen_center := visible_rect.position + half_extents
+	var screen_center := camera.get_screen_center_position() if camera != null else get_viewport().get_visible_rect().position + half_extents
 	var anchor_offset := anchor - screen_center
 	return maxf(scale_to_edge - anchor_offset.dot(safe_direction), 0.0)
+
+func _get_camera_world_half_extents(camera: Camera2D) -> Vector2:
+	if camera != null and camera.has_method("get_world_half_extents"):
+		return camera.call("get_world_half_extents")
+	return get_viewport().get_visible_rect().size * 0.5
 
 # Signal Handlers
 

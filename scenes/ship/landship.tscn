@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ship/landship.gd" id="1_ship"]
 [ext_resource type="Script" path="res://scripts/health_component.gd" id="2_health"]
 [ext_resource type="PackedScene" path="res://scenes/ship/player_character.tscn" id="3_player"]
+[ext_resource type="Script" path="res://scripts/combat_camera.gd" id="4_camera"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hull"]
 size = Vector2(800, 400)
@@ -51,6 +52,10 @@ position = Vector2(-400, 0)
 position = Vector2(400, 0)
 
 [node name="PlayerCharacter" parent="." instance=ExtResource("3_player")]
+
+[node name="CombatCamera" type="Camera2D" parent="."]
+enabled = true
+script = ExtResource("4_camera")
 
 [node name="DamageIndicator" type="ColorRect" parent="."]
 mouse_filter = 2

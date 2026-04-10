@@ -16,6 +16,9 @@
 [ext_resource type="Resource" path="res://resources/input/actions/input_hints_toggle.tres" id="12_input_hints"]
 [ext_resource type="Resource" path="res://resources/input/actions/fire.tres" id="13_fire"]
 [ext_resource type="Script" uid="uid://vgjlx6p007lp" path="res://addons/guide/inputs/guide_input_mouse_button.gd" id="14_mouse_button"]
+[ext_resource type="Resource" path="res://resources/input/actions/camera_zoom_in.tres" id="15_camera_zoom_in"]
+[ext_resource type="Resource" path="res://resources/input/actions/camera_zoom_out.tres" id="16_camera_zoom_out"]
+[ext_resource type="Resource" path="res://resources/input/actions/camera_zoom_reset.tres" id="17_camera_zoom_reset"]
 
 [sub_resource type="Resource" id="WKey"]
 script = ExtResource("3_key")
@@ -210,7 +213,52 @@ script = ExtResource("7_action_mapping")
 action = ExtResource("13_fire")
 input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("FireLeftMouse")])
 
+[sub_resource type="Resource" id="ZoomInMouseWheel"]
+script = ExtResource("14_mouse_button")
+button = 4
+
+[sub_resource type="Resource" id="ZoomInMapping"]
+script = ExtResource("6_input_mapping")
+input = SubResource("ZoomInMouseWheel")
+
+[sub_resource type="Resource" id="ZoomInActionMapping"]
+script = ExtResource("7_action_mapping")
+action = ExtResource("15_camera_zoom_in")
+input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("ZoomInMapping")])
+
+[sub_resource type="Resource" id="ZoomOutMouseWheel"]
+script = ExtResource("14_mouse_button")
+button = 5
+
+[sub_resource type="Resource" id="ZoomOutMapping"]
+script = ExtResource("6_input_mapping")
+input = SubResource("ZoomOutMouseWheel")
+
+[sub_resource type="Resource" id="ZoomOutActionMapping"]
+script = ExtResource("7_action_mapping")
+action = ExtResource("16_camera_zoom_out")
+input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("ZoomOutMapping")])
+
+[sub_resource type="Resource" id="ResetZoomKey"]
+script = ExtResource("3_key")
+key = 49
+control = true
+allow_additional_modifiers = false
+
+[sub_resource type="Resource" id="PressedTriggerResetZoom"]
+script = ExtResource("11_pressed")
+
+[sub_resource type="Resource" id="ResetZoomMapping"]
+script = ExtResource("6_input_mapping")
+input = SubResource("ResetZoomKey")
+triggers = Array[ExtResource("8_ldkpb")]([SubResource("PressedTriggerResetZoom")])
+
+[sub_resource type="Resource" id="ResetZoomActionMapping"]
+script = ExtResource("7_action_mapping")
+action = ExtResource("17_camera_zoom_reset")
+input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("ResetZoomMapping")])
+
 [resource]
 script = ExtResource("1_context")
 display_name = "Combat"
-mappings = Array[ExtResource("7_action_mapping")]([SubResource("MoveActionMapping"), SubResource("RepairActionMapping"), SubResource("InteractActionMapping"), SubResource("PauseActionMapping"), SubResource("InputHintsActionMapping"), SubResource("FireActionMapping")])
+mappings = Array[ExtResource("7_action_mapping")]([SubResource("MoveActionMapping"), SubResource("RepairActionMapping"), SubResource("InteractActionMapping"), SubResource("PauseActionMapping"), SubResource("InputHintsActionMapping"), SubResource("FireActionMapping"), SubResource("ZoomInActionMapping"), SubResource("ZoomOutActionMapping"), SubResource("ResetZoomActionMapping")])
