@@ -232,10 +232,10 @@ func _calculate_lead_position(turret_pos: Vector2, enemy: Node2D, proj_speed: fl
 		# 无实数解 → 弹速不足以拦截，瞄当前位置
 		return enemy.global_position
 
-	var sqrt_disc := sqrtf(discriminant)
-	var two_a := 2.0 * a
-	var t1 := (-b - sqrt_disc) / two_a
-	var t2 := (-b + sqrt_disc) / two_a
+	var sqrt_disc: float = sqrt(discriminant)
+	var two_a: float = 2.0 * a
+	var t1: float = (-b - sqrt_disc) / two_a
+	var t2: float = (-b + sqrt_disc) / two_a
 
 	# 取最小的非负时间解（更快命中）
 	var t: float = -1.0
