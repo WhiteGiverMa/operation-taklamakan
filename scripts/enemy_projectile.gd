@@ -14,6 +14,7 @@ var _lifetime_timer: SceneTreeTimer = null
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var visual: ColorRect = $Visual
+@onready var trail: GPUParticles2D = $Trail
 
 func _ready() -> void:
 	# 敌方投射物同样由 ProjectileSpawner 管理，需要提高 z_index
@@ -40,6 +41,8 @@ func setup(dir: Vector2, spd: float, dmg: float, source: Node = null) -> void:
 	
 	# Rotate visual to face direction of travel
 	rotation = dir.angle()
+	if trail != null and trail.has_method("configure_for_spawn"):
+		trail.configure_for_spawn(spd, visual.color)
 	
 	# Auto-recycle after 5 seconds to prevent memory leaks
 	# 取消之前的定时器（如果存在）
@@ -92,6 +95,8 @@ func is_pool_active() -> bool:
 ## 回收到对象池
 func _recycle_to_pool() -> void:
 	_is_pool_active = false
+	if trail != null and trail.has_method("stop_for_pool"):
+		trail.stop_for_pool()
 	
 	# 取消生命周期定时器
 	if _lifetime_timer and _lifetime_timer.timeout.is_connected(_on_lifetime_timeout):

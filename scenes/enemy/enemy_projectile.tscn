@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/enemy_projectile.gd" id="1_enemyproj"]
+[ext_resource type="Script" path="res://scripts/projectile_trail.gd" id="2_trail"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_proj"]
 size = Vector2(16, 8)
@@ -15,6 +16,10 @@ offset_top = -4.0
 offset_right = 8.0
 offset_bottom = 4.0
 color = Color(1, 0.26666668, 0.26666668, 1)
+
+[node name="Trail" type="GPUParticles2D" parent="." unique_id="11050466959"]
+z_index = -1
+script = ExtResource("2_trail")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1847980148]
 shape = SubResource("RectangleShape2D_proj")

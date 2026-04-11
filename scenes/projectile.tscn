@@ -1,6 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/projectile.gd" id="1_projectile"]
+[ext_resource type="Script" path="res://scripts/projectile_trail.gd" id="2_trail"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_bullet"]
 radius = 8.0
@@ -19,3 +20,8 @@ offset_top = -6.0
 offset_right = 10.0
 offset_bottom = 6.0
 color = Color(1, 0.8, 0, 1)
+
+[node name="Trail" type="GPUParticles2D" parent="." unique_id="1173192825"]
+top_level = false
+z_index = -1
+script = ExtResource("2_trail")

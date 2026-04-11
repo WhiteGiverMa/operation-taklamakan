@@ -13,6 +13,7 @@ var _is_pool_active: bool = false
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var visual: ColorRect = $Visual
+@onready var trail: GPUParticles2D = $Trail
 
 func _ready() -> void:
 	# 投射物由 ProjectileSpawner（Autoload 根节点）管理，
@@ -39,6 +40,8 @@ func setup(dir: Vector2, spd: float, dmg: float, source: Node = null) -> void:
 	
 	# Rotate visual to face direction of travel
 	rotation = dir.angle()
+	if trail != null and trail.has_method("configure_for_spawn"):
+		trail.configure_for_spawn(spd, visual.color)
 
 func _physics_process(delta: float) -> void:
 	if _has_hit:
@@ -156,6 +159,8 @@ func is_pool_active() -> bool:
 ## 回收到对象池
 func _recycle_to_pool() -> void:
 	_is_pool_active = false
+	if trail != null and trail.has_method("stop_for_pool"):
+		trail.stop_for_pool()
 	
 	# 尝试通过 ProjectileSpawner 回收
 	if is_inside_tree():
