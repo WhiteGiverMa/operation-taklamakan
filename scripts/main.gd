@@ -11,6 +11,7 @@ const MAIN_MENU_SCENE := preload("res://scenes/ui/main_menu.tscn")
 const SETTINGS_MENU_SCENE := preload("res://scenes/ui/settings_menu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
 const ENCOUNTER_OVERLAY_SCENE := preload("res://scenes/ui/encounter_overlay.tscn")
+const DEV_MODE_SCENE := preload("res://scenes/ui/dev_mode.tscn")
 
 enum FlowState { MAP, COMBAT, SHOP, TRANSITION }
 enum SettingsReturnTarget { MAIN_MENU, PAUSE_MENU }
@@ -24,6 +25,7 @@ var _main_menu: Control = null
 var _settings_menu: Control = null
 var _pause_menu: Control = null
 var _encounter_overlay: Control = null
+var _dev_mode_panel: Control = null
 var _settings_return_target: SettingsReturnTarget = SettingsReturnTarget.MAIN_MENU
 
 @onready var landship: Landship = $Landship
@@ -38,6 +40,10 @@ func _ready() -> void:
 	_connect_signals()
 	_ensure_starting_turrets()
 	_show_main_menu(false)
+
+func _process(_delta: float) -> void:
+	if InputManager.dev_console_toggle_action.is_triggered():
+		_toggle_dev_mode()
 
 func _setup_wave_manager() -> void:
 	# Assign enemy scenes to WaveManager
@@ -76,11 +82,19 @@ func _setup_overlay_screens() -> void:
 	_settings_menu.visible = false
 	_settings_menu.back_requested.connect(_on_settings_back_requested)
 
+	_dev_mode_panel = DEV_MODE_SCENE.instantiate() as Control
+	ui_layer.add_child(_dev_mode_panel)
+	_dev_mode_panel.visible = false
+
 	_encounter_overlay = ENCOUNTER_OVERLAY_SCENE.instantiate() as Control
 	ui_layer.add_child(_encounter_overlay)
 	_encounter_overlay.visible = false
 	if _encounter_overlay.has_signal("completed"):
 		_encounter_overlay.completed.connect(_on_encounter_overlay_completed)
+
+func _toggle_dev_mode() -> void:
+	if _dev_mode_panel:
+		_dev_mode_panel.visible = not _dev_mode_panel.visible
 
 func _connect_signals() -> void:
 	MapManager.current_node_changed.connect(_on_current_node_changed)
