@@ -16,12 +16,14 @@ const DEFAULT_MASTER_VOLUME := 0.8
 const DEFAULT_WINDOW_MODE := WindowMode.WINDOWED
 const DEFAULT_VSYNC_ENABLED := true
 const DEFAULT_MANUAL_FIRE_FULL_AUTO := true
+const DEFAULT_DEV_MODE_ENABLED := false
 
 var language: String = DEFAULT_LANGUAGE
 var master_volume: float = DEFAULT_MASTER_VOLUME
 var window_mode: WindowMode = DEFAULT_WINDOW_MODE
 var vsync_enabled: bool = DEFAULT_VSYNC_ENABLED
 var manual_fire_full_auto: bool = DEFAULT_MANUAL_FIRE_FULL_AUTO
+var dev_mode_enabled: bool = DEFAULT_DEV_MODE_ENABLED
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -43,6 +45,7 @@ func load_settings() -> void:
 	window_mode = int(config.get_value("display", "window_mode", DEFAULT_WINDOW_MODE)) as WindowMode
 	vsync_enabled = bool(config.get_value("display", "vsync_enabled", DEFAULT_VSYNC_ENABLED))
 	manual_fire_full_auto = bool(config.get_value("gameplay", "manual_fire_full_auto", DEFAULT_MANUAL_FIRE_FULL_AUTO))
+	dev_mode_enabled = bool(config.get_value("developer", "dev_mode_enabled", DEFAULT_DEV_MODE_ENABLED))
 
 func save_settings() -> void:
 	_ensure_config_dir()
@@ -53,6 +56,7 @@ func save_settings() -> void:
 	config.set_value("display", "window_mode", window_mode)
 	config.set_value("display", "vsync_enabled", vsync_enabled)
 	config.set_value("gameplay", "manual_fire_full_auto", manual_fire_full_auto)
+	config.set_value("developer", "dev_mode_enabled", dev_mode_enabled)
 	config.save(CONFIG_PATH)
 
 func apply_settings() -> void:
@@ -90,6 +94,11 @@ func set_manual_fire_full_auto(value: bool) -> void:
 	save_settings()
 	settings_changed.emit()
 
+func set_dev_mode_enabled(value: bool) -> void:
+	dev_mode_enabled = value
+	save_settings()
+	settings_changed.emit()
+
 func _apply_audio_settings() -> void:
 	var bus_index := AudioServer.get_bus_index("Master")
 	if bus_index < 0:
@@ -112,6 +121,7 @@ func _save_defaults(config: ConfigFile) -> void:
 	config.set_value("display", "window_mode", DEFAULT_WINDOW_MODE)
 	config.set_value("display", "vsync_enabled", DEFAULT_VSYNC_ENABLED)
 	config.set_value("gameplay", "manual_fire_full_auto", DEFAULT_MANUAL_FIRE_FULL_AUTO)
+	config.set_value("developer", "dev_mode_enabled", DEFAULT_DEV_MODE_ENABLED)
 	config.save(CONFIG_PATH)
 
 func _ensure_config_dir() -> void:
