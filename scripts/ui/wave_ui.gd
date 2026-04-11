@@ -15,6 +15,7 @@ extends Control
 
 var _wave_manager: Node = null
 var _is_visible: bool = false
+var _panel_open: bool = true
 
 func _ready() -> void:
 	_hide_ui()
@@ -27,8 +28,8 @@ func _process(_delta: float) -> void:
 	if not _wave_manager:
 		return
 
-	if _is_visible and InputManager.upgrade_toggle_action.is_triggered():
-		_on_upgrade_pressed()
+	if _wave_manager.get_state() == _wave_manager.State.BETWEEN_WAVES and InputManager.upgrade_toggle_action.is_triggered():
+		_toggle_intermission_panel()
 	
 	_update_ui()
 
@@ -69,13 +70,18 @@ func _update_ui() -> void:
 	
 	match state:
 		_wave_manager.State.BETWEEN_WAVES:
-			if not _is_visible:
+			if _panel_open and not _is_visible:
 				_show_ui()
-			_update_intermission_ui()
+			elif not _panel_open and _is_visible:
+				_hide_ui()
+			if _panel_open:
+				_update_intermission_ui()
 		_wave_manager.State.ACTIVE_WAVE:
+			_panel_open = true
 			if _is_visible:
 				_hide_ui()
 		_wave_manager.State.COMPLETE:
+			_panel_open = true
 			_show_completion_ui()
 
 func _update_intermission_ui() -> void:
@@ -111,6 +117,7 @@ func _update_intermission_ui() -> void:
 func _show_ui() -> void:
 	visible = true
 	_is_visible = true
+	_panel_open = true
 	button_container.visible = true
 	wave_progress_bar.visible = true
 	
@@ -125,9 +132,18 @@ func _hide_ui() -> void:
 
 func set_combat_visibility(should_show: bool) -> void:
 	if not should_show:
+		_panel_open = true
 		_hide_ui()
 		return
 	_update_ui()
+
+func _toggle_intermission_panel() -> void:
+	_panel_open = not _panel_open
+	if _panel_open:
+		_show_ui()
+		_update_intermission_ui()
+	else:
+		_hide_ui()
 
 func _show_completion_ui() -> void:
 	visible = true
@@ -178,6 +194,7 @@ func _on_all_waves_complete() -> void:
 	_show_completion_ui()
 
 func _on_intermission_started(_duration: float) -> void:
+	_panel_open = true
 	_show_ui()
 
 func _on_intermission_ended() -> void:
