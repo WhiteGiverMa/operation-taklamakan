@@ -27,8 +27,11 @@ extends Resource
 ## 投射物飞行速度
 @export var projectile_speed: float = 600.0
 
-## 自动索敌/交互范围
+## 玩家交互范围（靠近炮塔可进入手动模式）
 @export var interaction_range: float = 150.0
+
+## 自动索敌射程（自动火控发现目标的距离）
+@export var auto_target_range: float = 1500.0
 
 ## === 韧性参数 ===
 
@@ -40,8 +43,8 @@ extends Resource
 
 ## === 射界参数 ===
 
-## 炮塔射击半弧角度（手动瞄准与自动火控共用）
-@export_range(0.0, 180.0, 1.0) var fire_arc_half_angle: float = 120.0
+## 炮塔射界半弧角度（手动瞄准与自动火控共用）
+@export_range(0.0, 180.0, 1.0) var firing_arc_half_angle: float = 120.0
 
 ## === 经济参数 ===
 

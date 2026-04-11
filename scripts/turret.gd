@@ -25,18 +25,20 @@ var _base_damage: float = 15.0
 var _base_fire_rate: float = 0.5
 var _base_projectile_speed: float = 600.0
 var _base_interaction_range: float = 150.0
+var _base_auto_target_range: float = 1500.0
 var _base_toughness_damage_radius: float = 180.0
 var _base_repair_duration: float = 2.0
-var _base_fire_arc_half_angle: float = 90.0
+var _base_firing_arc_half_angle: float = 90.0
 
 ## 最终计算后的属性（受全局倍率和类型专精影响）
 var projectile_damage: float = 15.0
 var fire_rate: float = 0.5
 var projectile_speed: float = 600.0
 var interaction_range: float = 150.0
+var auto_target_range: float = 1500.0
 var toughness_damage_radius: float = 180.0
 var repair_duration: float = 2.0
-var fire_arc_half_angle_degrees: float = 90.0
+var firing_arc_half_angle_degrees: float = 90.0
 var _visual_color: Color = Color.WHITE
 
 # @export 保留用于编辑器调试，但运行时通过definition设置
@@ -44,6 +46,10 @@ var _visual_color: Color = Color.WHITE
 	set(value):
 		_debug_interaction_range = value
 		interaction_range = value
+@export var _debug_auto_target_range: float = 1500.0:
+	set(value):
+		_debug_auto_target_range = value
+		auto_target_range = value
 @export var _debug_projectile_speed: float = 600.0:
 	set(value):
 		_debug_projectile_speed = value
@@ -65,10 +71,10 @@ var _visual_color: Color = Color.WHITE
 	set(value):
 		_debug_repair_duration = value
 		repair_duration = value
-@export_range(0.0, 180.0, 1.0) var _debug_fire_arc_half_angle_degrees: float = 90.0:
+@export_range(0.0, 180.0, 1.0) var _debug_firing_arc_half_angle_degrees: float = 90.0:
 	set(value):
-		_debug_fire_arc_half_angle_degrees = value
-		fire_arc_half_angle_degrees = value
+		_debug_firing_arc_half_angle_degrees = value
+		firing_arc_half_angle_degrees = value
 
 var is_manual_mode: bool = false
 var _can_fire: bool = true
@@ -77,7 +83,7 @@ var _player_in_range: bool = false
 var _repair_timer: float = 0.0
 var _toughness_bar: ProgressBar
 var _player: Node2D
-var _manual_arc_center_angle: float = 0.0
+var _firing_arc_center_angle: float = 0.0
 var _skip_manual_exit_once: bool = false
 
 @onready var barrel: Node2D = $Barrel
@@ -107,7 +113,7 @@ func _ready() -> void:
 	toughness_component.paralysis_started.connect(_on_paralysis_started)
 	toughness_component.paralysis_ended.connect(_on_paralysis_ended)
 	_player = _resolve_player()
-	_manual_arc_center_angle = _resolve_manual_arc_center_angle()
+	_firing_arc_center_angle = _resolve_firing_arc_center_angle()
 
 	_spawn_toughness_bar()
 	_update_toughness_bar()
@@ -193,7 +199,7 @@ func _find_auto_target() -> Node2D:
 		var enemy := candidate as Node2D
 		var distance := global_position.distance_to(enemy.global_position)
 		# 只索敌射程内的敌人
-		if distance > interaction_range:
+		if distance > auto_target_range:
 			continue
 		if not _resolve_fire_solution(enemy.global_position).get("within_arc", false):
 			continue
@@ -385,9 +391,10 @@ func _apply_definition() -> void:
 	_base_fire_rate = definition.get("base_fire_rate")
 	_base_projectile_speed = definition.get("projectile_speed")
 	_base_interaction_range = definition.get("interaction_range")
+	_base_auto_target_range = definition.get("auto_target_range")
 	_base_toughness_damage_radius = definition.get("toughness_damage_radius")
 	_base_repair_duration = definition.get("repair_duration")
-	_base_fire_arc_half_angle = definition.get("fire_arc_half_angle")
+	_base_firing_arc_half_angle = definition.get("firing_arc_half_angle")
 	_visual_color = definition.get("visual_color")
 	
 	_update_final_stats()
@@ -405,9 +412,10 @@ func _update_final_stats() -> void:
 	fire_rate = _base_fire_rate
 	projectile_speed = _base_projectile_speed
 	interaction_range = _base_interaction_range
+	auto_target_range = _base_auto_target_range
 	toughness_damage_radius = _base_toughness_damage_radius
 	repair_duration = _base_repair_duration
-	fire_arc_half_angle_degrees = _base_fire_arc_half_angle
+	firing_arc_half_angle_degrees = _base_firing_arc_half_angle
 	
 	# 更新视觉状态以应用颜色
 	_update_visual_state()
@@ -452,7 +460,7 @@ func _resolve_player() -> Node2D:
 	return get_tree().get_first_node_in_group("player") as Node2D
 
 
-func _resolve_manual_arc_center_angle() -> float:
+func _resolve_firing_arc_center_angle() -> float:
 	var ship := get_tree().get_first_node_in_group("ship") as Node2D
 	if ship == null:
 		return 0.0
@@ -465,11 +473,11 @@ func _resolve_manual_arc_center_angle() -> float:
 
 func _resolve_fire_solution(target_position: Vector2) -> Dictionary:
 	var raw_angle := global_position.angle_to_point(target_position)
-	var relative_angle := wrapf(raw_angle - _manual_arc_center_angle, -PI, PI)
-	var half_arc := deg_to_rad(fire_arc_half_angle_degrees)
+	var relative_angle := wrapf(raw_angle - _firing_arc_center_angle, -PI, PI)
+	var half_arc := deg_to_rad(firing_arc_half_angle_degrees)
 	var clamped_relative_angle := clampf(relative_angle, -half_arc, half_arc)
 	return {
 		"raw_angle": raw_angle,
 		"within_arc": absf(relative_angle) <= half_arc,
-		"clamped_angle": _manual_arc_center_angle + clamped_relative_angle,
+		"clamped_angle": _firing_arc_center_angle + clamped_relative_angle,
 	}

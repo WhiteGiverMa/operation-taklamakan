@@ -165,7 +165,7 @@ func _create_item_row(data: Dictionary) -> HBoxContainer:
 		var def: Resource = data["definition"]
 		var base_dmg_val = def.get("base_damage")
 		var rate_val = def.get("base_fire_rate")
-		var range_val = def.get("interaction_range")
+		var range_val = def.get("auto_target_range")
 		var type_id_val = def.get("id")
 		
 		var base_dmg: float = base_dmg_val if base_dmg_val != null else 0.0
