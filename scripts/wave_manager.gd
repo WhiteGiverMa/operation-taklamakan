@@ -144,7 +144,7 @@ func start_combat_session(layer: int = 1) -> void:
 	_find_spawn_points()
 	current_wave = 0
 	set_state(State.BETWEEN_WAVES)
-	_start_intermission(3.0)  # Short prep time before first wave
+	_start_intermission(0.0)
 
 func end_combat_session() -> void:
 	print("WaveManager: Ending combat session")
@@ -217,12 +217,7 @@ func _complete_wave() -> void:
 	if _session_progress_wave >= total_waves:
 		_complete_all_waves()
 	else:
-		var intermission_time = intermission_duration
-		if _current_wave_data:
-			var saved_duration = _current_wave_data.get("intermission_duration")
-			if saved_duration != null:
-				intermission_time = saved_duration
-		_start_intermission(intermission_time)
+		_start_intermission(0.0)
 
 func _complete_all_waves() -> void:
 	print("WaveManager: All waves completed!")
@@ -239,14 +234,13 @@ func _complete_all_waves() -> void:
 # Intermission Management
 
 func _start_intermission(duration: float) -> void:
-	_intermission_timer = duration
+	_intermission_timer = maxf(duration, 0.0)
 	intermission_started.emit(duration)
-	print("WaveManager: Intermission started (", duration, "s)")
+	print("WaveManager: Intermission started (manual continue)")
 
 func _end_intermission() -> void:
 	intermission_ended.emit()
 	print("WaveManager: Intermission ended")
-	# Don't auto-start next wave - wait for player input via UI
 
 func skip_intermission() -> void:
 	if _state == State.BETWEEN_WAVES:

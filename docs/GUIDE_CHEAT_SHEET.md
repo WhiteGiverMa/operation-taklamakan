@@ -26,6 +26,7 @@
 | `interact` | `InputManager.interact_action` | 与炮台交互（接管/离开） |
 | `repair` | `InputManager.repair_action` | 维修船体或炮台 |
 | `pause_toggle` | `InputManager.pause_toggle_action` | 暂停菜单开关 |
+| `upgrade_toggle` | `InputManager.upgrade_toggle_action` | 波间升级界面开关 |
 | `ui_back` | `InputManager.ui_back_action` | UI 返回/取消 |
 | `map_pan_hold` | `InputManager.map_pan_hold_action` | 地图平移按住 |
 | `map_pan_delta` | `InputManager.map_pan_delta_action` | 地图平移方向 |
@@ -44,13 +45,14 @@ res://resources/input/
 │   ├── interact.tres          # 交互（E键/手柄X）
 │   ├── repair.tres            # 维修（R键/手柄Y）
 │   ├── pause_toggle.tres      # 暂停（Esc/Start）
+│   ├── upgrade_toggle.tres    # 升级界面开关（Tab）
 │   ├── ui_back.tres           # UI返回（Esc/B键）
 │   ├── map_pan_hold.tres      # 地图平移按住（中键/右键）
 │   ├── map_pan_delta.tres     # 地图平移方向（鼠标/右摇杆）
 │   ├── camera_zoom_in.tres    # 放大（滚轮上/RT）
 │   ├── camera_zoom_out.tres   # 缩小（滚轮下/LT）
 │   ├── camera_zoom_reset.tres # 重置（中键点击/L3）
-│   └── input_hints_toggle.tres # 输入提示开关（Tab/Select）
+│   └── input_hints_toggle.tres # 输入提示开关（O）
 │
 └── contexts/
     ├── combat.tres            # 战斗玩法上下文
@@ -210,6 +212,7 @@ InputManager.restore_flow_context()
 | COMBAT | `combat` (+ `turret_manual` 可选) | 基础战斗输入 |
 | COMBAT + 手动炮台 | `combat` + `turret_manual` | 叠加手动瞄准 |
 | SHOP | 无 | 商店使用按钮驱动 UI |
+| SHOP | `shop` | 商店 / 升级界面返回与切换 |
 | 覆盖层（暂停/设置） | `overlay_back` | 仅返回操作可用 |
 
 ---

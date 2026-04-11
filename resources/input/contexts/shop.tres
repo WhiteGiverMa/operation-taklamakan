@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="GUIDEMappingContext" format=3]
+
+[ext_resource type="Script" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
+[ext_resource type="Resource" path="res://resources/input/actions/ui_back.tres" id="2_back"]
+[ext_resource type="Resource" path="res://resources/input/actions/upgrade_toggle.tres" id="3_upgrade_toggle"]
+[ext_resource type="Script" path="res://addons/guide/inputs/guide_input_key.gd" id="4_key"]
+[ext_resource type="Script" path="res://addons/guide/guide_input_mapping.gd" id="5_input_mapping"]
+[ext_resource type="Script" path="res://addons/guide/guide_action_mapping.gd" id="6_action_mapping"]
+[ext_resource type="Script" path="res://addons/guide/triggers/guide_trigger.gd" id="7_trigger"]
+[ext_resource type="Script" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="8_pressed"]
+
+[sub_resource type="Resource" id="EscapeKey"]
+script = ExtResource("4_key")
+key = 4194305
+allow_additional_modifiers = false
+
+[sub_resource type="Resource" id="BackTrigger"]
+script = ExtResource("8_pressed")
+
+[sub_resource type="Resource" id="BackMapping"]
+script = ExtResource("5_input_mapping")
+input = SubResource("EscapeKey")
+triggers = Array[ExtResource("7_trigger")]([SubResource("BackTrigger")])
+
+[sub_resource type="Resource" id="BackActionMapping"]
+script = ExtResource("6_action_mapping")
+action = ExtResource("2_back")
+input_mappings = Array[ExtResource("5_input_mapping")]([SubResource("BackMapping")])
+
+[sub_resource type="Resource" id="TabKey"]
+script = ExtResource("4_key")
+key = 4194308
+allow_additional_modifiers = false
+
+[sub_resource type="Resource" id="UpgradeToggleTrigger"]
+script = ExtResource("8_pressed")
+
+[sub_resource type="Resource" id="UpgradeToggleMapping"]
+script = ExtResource("5_input_mapping")
+input = SubResource("TabKey")
+triggers = Array[ExtResource("7_trigger")]([SubResource("UpgradeToggleTrigger")])
+
+[sub_resource type="Resource" id="UpgradeToggleActionMapping"]
+script = ExtResource("6_action_mapping")
+action = ExtResource("3_upgrade_toggle")
+input_mappings = Array[ExtResource("5_input_mapping")]([SubResource("UpgradeToggleMapping")])
+
+[resource]
+script = ExtResource("1_context")
+display_name = "Shop"
+mappings = Array[ExtResource("6_action_mapping")]([SubResource("BackActionMapping"), SubResource("UpgradeToggleActionMapping")])

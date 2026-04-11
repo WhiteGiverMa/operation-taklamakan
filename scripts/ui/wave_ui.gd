@@ -26,6 +26,9 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if not _wave_manager:
 		return
+
+	if _is_visible and InputManager.upgrade_toggle_action.is_triggered():
+		_on_upgrade_pressed()
 	
 	_update_ui()
 
@@ -78,12 +81,15 @@ func _update_ui() -> void:
 func _update_intermission_ui() -> void:
 	var current_wave = _wave_manager.current_wave
 	var total_waves = _wave_manager.total_waves
-	
-	wave_label.text = Localization.t("wave.ui.complete_title", "", {"wave": current_wave, "total": total_waves})
-	status_label.text = Localization.t("wave.ui.intermission_status")
-	
-	var time_remaining = _wave_manager.get_intermission_time_remaining()
-	timer_label.text = Localization.t("wave.ui.auto_continue", "", {"seconds": "%.1f" % time_remaining})
+
+	if current_wave <= 0:
+		wave_label.text = Localization.t("wave.ui.pre_battle_title")
+		status_label.text = Localization.t("wave.ui.pre_battle_status")
+	else:
+		wave_label.text = Localization.t("wave.ui.complete_title", "", {"wave": current_wave, "total": total_waves})
+		status_label.text = Localization.t("wave.ui.intermission_status")
+
+	timer_label.text = Localization.t("wave.ui.waiting_for_continue")
 	
 	# Get next wave info
 	var next_wave_data = null
@@ -156,6 +162,8 @@ func _on_repair_pressed() -> void:
 	repair_button.disabled = true
 
 func _on_upgrade_pressed() -> void:
+	if not _is_visible:
+		return
 	# Emit shop entered signal to show upgrade UI
 	EventBus.shop_entered.emit()
 	upgrade_button.disabled = true
@@ -173,7 +181,7 @@ func _on_intermission_started(_duration: float) -> void:
 	_show_ui()
 
 func _on_intermission_ended() -> void:
-	_hide_ui()
+	_update_ui()
 
 func _on_game_over(_won: bool) -> void:
 	_hide_ui()

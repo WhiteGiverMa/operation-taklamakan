@@ -85,8 +85,11 @@
   "encounter.rest.continue": "继续",
 
   "wave.ui.complete_title": "第 {wave} / {total} 波完成",
+  "wave.ui.pre_battle_title": "战斗准备",
+  "wave.ui.pre_battle_status": "检查舰船并准备迎敌。",
   "wave.ui.intermission_status": "间歇中 - 为下一波做好准备！",
   "wave.ui.auto_continue": "{seconds} 秒后自动继续",
+  "wave.ui.waiting_for_continue": "整备不限时，点击“继续”开始下一波。",
   "wave.ui.next_wave_enemies": "下一波敌人：{tanks} 坦克，{dogs} 机械狗，{bosses} 首领",
   "wave.ui.next_wave_unknown": "下一波：未知",
   "wave.ui.all_complete": "全部波次完成！",

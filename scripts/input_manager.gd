@@ -22,6 +22,7 @@ const INTERACT_ACTION := preload("res://resources/input/actions/interact.tres")
 const FIRE_ACTION := preload("res://resources/input/actions/fire.tres")
 const PAUSE_TOGGLE_ACTION := preload("res://resources/input/actions/pause_toggle.tres")
 const INPUT_HINTS_TOGGLE_ACTION := preload("res://resources/input/actions/input_hints_toggle.tres")
+const UPGRADE_TOGGLE_ACTION := preload("res://resources/input/actions/upgrade_toggle.tres")
 const UI_BACK_ACTION := preload("res://resources/input/actions/ui_back.tres")
 const MAP_PAN_HOLD_ACTION := preload("res://resources/input/actions/map_pan_hold.tres")
 const MAP_PAN_DELTA_ACTION := preload("res://resources/input/actions/map_pan_delta.tres")
@@ -32,6 +33,7 @@ const CAMERA_ZOOM_RESET_ACTION := preload("res://resources/input/actions/camera_
 const COMBAT_CONTEXT := preload("res://resources/input/contexts/combat.tres")
 const TURRET_MANUAL_CONTEXT := preload("res://resources/input/contexts/turret_manual.tres")
 const MAP_CONTEXT := preload("res://resources/input/contexts/map.tres")
+const SHOP_CONTEXT := preload("res://resources/input/contexts/shop.tres")
 const OVERLAY_BACK_CONTEXT := preload("res://resources/input/contexts/overlay_back.tres")
 
 var _flow_context: FlowContext = FlowContext.NONE
@@ -61,6 +63,10 @@ var pause_toggle_action: GUIDEAction:
 var input_hints_toggle_action: GUIDEAction:
 	get:
 		return INPUT_HINTS_TOGGLE_ACTION
+
+var upgrade_toggle_action: GUIDEAction:
+	get:
+		return UPGRADE_TOGGLE_ACTION
 
 var ui_back_action: GUIDEAction:
 	get:
@@ -155,8 +161,7 @@ func _activate_for_current_state() -> void:
 				contexts.append(TURRET_MANUAL_CONTEXT)
 			_apply_contexts(contexts)
 		FlowContext.SHOP:
-			# Shop currently uses button-driven UI only, so gameplay contexts stay disabled here.
-			_apply_contexts([])
+			_apply_contexts([SHOP_CONTEXT])
 		_:
 			_apply_contexts([])
 

@@ -19,6 +19,7 @@
 [ext_resource type="Resource" path="res://resources/input/actions/camera_zoom_in.tres" id="15_camera_zoom_in"]
 [ext_resource type="Resource" path="res://resources/input/actions/camera_zoom_out.tres" id="16_camera_zoom_out"]
 [ext_resource type="Resource" path="res://resources/input/actions/camera_zoom_reset.tres" id="17_camera_zoom_reset"]
+[ext_resource type="Resource" path="res://resources/input/actions/upgrade_toggle.tres" id="18_upgrade_toggle"]
 
 [sub_resource type="Resource" id="WKey"]
 script = ExtResource("3_key")
@@ -197,6 +198,24 @@ script = ExtResource("7_action_mapping")
 action = ExtResource("12_input_hints")
 input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("InputHintsMapping")])
 
+[sub_resource type="Resource" id="UpgradeToggleKey"]
+script = ExtResource("3_key")
+key = 4194308
+allow_additional_modifiers = false
+
+[sub_resource type="Resource" id="PressedTriggerUpgradeToggle"]
+script = ExtResource("11_pressed")
+
+[sub_resource type="Resource" id="UpgradeToggleMapping"]
+script = ExtResource("6_input_mapping")
+input = SubResource("UpgradeToggleKey")
+triggers = Array[ExtResource("8_ldkpb")]([SubResource("PressedTriggerUpgradeToggle")])
+
+[sub_resource type="Resource" id="UpgradeToggleActionMapping"]
+script = ExtResource("7_action_mapping")
+action = ExtResource("18_upgrade_toggle")
+input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("UpgradeToggleMapping")])
+
 [sub_resource type="Resource" id="FireMouseButton"]
 script = ExtResource("14_mouse_button")
 
@@ -261,4 +280,4 @@ input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("ResetZoomMa
 [resource]
 script = ExtResource("1_context")
 display_name = "Combat"
-mappings = Array[ExtResource("7_action_mapping")]([SubResource("MoveActionMapping"), SubResource("RepairActionMapping"), SubResource("InteractActionMapping"), SubResource("PauseActionMapping"), SubResource("InputHintsActionMapping"), SubResource("FireActionMapping"), SubResource("ZoomInActionMapping"), SubResource("ZoomOutActionMapping"), SubResource("ResetZoomActionMapping")])
+mappings = Array[ExtResource("7_action_mapping")]([SubResource("MoveActionMapping"), SubResource("RepairActionMapping"), SubResource("InteractActionMapping"), SubResource("PauseActionMapping"), SubResource("InputHintsActionMapping"), SubResource("UpgradeToggleActionMapping"), SubResource("FireActionMapping"), SubResource("ZoomInActionMapping"), SubResource("ZoomOutActionMapping"), SubResource("ResetZoomActionMapping")])

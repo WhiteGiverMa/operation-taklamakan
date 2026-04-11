@@ -85,8 +85,11 @@
   "encounter.rest.continue": "Continue",
 
   "wave.ui.complete_title": "Wave {wave} / {total} Complete",
+  "wave.ui.pre_battle_title": "Prepare for Combat",
+  "wave.ui.pre_battle_status": "Check the landship and get ready for the incoming wave.",
   "wave.ui.intermission_status": "Intermission - Prepare for the next wave!",
   "wave.ui.auto_continue": "Auto-continue in: {seconds} s",
+  "wave.ui.waiting_for_continue": "Intermission is unlimited. Press Continue when you're ready.",
   "wave.ui.next_wave_enemies": "Next Wave Enemies: {tanks} Tanks, {dogs} Dogs, {bosses} Bosses",
   "wave.ui.next_wave_unknown": "Next Wave: Unknown",
   "wave.ui.all_complete": "All Waves Complete!",

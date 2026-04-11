@@ -39,12 +39,14 @@
   - `resources/input/actions/fire.tres`
   - `resources/input/actions/pause_toggle.tres`
   - `resources/input/actions/ui_back.tres`
-  - `resources/input/actions/map_pan_hold.tres`
-  - `resources/input/actions/map_pan_delta.tres`
+- `resources/input/actions/map_pan_hold.tres`
+- `resources/input/actions/map_pan_delta.tres`
+- `resources/input/actions/upgrade_toggle.tres`
 - 已有 GUIDE Mapping Context：
   - `resources/input/contexts/combat.tres`
   - `resources/input/contexts/turret_manual.tres`
   - `resources/input/contexts/map.tres`
+  - `resources/input/contexts/shop.tres`
   - `resources/input/contexts/overlay_back.tres`
 - 部分业务逻辑已经改为通过 `InputManager` 读取 GUIDEAction：
   - `scripts/turret.gd`

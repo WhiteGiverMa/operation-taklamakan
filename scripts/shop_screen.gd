@@ -55,7 +55,10 @@ func _ready() -> void:
 	_apply_localization()
 
 func _process(_delta: float) -> void:
-	if visible and InputManager.ui_back_action.is_triggered():
+	if not visible:
+		return
+
+	if InputManager.upgrade_toggle_action.is_triggered() or InputManager.ui_back_action.is_triggered():
 		_close_shop()
 
 func _connect_localization() -> void:
