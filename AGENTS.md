@@ -105,3 +105,7 @@ godot4 --path .
 - 下游同步优先使用 fork 仓库中的 `scripts/sync-downstream.ps1`，不要在项目内长期分叉维护 runtime 脚本
 - `docs/what-expected-behavior.md` 是产品基线——保持代码与文档一致
 - 当前无 CI、无导出预设、无打包测试运行器
+
+## 外部文档
+
+[GUIDE速查表](docs\GUIDE_CHEAT_SHEET.md)
