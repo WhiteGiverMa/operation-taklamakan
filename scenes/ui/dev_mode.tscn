@@ -98,3 +98,159 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="ResourcesVBox" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="GoldRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="GoldLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/GoldRow"]
+layout_mode = 2
+text = "金币"
+
+[node name="GoldButtons" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/GoldRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GoldPlus100" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/GoldRow/GoldButtons"]
+layout_mode = 2
+text = "+100"
+
+[node name="GoldPlus1000" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/GoldRow/GoldButtons"]
+layout_mode = 2
+text = "+1000"
+
+[node name="GoldPlus10000" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/GoldRow/GoldButtons"]
+layout_mode = 2
+text = "+10000"
+
+[node name="GoldCustomInput" type="LineEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/GoldRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 0)
+placeholder_text = "自定义"
+
+[node name="GoldAddButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/GoldRow"]
+layout_mode = 2
+text = "添加"
+
+[node name="HealthRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HealButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/HealthRow"]
+layout_mode = 2
+text = "满血恢复"
+
+[node name="SkipRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SkipWaveButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/SkipRow"]
+layout_mode = 2
+text = "跳过当前波"
+
+[node name="SkipFloorButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/SkipRow"]
+layout_mode = 2
+text = "跳过当前层"
+
+[node name="SpawnVBox" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="EnemyTypeRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="EnemyTypeLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox/EnemyTypeRow"]
+layout_mode = 2
+text = "敌人类型"
+
+[node name="EnemyTypeOption" type="OptionButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox/EnemyTypeRow"]
+layout_mode = 2
+
+[node name="CountRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CountLabel" type="Label" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox/CountRow"]
+layout_mode = 2
+text = "数量"
+
+[node name="EnemyCountSpinBox" type="SpinBox" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox/CountRow"]
+layout_mode = 2
+min_value = 1.0
+max_value = 50.0
+value = 1.0
+
+[node name="SpawnButtonRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SpawnEnemyButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox/SpawnButtonRow"]
+layout_mode = 2
+text = "生成敌人"
+
+[node name="ClearEnemiesButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox/SpawnButtonRow"]
+layout_mode = 2
+text = "清空所有敌人"
+
+[node name="DebugVBox" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/DebugTab"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="ToggleCollisionCheck" type="CheckButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/DebugTab/DebugVBox"]
+layout_mode = 2
+text = "显示碰撞框"
+
+[node name="TogglePathsCheck" type="CheckButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/DebugTab/DebugVBox"]
+layout_mode = 2
+text = "显示路径点"
+
+[node name="ToggleRangesCheck" type="CheckButton" parent="Panel/MarginContainer/VBoxContainer/TabContainer/DebugTab/DebugVBox"]
+layout_mode = 2
+text = "显示攻击范围"
+
+[node name="ConsoleVBox" type="VBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ConsoleTab"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="ConsoleHistory" type="RichTextLabel" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ConsoleTab/ConsoleVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+
+[node name="ConsoleInputRow" type="HBoxContainer" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ConsoleTab/ConsoleVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConsoleInput" type="LineEdit" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ConsoleTab/ConsoleVBox/ConsoleInputRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "输入命令..."
+
+[node name="ConsoleExecuteButton" type="Button" parent="Panel/MarginContainer/VBoxContainer/TabContainer/ConsoleTab/ConsoleVBox/ConsoleInputRow"]
+layout_mode = 2
+text = "执行"
