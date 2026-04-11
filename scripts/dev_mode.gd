@@ -191,6 +191,15 @@ func _cmd_skip_wave(_args: Array[String]) -> String:
 
 func _cmd_skip_layer(_args: Array[String]) -> String:
 	var old_layer := GameState.current_layer
+	var old_map_layer := MapManager.current_layer
+	# 先尝试推进地图层；只有当前节点为终点时 MapManager 才会真正推进
+	MapManager.advance_to_next_layer()
+	if MapManager.current_layer == old_map_layer:
+		# 地图层未推进（当前节点不是终点，或已是 Boss 终点）
+		if MapManager.current_node != null and MapManager.current_node.is_terminal() and MapManager.current_node.type == MapNode.TYPE_BOSS:
+			return "已到达 Boss 终点，无法继续推进。"
+		return "当前节点不是终点，无法跳过层级。请先完成当前节点。"
+	# 地图层推进成功，同步游戏状态
 	GameState.advance_layer()
 	return "层数已从 %d 推进到 %d。" % [old_layer, GameState.current_layer]
 

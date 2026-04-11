@@ -98,7 +98,7 @@ func _find_collision_shape_2d_children(root: Node) -> Array[CollisionShape2D]:
 
 func _find_nodes_of_class(root: Node, p_class, out: Array[Node2D]) -> void:
 	for child in root.get_children():
-		if child is Node2D and child is p_class:
+		if child is Node2D and is_instance_of(child, p_class):
 			out.append(child as Node2D)
 		_find_nodes_of_class(child, p_class, out)
 

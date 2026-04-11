@@ -108,7 +108,7 @@ func _on_skip_wave_pressed() -> void:
 	_execute_and_log("skip_wave")
 
 func _on_skip_floor_pressed() -> void:
-	_execute_and_log("skip_floor")
+	_execute_and_log("skip_layer")
 
 # SpawnTab handlers
 func _on_spawn_enemy_pressed() -> void:
@@ -142,17 +142,26 @@ func _on_console_execute_pressed() -> void:
 
 func _on_console_input_gui_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
-		if event.is_action("ui_up") and _console_history.size() > 0:
-			_console_history_index = clampi(_console_history_index + 1, 0, _console_history.size() - 1)
-			console_input.text = _console_history[_console_history.size() - 1 - _console_history_index]
-			console_input.caret_column = console_input.text.length()
+		# 历史为空时，不响应导航操作
+		if _console_history.is_empty():
+			return
+
+		var history_size: int = _console_history.size()
+		if event.is_action("ui_up"):
+			# 往旧命令走：index 从 0（最新）往最大偏移递增，不超过 size-1
+			if _console_history_index < history_size - 1:
+				_console_history_index += 1
+				console_input.text = _console_history[history_size - 1 - _console_history_index]
+				console_input.caret_column = console_input.text.length()
 			get_viewport().set_input_as_handled()
-		elif event.is_action("ui_down") and _console_history_index >= 0:
-			_console_history_index -= 1
-			if _console_history_index >= 0:
-				console_input.text = _console_history[_console_history.size() - 1 - _console_history_index]
+		elif event.is_action("ui_down"):
+			# 往新命令走：index 递减，如果 < 0 则清空输入框
+			if _console_history_index > 0:
+				_console_history_index -= 1
+				console_input.text = _console_history[history_size - 1 - _console_history_index]
 				console_input.caret_column = console_input.text.length()
 			else:
+				_console_history_index = -1
 				console_input.text = ""
 				console_input.caret_column = 0
 			get_viewport().set_input_as_handled()

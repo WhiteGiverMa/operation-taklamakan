@@ -42,6 +42,8 @@ func _ready() -> void:
 	_show_main_menu(false)
 
 func _process(_delta: float) -> void:
+	if not SettingsManager.dev_mode_enabled:
+		return
 	if InputManager.dev_console_toggle_action.is_triggered():
 		_toggle_dev_mode()
 
