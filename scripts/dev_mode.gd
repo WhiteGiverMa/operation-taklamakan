@@ -19,6 +19,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	SettingsManager.settings_changed.connect(_on_settings_changed)
 	_register_commands()
+	var overlay := preload("res://scripts/dev_mode/debug_overlay.gd").new()
+	get_tree().root.add_child.call_deferred(overlay)
 
 func _on_settings_changed() -> void:
 	# is_enabled getter automatically reads from SettingsManager.dev_mode_enabled
