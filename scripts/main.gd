@@ -38,14 +38,18 @@ func _ready() -> void:
 	_setup_wave_manager()
 	_setup_overlay_screens()
 	_connect_signals()
+	_connect_input_actions()
 	_ensure_starting_turrets()
 	_show_main_menu(false)
 
-func _process(_delta: float) -> void:
+func _connect_input_actions() -> void:
+	if not InputManager.dev_console_toggle_action.just_triggered.is_connected(_on_dev_console_toggle_just_triggered):
+		InputManager.dev_console_toggle_action.just_triggered.connect(_on_dev_console_toggle_just_triggered)
+
+func _on_dev_console_toggle_just_triggered() -> void:
 	if not SettingsManager.dev_mode_enabled:
 		return
-	if InputManager.dev_console_toggle_action.is_triggered():
-		_toggle_dev_mode()
+	_toggle_dev_mode()
 
 func _setup_wave_manager() -> void:
 	# Assign enemy scenes to WaveManager

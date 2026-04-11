@@ -1,24 +1,26 @@
-[gd_resource type="Resource" script_class="GUIDEMappingContext" format=3]
+[gd_resource type="Resource" script_class="GUIDEMappingContext" format=3 uid="uid://dul7y63ta1j68"]
 
 [ext_resource type="Script" uid="uid://dsa1dnifd6w32" path="res://addons/guide/guide_mapping_context.gd" id="1_context"]
-[ext_resource type="Script" uid="uid://cw71o87tvdx3q" path="res://addons/guide/inputs/guide_input_key.gd" id="3_key"]
-[ext_resource type="Script" uid="uid://mtx1unc2aqn7" path="res://addons/guide/guide_input_mapping.gd" id="6_input_mapping"]
-[ext_resource type="Script" uid="uid://cpplm41b5bt6m" path="res://addons/guide/guide_action_mapping.gd" id="7_action_mapping"]
 [ext_resource type="Resource" path="res://resources/input/actions/dev_console_toggle.tres" id="2_dev_console_toggle"]
+[ext_resource type="Script" uid="uid://cw71o87tvdx3q" path="res://addons/guide/inputs/guide_input_key.gd" id="3_key"]
+[ext_resource type="Script" uid="uid://bl8rjl4oaldje" path="res://addons/guide/modifiers/guide_modifier.gd" id="5_ufk6y"]
+[ext_resource type="Script" uid="uid://mtx1unc2aqn7" path="res://addons/guide/guide_input_mapping.gd" id="6_input_mapping"]
+[ext_resource type="Script" uid="uid://x74mnwgr08a7" path="res://addons/guide/triggers/guide_trigger.gd" id="6_wx2nl"]
+[ext_resource type="Script" uid="uid://cpplm41b5bt6m" path="res://addons/guide/guide_action_mapping.gd" id="7_action_mapping"]
 
-[sub_resource type="Resource" id="BackquoteKey"]
+[sub_resource type="Resource" id="F1Key"]
 script = ExtResource("3_key")
-key = 4194326
+key = 4194312
 allow_additional_modifiers = false
 
-[sub_resource type="Resource" id="BackquoteMapping"]
+[sub_resource type="Resource" id="F1Mapping"]
 script = ExtResource("6_input_mapping")
-input = SubResource("BackquoteKey")
+input = SubResource("F1Key")
 
 [sub_resource type="Resource" id="DevConsoleToggleActionMapping"]
 script = ExtResource("7_action_mapping")
 action = ExtResource("2_dev_console_toggle")
-input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("BackquoteMapping")])
+input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("F1Mapping")])
 
 [resource]
 script = ExtResource("1_context")
