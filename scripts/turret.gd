@@ -180,18 +180,86 @@ func _handle_auto_fire() -> void:
 	if not _can_fire:
 		return
 
-	var target := _find_auto_target()
+	var result := _find_auto_target()
+	var target: Node2D = result.get("target")
 	if target == null:
 		return
 
-	barrel.rotation = _resolve_fire_solution(target.global_position).get("clamped_angle", barrel.rotation)
-	_fire_at_position(target.global_position, target)
+	var lead_pos: Vector2 = result.get("lead_position")
+	barrel.rotation = _resolve_fire_solution(lead_pos).get("clamped_angle", barrel.rotation)
+	_fire_at_position(lead_pos, target)
 
 
-func _find_auto_target() -> Node2D:
+## 计算预瞄提前量：根据敌人当前速度和投射物速度，求解拦截点
+## 经典弹道拦截二次方程：|D + V*t|² = (s*t)²
+## 展开为 (V·V - s²)t² + 2(D·V)t + D·D = 0
+## D=敌我相对位置, V=敌速, s=弹速, t=飞行时间
+## 当无有效解时（弹速不足或时间倒流），回退到敌人当前位置
+func _calculate_lead_position(turret_pos: Vector2, enemy: Node2D, proj_speed: float) -> Vector2:
+	# 读取敌人速度（CharacterBody2D.velocity，是 move_and_slide 后的近似值）
+	var enemy_velocity := Vector2.ZERO
+	if enemy is CharacterBody2D:
+		enemy_velocity = enemy.velocity
+
+	# 敌人静止 → 无需预瞄
+	if enemy_velocity.length_squared() < 0.01:
+		return enemy.global_position
+
+	# 投射物速度为零或负值 → 安全回退
+	if proj_speed <= 0.0:
+		return enemy.global_position
+
+	var relative_pos := enemy.global_position - turret_pos  # D
+	var speed_sq := proj_speed * proj_speed                 # s²
+	var vel_sq := enemy_velocity.length_squared()           # V·V
+
+	# 二次方程 at² + bt + c = 0
+	var a := vel_sq - speed_sq
+	var b := 2.0 * relative_pos.dot(enemy_velocity)
+	var c := relative_pos.length_squared()
+
+	# 退化情况：敌速与弹速接近（a ≈ 0）→ 线性求解
+	if is_equal_approx(vel_sq, speed_sq):
+		if absf(b) < 0.001:
+			return enemy.global_position
+		var t_linear := -c / b
+		if t_linear < 0.0:
+			return enemy.global_position
+		return enemy.global_position + enemy_velocity * t_linear
+
+	var discriminant := b * b - 4.0 * a * c
+	if discriminant < 0.0:
+		# 无实数解 → 弹速不足以拦截，瞄当前位置
+		return enemy.global_position
+
+	var sqrt_disc := sqrtf(discriminant)
+	var two_a := 2.0 * a
+	var t1 := (-b - sqrt_disc) / two_a
+	var t2 := (-b + sqrt_disc) / two_a
+
+	# 取最小的非负时间解（更快命中）
+	var t: float = -1.0
+	if t1 >= 0.0 and t2 >= 0.0:
+		t = minf(t1, t2)
+	elif t1 >= 0.0:
+		t = t1
+	elif t2 >= 0.0:
+		t = t2
+
+	if t < 0.0:
+		# 两个解均为负 → 无法拦截
+		return enemy.global_position
+
+	return enemy.global_position + enemy_velocity * t
+
+
+## 寻找最佳自动射击目标：基于预瞄提前量位置判断射界和距离
+## 返回 { target: Node2D, lead_position: Vector2 } 或空字典（无目标）
+func _find_auto_target() -> Dictionary:
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	var closest: Node2D = null
 	var closest_distance := INF
+	var closest_lead: Vector2 = Vector2.ZERO
 
 	for candidate in enemies:
 		if not (candidate is Node2D) or not is_instance_valid(candidate):
@@ -201,13 +269,19 @@ func _find_auto_target() -> Node2D:
 		# 只索敌射程内的敌人
 		if distance > auto_target_range:
 			continue
-		if not _resolve_fire_solution(enemy.global_position).get("within_arc", false):
+		# 用预瞄点判定射界，而非敌人当前位置
+		# 避免选到"当前在射界但提前量不在射界"的目标
+		var lead_pos := _calculate_lead_position(muzzle.global_position, enemy, projectile_speed)
+		if not _resolve_fire_solution(lead_pos).get("within_arc", false):
 			continue
 		if distance < closest_distance:
 			closest_distance = distance
 			closest = enemy
+			closest_lead = lead_pos
 
-	return closest
+	if closest == null:
+		return {}
+	return { "target": closest, "lead_position": closest_lead }
 
 
 func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
@@ -217,9 +291,8 @@ func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
 	_can_fire = false
 	_fire_timer = fire_rate
 
-	var firing_angle := global_position.angle_to_point(target_position)
-	if is_manual_mode:
-		firing_angle = _resolve_fire_solution(target_position).get("clamped_angle", firing_angle)
+	var solution := _resolve_fire_solution(target_position)
+	var firing_angle: float = solution.get("clamped_angle", global_position.angle_to_point(target_position))
 	barrel.rotation = firing_angle
 	var direction := Vector2.RIGHT.rotated(firing_angle)
 
