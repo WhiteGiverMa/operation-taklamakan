@@ -13,6 +13,6 @@ projectile_speed = 700.0
 interaction_range = 130.0
 toughness_damage_radius = 160.0
 repair_duration = 2.0
-manual_fire_arc_half_angle = 100.0
+fire_arc_half_angle = 100.0
 price = 35
 visual_color = Color(0.4, 0.8, 1, 1)

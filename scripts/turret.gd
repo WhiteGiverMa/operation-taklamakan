@@ -27,7 +27,7 @@ var _base_projectile_speed: float = 600.0
 var _base_interaction_range: float = 150.0
 var _base_toughness_damage_radius: float = 180.0
 var _base_repair_duration: float = 2.0
-var _base_manual_arc_half_angle: float = 90.0
+var _base_fire_arc_half_angle: float = 90.0
 
 ## 最终计算后的属性（受全局倍率和类型专精影响）
 var projectile_damage: float = 15.0
@@ -36,7 +36,7 @@ var projectile_speed: float = 600.0
 var interaction_range: float = 150.0
 var toughness_damage_radius: float = 180.0
 var repair_duration: float = 2.0
-var manual_fire_arc_half_angle_degrees: float = 90.0
+var fire_arc_half_angle_degrees: float = 90.0
 var _visual_color: Color = Color.WHITE
 
 # @export 保留用于编辑器调试，但运行时通过definition设置
@@ -65,10 +65,10 @@ var _visual_color: Color = Color.WHITE
 	set(value):
 		_debug_repair_duration = value
 		repair_duration = value
-@export_range(0.0, 180.0, 1.0) var _debug_manual_fire_arc_half_angle_degrees: float = 90.0:
+@export_range(0.0, 180.0, 1.0) var _debug_fire_arc_half_angle_degrees: float = 90.0:
 	set(value):
-		_debug_manual_fire_arc_half_angle_degrees = value
-		manual_fire_arc_half_angle_degrees = value
+		_debug_fire_arc_half_angle_degrees = value
+		fire_arc_half_angle_degrees = value
 
 var is_manual_mode: bool = false
 var _can_fire: bool = true
@@ -139,7 +139,7 @@ func _process(_delta: float) -> void:
 
 func _rotate_barrel_toward_mouse() -> void:
 	var mouse_pos := get_global_mouse_position()
-	barrel.rotation = _resolve_manual_fire_solution(mouse_pos).get("clamped_angle", barrel.rotation)
+	barrel.rotation = _resolve_fire_solution(mouse_pos).get("clamped_angle", barrel.rotation)
 
 
 func _handle_fire_cooldown(delta: float) -> void:
@@ -178,7 +178,7 @@ func _handle_auto_fire() -> void:
 	if target == null:
 		return
 
-	barrel.rotation = barrel.global_position.angle_to_point(target.global_position)
+	barrel.rotation = _resolve_fire_solution(target.global_position).get("clamped_angle", barrel.rotation)
 	_fire_at_position(target.global_position, target)
 
 
@@ -194,6 +194,8 @@ func _find_auto_target() -> Node2D:
 		var distance := global_position.distance_to(enemy.global_position)
 		# 只索敌射程内的敌人
 		if distance > interaction_range:
+			continue
+		if not _resolve_fire_solution(enemy.global_position).get("within_arc", false):
 			continue
 		if distance < closest_distance:
 			closest_distance = distance
@@ -211,7 +213,7 @@ func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
 
 	var firing_angle := global_position.angle_to_point(target_position)
 	if is_manual_mode:
-		firing_angle = _resolve_manual_fire_solution(target_position).get("clamped_angle", firing_angle)
+		firing_angle = _resolve_fire_solution(target_position).get("clamped_angle", firing_angle)
 	barrel.rotation = firing_angle
 	var direction := Vector2.RIGHT.rotated(firing_angle)
 
@@ -385,7 +387,7 @@ func _apply_definition() -> void:
 	_base_interaction_range = definition.get("interaction_range")
 	_base_toughness_damage_radius = definition.get("toughness_damage_radius")
 	_base_repair_duration = definition.get("repair_duration")
-	_base_manual_arc_half_angle = definition.get("manual_fire_arc_half_angle")
+	_base_fire_arc_half_angle = definition.get("fire_arc_half_angle")
 	_visual_color = definition.get("visual_color")
 	
 	_update_final_stats()
@@ -405,7 +407,7 @@ func _update_final_stats() -> void:
 	interaction_range = _base_interaction_range
 	toughness_damage_radius = _base_toughness_damage_radius
 	repair_duration = _base_repair_duration
-	manual_fire_arc_half_angle_degrees = _base_manual_arc_half_angle
+	fire_arc_half_angle_degrees = _base_fire_arc_half_angle
 	
 	# 更新视觉状态以应用颜色
 	_update_visual_state()
@@ -461,10 +463,10 @@ func _resolve_manual_arc_center_angle() -> float:
 
 	return outward.angle()
 
-func _resolve_manual_fire_solution(target_position: Vector2) -> Dictionary:
+func _resolve_fire_solution(target_position: Vector2) -> Dictionary:
 	var raw_angle := global_position.angle_to_point(target_position)
 	var relative_angle := wrapf(raw_angle - _manual_arc_center_angle, -PI, PI)
-	var half_arc := deg_to_rad(manual_fire_arc_half_angle_degrees)
+	var half_arc := deg_to_rad(fire_arc_half_angle_degrees)
 	var clamped_relative_angle := clampf(relative_angle, -half_arc, half_arc)
 	return {
 		"raw_angle": raw_angle,

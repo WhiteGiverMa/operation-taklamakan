@@ -38,10 +38,10 @@ extends Resource
 ## 玩家维修瘫痪炮塔所需时间
 @export var repair_duration: float = 2.0
 
-## === 手动模式参数 ===
+## === 射界参数 ===
 
-## 手动开火半弧角度
-@export_range(0.0, 180.0, 1.0) var manual_fire_arc_half_angle: float = 120.0
+## 炮塔射击半弧角度（手动瞄准与自动火控共用）
+@export_range(0.0, 180.0, 1.0) var fire_arc_half_angle: float = 120.0
 
 ## === 经济参数 ===
 
