@@ -10,7 +10,7 @@
 
 [sub_resource type="Resource" id="F1Key"]
 script = ExtResource("3_key")
-key = 4194312
+key = 4194332
 allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="F1Mapping"]
