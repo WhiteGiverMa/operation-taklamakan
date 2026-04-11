@@ -36,6 +36,8 @@ const TURRET_MANUAL_CONTEXT := preload("res://resources/input/contexts/turret_ma
 const MAP_CONTEXT := preload("res://resources/input/contexts/map.tres")
 const SHOP_CONTEXT := preload("res://resources/input/contexts/shop.tres")
 const OVERLAY_BACK_CONTEXT := preload("res://resources/input/contexts/overlay_back.tres")
+const DEV_CONSOLE_TOGGLE_ACTION := preload("res://resources/input/actions/dev_console_toggle.tres")
+const DEVMODE_CONTEXT := preload("res://resources/input/contexts/devmode.tres")
 
 var _flow_context: FlowContext = FlowContext.NONE
 var _overlay_context: OverlayContext = OverlayContext.NONE
@@ -97,6 +99,10 @@ var time_scale_toggle_action: GUIDEAction:
 	get:
 		return TIME_SCALE_TOGGLE_ACTION
 
+var dev_console_toggle_action: GUIDEAction:
+	get:
+		return DEV_CONSOLE_TOGGLE_ACTION
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_activate_for_current_state()
@@ -151,24 +157,24 @@ func restore_flow_context() -> void:
 
 func _activate_for_current_state() -> void:
 	if _overlay_context != OverlayContext.NONE:
-		_apply_contexts([OVERLAY_BACK_CONTEXT])
+		_apply_contexts([OVERLAY_BACK_CONTEXT, DEVMODE_CONTEXT])
 		return
 
 	match _flow_context:
 		FlowContext.MENU:
 			# Main menu currently relies on focused Control nodes rather than GUIDE actions.
-			_apply_contexts([])
+			_apply_contexts([DEVMODE_CONTEXT])
 		FlowContext.MAP:
-			_apply_contexts([MAP_CONTEXT])
+			_apply_contexts([MAP_CONTEXT, DEVMODE_CONTEXT])
 		FlowContext.COMBAT:
-			var contexts: Array[GUIDEMappingContext] = [COMBAT_CONTEXT]
+			var contexts: Array[GUIDEMappingContext] = [COMBAT_CONTEXT, DEVMODE_CONTEXT]
 			if _turret_manual_active:
 				contexts.append(TURRET_MANUAL_CONTEXT)
 			_apply_contexts(contexts)
 		FlowContext.SHOP:
-			_apply_contexts([SHOP_CONTEXT])
+			_apply_contexts([SHOP_CONTEXT, DEVMODE_CONTEXT])
 		_:
-			_apply_contexts([])
+			_apply_contexts([DEVMODE_CONTEXT])
 
 func _apply_contexts(contexts: Array[GUIDEMappingContext]) -> void:
 	GUIDE.set_enabled_mapping_contexts(contexts)
