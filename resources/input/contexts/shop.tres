@@ -29,7 +29,7 @@ input_mappings = Array[ExtResource("5_input_mapping")]([SubResource("BackMapping
 
 [sub_resource type="Resource" id="TabKey"]
 script = ExtResource("4_key")
-key = 4194308
+key = 4194306
 allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="UpgradeToggleTrigger"]

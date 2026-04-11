@@ -201,7 +201,7 @@ input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("InputHintsM
 
 [sub_resource type="Resource" id="UpgradeToggleKey"]
 script = ExtResource("3_key")
-key = 4194308
+key = 4194306
 allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="PressedTriggerUpgradeToggle"]
@@ -280,7 +280,7 @@ input_mappings = Array[ExtResource("6_input_mapping")]([SubResource("ResetZoomMa
 
 [sub_resource type="Resource" id="CapsLockKey"]
 script = ExtResource("3_key")
-key = 280
+key = 4194329
 allow_additional_modifiers = false
 
 [sub_resource type="Resource" id="PressedTriggerTimeScale"]
