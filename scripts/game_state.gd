@@ -25,6 +25,7 @@ enum State { MENU, PLAYING, PAUSED, GAME_OVER }
 var turret_damage_multiplier: float = 1.0
 var auto_fire_unlocked: bool = false
 var has_active_run: bool = false
+var speed_2x_active: bool = false
 
 # 炮塔类型专精倍率：{StringName: float}
 # 每购买某类型炮塔，该类型伤害+5%
@@ -39,6 +40,8 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _state == State.PLAYING and InputManager.pause_toggle_action.is_triggered():
 		toggle_pause()
+	if _state == State.PLAYING and InputManager.time_scale_toggle_action.is_triggered():
+		toggle_speed_2x()
 
 func get_state() -> State:
 	return _state
@@ -60,15 +63,25 @@ func start_game() -> void:
 
 func toggle_pause() -> void:
 	if _state == State.PLAYING:
+		# 暂停时重置倍速，避免暂停菜单受 time_scale 影响
+		Engine.time_scale = 1.0
+		if is_inside_tree():
+			EventBus.game_speed_changed.emit(1.0)
 		set_state(State.PAUSED)
 		get_tree().paused = true
 	elif _state == State.PAUSED:
 		set_state(State.PLAYING)
 		get_tree().paused = false
+		# 恢复倍速（如果之前已开启且仍处于战斗中）
+		if speed_2x_active and _is_combat_active():
+			Engine.time_scale = 2.0
+			if is_inside_tree():
+				EventBus.game_speed_changed.emit(2.0)
 
 func end_game(won: bool) -> void:
 	if _state == State.GAME_OVER:
 		return
+	_reset_speed_2x()
 	WaveManager.end_combat_session()
 	has_active_run = false
 	set_state(State.GAME_OVER)
@@ -79,6 +92,7 @@ func reset_game() -> void:
 	start_game()
 
 func return_to_menu(preserve_run: bool = true) -> void:
+	_reset_speed_2x()
 	has_active_run = has_active_run and preserve_run
 	set_state(State.MENU)
 	get_tree().paused = preserve_run and has_active_run
@@ -97,6 +111,7 @@ func _reset_run_values() -> void:
 	kills = 0
 	current_layer = 1
 	level = 1
+	_reset_speed_2x()
 
 func _restore_ship_health() -> void:
 	var ship = get_tree().get_first_node_in_group("ship")
@@ -142,3 +157,26 @@ func _on_enemy_died(_enemy: Node2D, _position: Vector2, _reward: int) -> void:
 		kills += 1
 		if _reward > 0:
 			add_currency(_reward)
+
+## 切换2倍速。仅在战斗期间（波次进行中或波间期）生效。
+func toggle_speed_2x() -> void:
+	if _state != State.PLAYING:
+		return
+	if not _is_combat_active():
+		return
+	speed_2x_active = not speed_2x_active
+	Engine.time_scale = 2.0 if speed_2x_active else 1.0
+	if is_inside_tree():
+		EventBus.game_speed_changed.emit(Engine.time_scale)
+
+## 当前是否处于有"时间流逝"语义的战斗场景
+func _is_combat_active() -> bool:
+	var wm_state := WaveManager.get_state()
+	return wm_state == WaveManager.State.ACTIVE_WAVE or wm_state == WaveManager.State.BETWEEN_WAVES
+
+## 重置倍速状态到1x
+func _reset_speed_2x() -> void:
+	speed_2x_active = false
+	Engine.time_scale = 1.0
+	if is_inside_tree():
+		EventBus.game_speed_changed.emit(1.0)

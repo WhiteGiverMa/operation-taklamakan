@@ -38,6 +38,12 @@ const ENEMY_INDICATOR_THREAT_COUNT_MAX: int = 6
 @onready var toggle_row: HBoxContainer = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/ToggleRow
 @onready var toggle_action_label: Label = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/ToggleRow/ActionLabel
 @onready var toggle_input_label: Label = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/ToggleRow/InputLabel
+@onready var speed_toggle_row: HBoxContainer = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/SpeedToggleRow
+@onready var speed_toggle_action_label: Label = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/SpeedToggleRow/ActionLabel
+@onready var speed_toggle_input_label: Label = $InputHintsPanel/MarginContainer/VBoxContainer/Rows/SpeedToggleRow/InputLabel
+@onready var speed_indicator: Label = $SpeedIndicator
+@onready var speed_notification: Label = $SpeedNotification
+@onready var speed_notification_timer: Timer = $SpeedNotificationTimer
 
 var _input_formatter: GUIDEInputFormatter = null
 var _input_hints_enabled := false
@@ -87,14 +93,25 @@ const HINT_ACTIONS := [
 		"key": "hud.input_hints.toggle",
 		"action": "input_hints_toggle_action",
 	},
+	{
+		"row": NodePath("SpeedToggleRow"),
+		"action_label": NodePath("SpeedToggleRow/ActionLabel"),
+		"input_label": NodePath("SpeedToggleRow/InputLabel"),
+		"key": "hud.input_hints.speed_toggle",
+		"action": "time_scale_toggle_action",
+	},
 ]
 
 func _ready() -> void:
 	EventBus.ship_health_changed.connect(_on_ship_health_changed)
+	EventBus.game_speed_changed.connect(_on_game_speed_changed)
 	if not Localization.language_changed.is_connected(_on_language_changed):
 		Localization.language_changed.connect(_on_language_changed)
 	_load_enemy_arrow_texture()
 	input_hints_panel.visible = false
+	speed_indicator.visible = false
+	speed_notification.visible = false
+	speed_notification_timer.timeout.connect(_on_speed_notification_timeout)
 	_apply_localization()
 	_refresh_input_hints()
 
@@ -129,6 +146,31 @@ func _on_language_changed(_locale: String) -> void:
 	_apply_localization()
 	if input_hints_panel.visible:
 		_refresh_input_hints()
+
+func _on_game_speed_changed(new_speed: float) -> void:
+	# 更新常驻指示器
+	if new_speed > 1.0:
+		speed_indicator.text = Localization.t("hud.speed_2x.indicator")
+		speed_indicator.visible = true
+	else:
+		speed_indicator.visible = false
+
+	# 显示切换通知
+	var is_2x := new_speed > 1.0
+	var key := "hud.speed_2x.toggle_enabled" if is_2x else "hud.speed_2x.toggle_disabled"
+	speed_notification.text = Localization.t(key)
+	speed_notification.modulate.a = 1.0
+	speed_notification.visible = true
+	speed_notification_timer.start(2.0)
+
+func _on_speed_notification_timeout() -> void:
+	# 淡出通知
+	var tween := create_tween()
+	tween.tween_property(speed_notification, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(func() -> void:
+		speed_notification.visible = false
+		speed_notification.modulate.a = 1.0
+	)
 
 func _apply_localization() -> void:
 	input_hints_title.text = Localization.t("hud.input_hints.title")

@@ -119,5 +119,10 @@
   "turret_ui.switch_to_auto": "Switch to AUTO",
   "turret_ui.switch_to_manual": "Switch to MANUAL",
   "turret_ui.fire_control_locked": "Fire Control: LOCKED",
-  "turret_ui.unlock_fire_control_cost": "Unlock Fire Control ({cost}G)"
+  "turret_ui.unlock_fire_control_cost": "Unlock Fire Control ({cost}G)",
+
+  "hud.speed_2x.indicator": "2x",
+  "hud.speed_2x.toggle_enabled": "2x Speed Enabled",
+  "hud.speed_2x.toggle_disabled": "2x Speed Disabled",
+  "hud.input_hints.speed_toggle": "2x Speed"
 }

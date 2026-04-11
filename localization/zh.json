@@ -119,5 +119,10 @@
   "turret_ui.switch_to_auto": "切换到自动",
   "turret_ui.switch_to_manual": "切换到手动",
   "turret_ui.fire_control_locked": "火控：未解锁",
-  "turret_ui.unlock_fire_control_cost": "解锁火控（{cost}G）"
+  "turret_ui.unlock_fire_control_cost": "解锁火控（{cost}G）",
+
+  "hud.speed_2x.indicator": "2倍速",
+  "hud.speed_2x.toggle_enabled": "已开启2倍速",
+  "hud.speed_2x.toggle_disabled": "已关闭2倍速",
+  "hud.input_hints.speed_toggle": "2倍速切换"
 }

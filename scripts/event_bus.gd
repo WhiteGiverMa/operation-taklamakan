@@ -44,6 +44,7 @@ signal player_knockback_started(player: Node2D, source: Node)
 signal game_paused(is_paused: bool)
 signal game_over(won: bool)
 signal game_started()
+signal game_speed_changed(new_speed: float)
 
 # Upgrade events
 signal upgrade_purchased(upgrade_id: String, cost: int)

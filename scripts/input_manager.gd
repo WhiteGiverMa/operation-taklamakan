@@ -29,6 +29,7 @@ const MAP_PAN_DELTA_ACTION := preload("res://resources/input/actions/map_pan_del
 const CAMERA_ZOOM_IN_ACTION := preload("res://resources/input/actions/camera_zoom_in.tres")
 const CAMERA_ZOOM_OUT_ACTION := preload("res://resources/input/actions/camera_zoom_out.tres")
 const CAMERA_ZOOM_RESET_ACTION := preload("res://resources/input/actions/camera_zoom_reset.tres")
+const TIME_SCALE_TOGGLE_ACTION := preload("res://resources/input/actions/time_scale_toggle.tres")
 
 const COMBAT_CONTEXT := preload("res://resources/input/contexts/combat.tres")
 const TURRET_MANUAL_CONTEXT := preload("res://resources/input/contexts/turret_manual.tres")
@@ -91,6 +92,10 @@ var camera_zoom_out_action: GUIDEAction:
 var camera_zoom_reset_action: GUIDEAction:
 	get:
 		return CAMERA_ZOOM_RESET_ACTION
+
+var time_scale_toggle_action: GUIDEAction:
+	get:
+		return TIME_SCALE_TOGGLE_ACTION
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
