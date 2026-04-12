@@ -14,6 +14,7 @@ enum OverlayContext {
 	NONE,
 	PAUSE,
 	SETTINGS,
+	INFO,
 }
 
 const MOVE_ACTION := preload("res://resources/input/actions/move.tres")
@@ -36,6 +37,7 @@ const TURRET_MANUAL_CONTEXT := preload("res://resources/input/contexts/turret_ma
 const MAP_CONTEXT := preload("res://resources/input/contexts/map.tres")
 const SHOP_CONTEXT := preload("res://resources/input/contexts/shop.tres")
 const OVERLAY_BACK_CONTEXT := preload("res://resources/input/contexts/overlay_back.tres")
+const INFO_OVERLAY_CONTEXT := preload("res://resources/input/contexts/info_overlay.tres")
 const DEV_CONSOLE_TOGGLE_ACTION := preload("res://resources/input/actions/dev_console_toggle.tres")
 const DEVMODE_CONTEXT := preload("res://resources/input/contexts/devmode.tres")
 
@@ -139,6 +141,10 @@ func activate_settings() -> void:
 	_overlay_context = OverlayContext.SETTINGS
 	_activate_for_current_state()
 
+func activate_info_overlay() -> void:
+	_overlay_context = OverlayContext.INFO
+	_activate_for_current_state()
+
 func activate_turret_manual() -> void:
 	if _flow_context != FlowContext.COMBAT:
 		return
@@ -156,9 +162,15 @@ func restore_flow_context() -> void:
 	_activate_for_current_state()
 
 func _activate_for_current_state() -> void:
-	if _overlay_context != OverlayContext.NONE:
-		_apply_contexts([OVERLAY_BACK_CONTEXT, DEVMODE_CONTEXT])
-		return
+	match _overlay_context:
+		OverlayContext.PAUSE, OverlayContext.SETTINGS:
+			_apply_contexts([OVERLAY_BACK_CONTEXT, DEVMODE_CONTEXT])
+			return
+		OverlayContext.INFO:
+			_apply_contexts([INFO_OVERLAY_CONTEXT, DEVMODE_CONTEXT])
+			return
+		_:
+			pass
 
 	match _flow_context:
 		FlowContext.MENU:

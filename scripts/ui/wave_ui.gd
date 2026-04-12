@@ -1,21 +1,7 @@
 extends Control
 
-## Wave intermission UI showing wave progress and intermission controls.
-## Displays Continue, Repair, and upgrade preparation options between waves.
-
-@onready var wave_label: Label = $Panel/VBoxContainer/WaveLabel
-@onready var status_label: Label = $Panel/VBoxContainer/StatusLabel
-@onready var timer_label: Label = $Panel/VBoxContainer/TimerLabel
-@onready var enemy_info_label: Label = $Panel/VBoxContainer/EnemyInfoLabel
-@onready var button_container: HBoxContainer = $Panel/VBoxContainer/ButtonContainer
-@onready var continue_button: Button = $Panel/VBoxContainer/ButtonContainer/ContinueButton
-@onready var repair_button: Button = $Panel/VBoxContainer/ButtonContainer/RepairButton
-@onready var upgrade_button: Button = $Panel/VBoxContainer/ButtonContainer/UpgradeButton
-@onready var wave_progress_bar: ProgressBar = $Panel/VBoxContainer/WaveProgressBar
-@onready var upgrade_section: VBoxContainer = $Panel/VBoxContainer/UpgradeSection
-@onready var upgrade_title_label: Label = $Panel/VBoxContainer/UpgradeSection/UpgradeTitleLabel
-@onready var upgrade_currency_label: Label = $Panel/VBoxContainer/UpgradeSection/UpgradeCurrencyLabel
-@onready var upgrade_list: VBoxContainer = $Panel/VBoxContainer/UpgradeSection/UpgradeList
+## 综合信息界面：整备 / 藏品 / 地图
+## 波间期自动打开并允许操作整备；战斗进行中可手动打开查看，但整备功能只读。
 
 const INTERMISSION_UPGRADES: Array[Dictionary] = [
 	{
@@ -32,47 +18,124 @@ const INTERMISSION_UPGRADES: Array[Dictionary] = [
 	}
 ]
 
+const RELIC_ITEMS: Array[Dictionary] = [
+	{
+		"id": "gyro_sight",
+		"name_key": "shop.relic.gyro_sight.name",
+		"description_key": "shop.relic.gyro_sight.desc",
+	},
+	{
+		"id": "salvage_contract",
+		"name_key": "shop.relic.salvage_contract.name",
+		"description_key": "shop.relic.salvage_contract.desc",
+	},
+	{
+		"id": "field_toolkit",
+		"name_key": "shop.relic.field_toolkit.name",
+		"description_key": "shop.relic.field_toolkit.desc",
+	},
+	{
+		"id": "overclock_core",
+		"name_key": "shop.relic.overclock_core.name",
+		"description_key": "shop.relic.overclock_core.desc",
+	}
+]
+
+enum InfoTab {
+	MAINTENANCE,
+	RELICS,
+	MAP,
+}
+
+@onready var title_label: Label = $Backdrop/Panel/MarginContainer/Root/TopBar/TitleBlock/TitleLabel
+@onready var state_label: Label = $Backdrop/Panel/MarginContainer/Root/TopBar/TitleBlock/StateLabel
+@onready var maintenance_tab_button: Button = $Backdrop/Panel/MarginContainer/Root/TabBar/MaintenanceTabButton
+@onready var relics_tab_button: Button = $Backdrop/Panel/MarginContainer/Root/TabBar/RelicsTabButton
+@onready var map_tab_button: Button = $Backdrop/Panel/MarginContainer/Root/TabBar/MapTabButton
+@onready var close_button: Button = $Backdrop/Panel/MarginContainer/Root/TopBar/CloseButton
+@onready var maintenance_page: Control = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage
+@onready var relics_page: Control = $Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage
+@onready var map_page: Control = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage
+
+@onready var wave_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/WaveLabel
+@onready var status_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/StatusLabel
+@onready var timer_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/TimerLabel
+@onready var enemy_info_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/EnemyInfoLabel
+@onready var ship_health_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ShipHealthLabel
+@onready var ship_health_bar: ProgressBar = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ShipHealthBar
+@onready var upgrade_currency_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeCurrencyLabel
+@onready var maintenance_hint_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/MaintenanceHintLabel
+@onready var button_container: HBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer
+@onready var continue_button: Button = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/ContinueButton
+@onready var repair_button: Button = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/RepairButton
+@onready var upgrade_button: Button = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/UpgradeButton
+@onready var upgrade_section: VBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection
+@onready var upgrade_title_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection/UpgradeTitleLabel
+@onready var upgrade_list: VBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection/UpgradeList
+
+@onready var relic_summary_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage/Scroll/Margin/Content/RelicSummaryLabel
+@onready var relic_list: VBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage/Scroll/Margin/Content/RelicList
+
+@onready var map_overview_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content/MapOverviewLabel
+@onready var map_current_node_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content/MapCurrentNodeLabel
+@onready var map_choices_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content/MapChoicesLabel
+@onready var map_list: VBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content/MapList
+
 var _wave_manager: Node = null
 var _is_visible: bool = false
-var _panel_open: bool = true
+var _combat_visible: bool = false
 var _upgrade_section_open: bool = false
+var _current_tab: InfoTab = InfoTab.MAINTENANCE
+var _panel_paused_tree: bool = false
 
 func _ready() -> void:
-	_hide_ui()
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	visible = false
 	_find_wave_manager()
 	_connect_signals()
 	_connect_localization()
 	_apply_localization()
+	_update_tab_visibility()
+	_update_all_content()
 
 func _process(_delta: float) -> void:
-	if not _wave_manager:
+	if not _combat_visible:
+		return
+	if InputManager.upgrade_toggle_action.is_triggered():
+		_toggle_panel()
+		return
+	if _is_visible and InputManager.ui_back_action.is_triggered():
+		_close_panel()
 		return
 
-	if _wave_manager.get_state() == _wave_manager.State.BETWEEN_WAVES and InputManager.upgrade_toggle_action.is_triggered():
-		_toggle_intermission_panel()
-	
-	_update_ui()
-
 func _connect_signals() -> void:
-	# Connect buttons
 	continue_button.pressed.connect(_on_continue_pressed)
 	repair_button.pressed.connect(_on_repair_pressed)
 	upgrade_button.pressed.connect(_on_upgrade_pressed)
-	
-	# Connect to EventBus signals
+	close_button.pressed.connect(_close_panel)
+	maintenance_tab_button.pressed.connect(_on_tab_pressed.bind(InfoTab.MAINTENANCE))
+	relics_tab_button.pressed.connect(_on_tab_pressed.bind(InfoTab.RELICS))
+	map_tab_button.pressed.connect(_on_tab_pressed.bind(InfoTab.MAP))
+
 	EventBus.wave_started.connect(_on_wave_started)
 	EventBus.wave_complete.connect(_on_wave_complete)
 	EventBus.wave_all_complete.connect(_on_all_waves_complete)
 	EventBus.game_over.connect(_on_game_over)
-	EventBus.currency_changed.connect(_on_currency_changed)
+	EventBus.currency_changed.connect(_on_runtime_state_changed)
 	EventBus.game_started.connect(_on_game_started)
-	
-	# Connect to WaveManager if available
+	EventBus.relic_purchased.connect(_on_relic_purchased)
+	EventBus.ship_health_changed.connect(_on_ship_health_changed)
+	MapManager.current_node_changed.connect(_on_map_changed)
+	MapManager.layer_changed.connect(_on_map_layer_changed)
+	MapManager.map_generated.connect(_on_map_generated)
+
 	if _wave_manager:
 		if not _wave_manager.intermission_started.is_connected(_on_intermission_started):
 			_wave_manager.intermission_started.connect(_on_intermission_started)
 		if not _wave_manager.intermission_ended.is_connected(_on_intermission_ended):
 			_wave_manager.intermission_ended.connect(_on_intermission_ended)
+		if not _wave_manager.wave_progress_updated.is_connected(_on_wave_progress_updated):
+			_wave_manager.wave_progress_updated.connect(_on_wave_progress_updated)
 
 func _connect_localization() -> void:
 	if not Localization.language_changed.is_connected(_on_language_changed):
@@ -84,174 +147,168 @@ func _on_language_changed(_locale: String) -> void:
 func _find_wave_manager() -> void:
 	_wave_manager = WaveManager
 
-func _update_ui() -> void:
+func set_combat_visibility(should_show: bool) -> void:
+	_combat_visible = should_show
+	if not should_show:
+		_close_panel()
+		return
+	_update_all_content()
+
+func _toggle_panel() -> void:
+	if not _can_toggle_panel():
+		return
+	if _is_visible:
+		_close_panel()
+	else:
+		_open_panel(false)
+
+func _can_toggle_panel() -> bool:
+	if not _combat_visible or not _wave_manager:
+		return false
+	if GameState.get_state() != GameState.State.PLAYING:
+		return false
+	var wave_state: int = _wave_manager.get_state()
+	return wave_state == _wave_manager.State.ACTIVE_WAVE or wave_state == _wave_manager.State.BETWEEN_WAVES
+
+func _open_panel(force_maintenance_tab: bool) -> void:
+	if force_maintenance_tab:
+		_current_tab = InfoTab.MAINTENANCE
+	_update_tab_visibility()
+	_update_all_content()
+	visible = true
+	_is_visible = true
+	InputManager.activate_info_overlay()
+	if not get_tree().paused:
+		get_tree().paused = true
+		_panel_paused_tree = true
+	close_button.grab_focus()
+
+func _close_panel(restore_input: bool = true) -> void:
+	if _panel_paused_tree:
+		get_tree().paused = false
+		_panel_paused_tree = false
+	visible = false
+	_is_visible = false
+	if restore_input:
+		InputManager.restore_flow_context()
+
+func _on_tab_pressed(tab: InfoTab) -> void:
+	_current_tab = tab
+	_update_tab_visibility()
+	_update_all_content()
+
+func _update_tab_visibility() -> void:
+	maintenance_page.visible = _current_tab == InfoTab.MAINTENANCE
+	relics_page.visible = _current_tab == InfoTab.RELICS
+	map_page.visible = _current_tab == InfoTab.MAP
+	_update_tab_button_state(maintenance_tab_button, _current_tab == InfoTab.MAINTENANCE)
+	_update_tab_button_state(relics_tab_button, _current_tab == InfoTab.RELICS)
+	_update_tab_button_state(map_tab_button, _current_tab == InfoTab.MAP)
+
+func _update_tab_button_state(button: Button, is_active: bool) -> void:
+	button.disabled = is_active
+	button.modulate = Color(1.0, 1.0, 1.0, 1.0) if is_active else Color(0.82, 0.84, 0.9, 1.0)
+
+func _update_all_content() -> void:
+	_update_header_state()
+	_update_maintenance_page()
+	_update_relics_page()
+	_update_map_page()
+
+func _update_header_state() -> void:
+	state_label.text = Localization.t(_get_panel_state_key())
+
+func _get_panel_state_key() -> String:
+	if not _wave_manager:
+		return "info.state.inactive"
+	match _wave_manager.get_state():
+		_wave_manager.State.ACTIVE_WAVE:
+			return "info.state.read_only"
+		_wave_manager.State.BETWEEN_WAVES:
+			return "info.state.editable"
+		_wave_manager.State.COMPLETE:
+			return "info.state.complete"
+		_:
+			return "info.state.inactive"
+
+func _update_maintenance_page() -> void:
 	if not _wave_manager:
 		return
-	
-	var state = _wave_manager.get_state()
-	
-	match state:
-		_wave_manager.State.BETWEEN_WAVES:
-			if _panel_open and not _is_visible:
-				_show_ui()
-			elif not _panel_open and _is_visible:
-				_hide_ui()
-			if _panel_open:
-				_update_intermission_ui()
+
+	var current_wave: int = _wave_manager.current_wave
+	var total_waves: int = _wave_manager.total_waves
+	var wave_state: int = _wave_manager.get_state()
+
+	match wave_state:
 		_wave_manager.State.ACTIVE_WAVE:
-			_panel_open = true
-			_upgrade_section_open = false
-			if _is_visible:
-				_hide_ui()
+			wave_label.text = Localization.t("info.maintenance.wave_active", "", {"wave": current_wave, "total": total_waves})
+			status_label.text = Localization.t("info.maintenance.active_wave")
+			timer_label.text = Localization.t("info.maintenance.actions_locked")
+		_wave_manager.State.BETWEEN_WAVES:
+			if current_wave <= 0:
+				wave_label.text = Localization.t("wave.ui.pre_battle_title")
+				status_label.text = Localization.t("wave.ui.pre_battle_status")
+			else:
+				wave_label.text = Localization.t("wave.ui.complete_title", "", {"wave": current_wave, "total": total_waves})
+				status_label.text = Localization.t("wave.ui.intermission_status")
+			timer_label.text = Localization.t("wave.ui.waiting_for_continue")
 		_wave_manager.State.COMPLETE:
-			_panel_open = true
-			_upgrade_section_open = false
-			_show_completion_ui()
+			wave_label.text = Localization.t("wave.ui.all_complete")
+			status_label.text = Localization.t("wave.ui.combat_finished")
+			timer_label.text = Localization.t("wave.ui.victory")
+		_:
+			wave_label.text = Localization.t("info.maintenance.wave_idle")
+			status_label.text = Localization.t("info.state.inactive")
+			timer_label.text = ""
 
-func _update_intermission_ui() -> void:
-	var current_wave = _wave_manager.current_wave
-	var total_waves = _wave_manager.total_waves
+	enemy_info_label.text = _get_next_wave_info_text()
+	_update_ship_health_display()
+	upgrade_currency_label.text = Localization.t("shop.currency", "", {"amount": GameState.currency})
+	maintenance_hint_label.text = Localization.t("info.maintenance.actions_locked") if _is_maintenance_read_only() else Localization.t("info.maintenance.actions_available")
 
-	if current_wave <= 0:
-		wave_label.text = Localization.t("wave.ui.pre_battle_title")
-		status_label.text = Localization.t("wave.ui.pre_battle_status")
-	else:
-		wave_label.text = Localization.t("wave.ui.complete_title", "", {"wave": current_wave, "total": total_waves})
-		status_label.text = Localization.t("wave.ui.intermission_status")
+	var maintenance_enabled := _can_perform_maintenance()
+	continue_button.disabled = not maintenance_enabled
+	repair_button.disabled = not maintenance_enabled
+	upgrade_button.disabled = false
+	button_container.modulate = Color(1, 1, 1, 1) if maintenance_enabled else Color(0.72, 0.72, 0.72, 1)
+	upgrade_section.visible = _upgrade_section_open
+	_update_upgrade_ui()
 
-	timer_label.text = Localization.t("wave.ui.waiting_for_continue")
-	
-	# Get next wave info
-	var next_wave_data = null
-	if _wave_manager.wave_set and _wave_manager.wave_set.has_method("get_wave"):
-		next_wave_data = _wave_manager.wave_set.get_wave(current_wave + 1)
+func _get_next_wave_info_text() -> String:
+	if not _wave_manager or not _wave_manager.wave_set or not _wave_manager.wave_set.has_method("get_wave"):
+		return Localization.t("wave.ui.next_wave_unknown")
+	var next_wave_data = _wave_manager.wave_set.get_wave(_wave_manager.current_wave + 1)
 	if next_wave_data and next_wave_data.has_method("get_enemy_counts"):
 		var enemy_counts = next_wave_data.get_enemy_counts()
-		enemy_info_label.text = Localization.t("wave.ui.next_wave_enemies", "", {
+		return Localization.t("wave.ui.next_wave_enemies", "", {
 			"tanks": enemy_counts.get("tank", 0),
 			"dogs": enemy_counts.get("mechanical_dog", 0),
 			"bosses": enemy_counts.get("boss_tank", 0),
 		})
-	else:
-		enemy_info_label.text = Localization.t("wave.ui.next_wave_unknown")
-	
-	# Update progress bar
-	wave_progress_bar.value = float(current_wave) / float(total_waves) * 100.0
+	return Localization.t("wave.ui.next_wave_unknown")
 
-func _show_ui() -> void:
-	visible = true
-	_is_visible = true
-	_panel_open = true
-	button_container.visible = true
-	wave_progress_bar.visible = true
-	
-	# Enable all buttons
-	continue_button.disabled = false
-	repair_button.disabled = false
-	upgrade_button.disabled = false
-	upgrade_section.visible = _upgrade_section_open
-	_update_upgrade_ui()
-
-func _hide_ui() -> void:
-	visible = false
-	_is_visible = false
-
-func set_combat_visibility(should_show: bool) -> void:
-	if not should_show:
-		_panel_open = true
-		_upgrade_section_open = false
-		_hide_ui()
-		return
-	_update_ui()
-
-func _toggle_intermission_panel() -> void:
-	_panel_open = not _panel_open
-	if _panel_open:
-		_show_ui()
-		_update_intermission_ui()
-	else:
-		_upgrade_section_open = false
-		_hide_ui()
-
-func _show_completion_ui() -> void:
-	visible = true
-	_is_visible = true
-	button_container.visible = false
-	wave_progress_bar.visible = false
-	
-	wave_label.text = Localization.t("wave.ui.all_complete")
-	status_label.text = Localization.t("wave.ui.combat_finished")
-	timer_label.text = ""
-	enemy_info_label.text = Localization.t("wave.ui.victory")
-
-func _apply_localization() -> void:
-	continue_button.text = Localization.t("common.continue")
-	repair_button.text = Localization.t("common.repair")
-	upgrade_button.text = Localization.t("common.upgrade")
-	upgrade_title_label.text = Localization.t("wave.ui.upgrade_title")
-	if _wave_manager:
-		_update_ui()
-	_update_upgrade_ui()
-
-func _on_continue_pressed() -> void:
-	if _wave_manager:
-		_wave_manager.continue_to_next_wave()
-
-func _on_repair_pressed() -> void:
-	# Find the ship and heal it
+func _update_ship_health_display() -> void:
 	var ship = get_tree().get_first_node_in_group("ship")
-	# health_component is a property, not a method - check if it exists
 	if ship and "health_component" in ship and ship.health_component:
-		var healed = ship.health_component.heal(GameState.apply_repair_multiplier(100.0))
-		if healed > 0:
-			EventBus.ship_health_changed.emit(ship.health_component.current_health, ship.max_health)
-	repair_button.disabled = true
-
-func _on_upgrade_pressed() -> void:
-	if not _is_visible:
+		var current_health: float = ship.health_component.current_health
+		var max_health: float = ship.health_component.max_health
+		ship_health_bar.max_value = max_health
+		ship_health_bar.value = current_health
+		ship_health_label.text = Localization.t("info.maintenance.ship_health", "", {
+			"current": int(round(current_health)),
+			"maximum": int(round(max_health)),
+		})
 		return
-	_upgrade_section_open = not _upgrade_section_open
-	upgrade_section.visible = _upgrade_section_open
-	_update_upgrade_ui()
-
-func _on_wave_started(_wave_number: int) -> void:
-	_hide_ui()
-
-func _on_wave_complete(_wave_number: int) -> void:
-	_show_ui()
-
-func _on_all_waves_complete() -> void:
-	_show_completion_ui()
-
-func _on_intermission_started(_duration: float) -> void:
-	_panel_open = true
-	_upgrade_section_open = false
-	_show_ui()
-
-func _on_intermission_ended() -> void:
-	_update_ui()
-
-func _on_game_over(_won: bool) -> void:
-	_upgrade_section_open = false
-	_hide_ui()
-
-func _on_currency_changed(_new_amount: int, _delta: int) -> void:
-	if _is_visible and _upgrade_section_open:
-		_update_upgrade_ui()
-
-func _on_game_started() -> void:
-	_upgrade_section_open = false
-	_update_upgrade_ui()
+	ship_health_bar.max_value = 100.0
+	ship_health_bar.value = 0.0
+	ship_health_label.text = Localization.t("info.maintenance.ship_health", "", {"current": 0, "maximum": 0})
 
 func _update_upgrade_ui() -> void:
 	if not is_instance_valid(upgrade_section):
 		return
-	upgrade_section.visible = _upgrade_section_open and _is_visible
-	upgrade_currency_label.text = Localization.t("shop.currency", "", {"amount": GameState.currency})
-
+	upgrade_section.visible = _upgrade_section_open
 	for child in upgrade_list.get_children():
 		child.queue_free()
-
 	for item in INTERMISSION_UPGRADES:
 		upgrade_list.add_child(_create_upgrade_row(item))
 
@@ -284,11 +341,15 @@ func _create_upgrade_row(data: Dictionary) -> HBoxContainer:
 func _update_upgrade_row(upgrade_id: StringName, price: int, buy_button: Button, price_label: Label) -> void:
 	var is_owned := _is_upgrade_purchased(upgrade_id)
 	var can_afford := GameState.can_afford(price)
-	buy_button.disabled = is_owned or not can_afford
+	var read_only := _is_maintenance_read_only()
+	buy_button.disabled = is_owned or not can_afford or read_only
 
 	if is_owned:
 		buy_button.text = Localization.t("common.owned")
 		price_label.add_theme_color_override("font_color", Color.GRAY)
+	elif read_only:
+		buy_button.text = Localization.t("info.maintenance.locked_button")
+		price_label.add_theme_color_override("font_color", Color.DIM_GRAY)
 	elif not can_afford:
 		buy_button.text = Localization.t("common.buy")
 		price_label.add_theme_color_override("font_color", Color.RED)
@@ -296,7 +357,156 @@ func _update_upgrade_row(upgrade_id: StringName, price: int, buy_button: Button,
 		buy_button.text = Localization.t("common.buy")
 		price_label.remove_theme_color_override("font_color")
 
+func _update_relics_page() -> void:
+	relic_summary_label.text = Localization.t("info.relics.summary", "", {
+		"owned": GameState.owned_relic_ids.size(),
+		"total": RELIC_ITEMS.size(),
+	})
+	for child in relic_list.get_children():
+		child.queue_free()
+	for relic_data in RELIC_ITEMS:
+		relic_list.add_child(_create_relic_row(relic_data))
+
+func _create_relic_row(data: Dictionary) -> VBoxContainer:
+	var container := VBoxContainer.new()
+	container.add_theme_constant_override("separation", 4)
+	container.custom_minimum_size.y = 78
+
+	var relic_id := StringName(data["id"])
+	var owned := GameState.has_relic(relic_id)
+	var title := Label.new()
+	title.text = "%s  [%s]" % [
+		Localization.t(data["name_key"]),
+		Localization.t("info.relics.owned_tag") if owned else Localization.t("info.relics.unowned_tag")
+	]
+	title.add_theme_font_size_override("font_size", 22)
+	container.add_child(title)
+
+	var desc := Label.new()
+	desc.text = Localization.t(data["description_key"])
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.modulate = Color(1, 1, 1, 1) if owned else Color(0.62, 0.62, 0.62, 1)
+	container.add_child(desc)
+
+	return container
+
+func _update_map_page() -> void:
+	var graph = MapManager.get_graph()
+	var visited_count := MapManager.visited_nodes.size()
+	map_overview_label.text = Localization.t("info.map.overview", "", {
+		"layer": MapManager.current_layer + 1,
+		"visited": visited_count,
+	})
+	map_current_node_label.text = Localization.t("info.map.current_node", "", {
+		"node": _get_current_node_text(),
+	})
+	map_choices_label.text = Localization.t("info.map.reachable", "", {
+		"count": MapManager.get_current_choices().size(),
+	})
+
+	for child in map_list.get_children():
+		child.queue_free()
+
+	if graph == null:
+		var empty_label := Label.new()
+		empty_label.text = Localization.t("info.map.none")
+		map_list.add_child(empty_label)
+		return
+
+	for layer_index in range(3):
+		map_list.add_child(_create_map_layer_row(layer_index, graph.get_layer_nodes(layer_index)))
+
+func _create_map_layer_row(layer_index: int, layer_nodes: Array) -> VBoxContainer:
+	var container := VBoxContainer.new()
+	container.add_theme_constant_override("separation", 6)
+
+	var title := Label.new()
+	title.text = Localization.t("info.map.layer_title", "", {"layer": layer_index + 1})
+	title.add_theme_font_size_override("font_size", 21)
+	container.add_child(title)
+
+	var body := Label.new()
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.text = _build_layer_summary_text(layer_nodes)
+	container.add_child(body)
+
+	return container
+
+func _build_layer_summary_text(layer_nodes: Array) -> String:
+	if layer_nodes.is_empty():
+		return Localization.t("info.map.none")
+	var parts: Array[String] = []
+	for node in layer_nodes:
+		parts.append("%s · %s" % [_get_node_display_name(node), _get_node_state_text(node)])
+	return "\n".join(parts)
+
+func _get_current_node_text() -> String:
+	if MapManager.current_node == null:
+		return Localization.t("map.node_type.unknown")
+	return _get_node_display_name(MapManager.current_node)
+
+func _get_node_display_name(node) -> String:
+	var type_key := "map.node_type.%s" % String(node.get_type_name())
+	return Localization.t(type_key)
+
+func _get_node_state_text(node) -> String:
+	if MapManager.current_node != null and node.id == MapManager.current_node.id:
+		return Localization.t("info.map.state.current")
+	if node.visited:
+		return Localization.t("info.map.state.visited")
+	if MapManager.current_node != null and MapManager.current_node.connections.has(node.id):
+		return Localization.t("info.map.state.reachable")
+	return Localization.t("info.map.state.locked")
+
+func _is_maintenance_read_only() -> bool:
+	if not _wave_manager:
+		return true
+	return _wave_manager.get_state() == _wave_manager.State.ACTIVE_WAVE
+
+func _can_perform_maintenance() -> bool:
+	if not _wave_manager:
+		return false
+	return _wave_manager.get_state() == _wave_manager.State.BETWEEN_WAVES
+
+func _apply_localization() -> void:
+	title_label.text = Localization.t("info.title")
+	maintenance_tab_button.text = Localization.t("info.tab.maintenance")
+	relics_tab_button.text = Localization.t("info.tab.relics")
+	map_tab_button.text = Localization.t("info.tab.map")
+	close_button.text = Localization.t("common.close")
+	continue_button.text = Localization.t("common.continue")
+	repair_button.text = Localization.t("common.repair")
+	upgrade_button.text = Localization.t("common.upgrade")
+	upgrade_title_label.text = Localization.t("wave.ui.upgrade_title")
+	_update_all_content()
+
+func _on_continue_pressed() -> void:
+	if not _can_perform_maintenance():
+		return
+	_close_panel()
+	if _wave_manager:
+		_wave_manager.continue_to_next_wave()
+
+func _on_repair_pressed() -> void:
+	if not _can_perform_maintenance():
+		return
+	var ship = get_tree().get_first_node_in_group("ship")
+	if ship and "health_component" in ship and ship.health_component:
+		var healed = ship.health_component.heal(GameState.apply_repair_multiplier(100.0))
+		if healed > 0:
+			EventBus.ship_health_changed.emit(ship.health_component.current_health, ship.max_health)
+	repair_button.disabled = true
+	_update_maintenance_page()
+
+func _on_upgrade_pressed() -> void:
+	if not _is_visible:
+		return
+	_upgrade_section_open = not _upgrade_section_open
+	_update_maintenance_page()
+
 func _on_upgrade_purchase_pressed(upgrade_id: StringName, price: int) -> void:
+	if _is_maintenance_read_only():
+		return
 	if _is_upgrade_purchased(upgrade_id):
 		return
 	if not GameState.spend_currency(price):
@@ -313,7 +523,7 @@ func _on_upgrade_purchase_pressed(upgrade_id: StringName, price: int) -> void:
 			return
 
 	EventBus.upgrade_purchased.emit(String(upgrade_id), price)
-	_update_upgrade_ui()
+	_update_all_content()
 
 func _is_upgrade_purchased(upgrade_id: StringName) -> bool:
 	match upgrade_id:
@@ -323,3 +533,53 @@ func _is_upgrade_purchased(upgrade_id: StringName) -> bool:
 			return GameState.auto_fire_unlocked
 		_:
 			return false
+
+func _on_wave_started(_wave_number: int) -> void:
+	_upgrade_section_open = false
+	_close_panel()
+
+func _on_wave_complete(_wave_number: int) -> void:
+	_open_panel(true)
+
+func _on_all_waves_complete() -> void:
+	_upgrade_section_open = false
+	_update_all_content()
+
+func _on_intermission_started(_duration: float) -> void:
+	_upgrade_section_open = false
+	_open_panel(true)
+
+func _on_intermission_ended() -> void:
+	_update_all_content()
+
+func _on_game_over(_won: bool) -> void:
+	_upgrade_section_open = false
+	_close_panel()
+
+func _on_game_started() -> void:
+	_upgrade_section_open = false
+	_current_tab = InfoTab.MAINTENANCE
+	_update_tab_visibility()
+	_update_all_content()
+
+func _on_runtime_state_changed(_value_a = null, _value_b = null) -> void:
+	if _is_visible:
+		_update_all_content()
+
+func _on_relic_purchased(_relic_id: String, _cost: int) -> void:
+	_on_runtime_state_changed()
+
+func _on_ship_health_changed(_current: float, _maximum: float) -> void:
+	_on_runtime_state_changed()
+
+func _on_map_changed(_node) -> void:
+	_on_runtime_state_changed()
+
+func _on_map_layer_changed(_new_layer: int) -> void:
+	_on_runtime_state_changed()
+
+func _on_map_generated(_seed: int, _graph) -> void:
+	_on_runtime_state_changed()
+
+func _on_wave_progress_updated(_enemies_remaining: int, _total_enemies: int) -> void:
+	_on_runtime_state_changed()
