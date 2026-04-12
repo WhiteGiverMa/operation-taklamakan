@@ -3,7 +3,7 @@ extends Node2D
 const TANK_SCENE := preload("res://scenes/enemy/tank.tscn")
 const MECHANICAL_DOG_SCENE := preload("res://scenes/enemy/mechanical_dog.tscn")
 const BOSS_TANK_SCENE := preload("res://scenes/enemy/boss_tank.tscn")
-const MAP_SCREEN_SCENE := preload("res://scenes/ui/map_screen.tscn")
+const MAP_SELECT_SCREEN_SCENE := preload("res://scenes/ui/map_select_screen.tscn")
 const SHOP_SCREEN_SCENE := preload("res://scenes/map/shop_screen.tscn")
 const TURRET_SCENE := preload("res://scenes/turret/turret.tscn")
 const STANDARD_TURRET_DEF := preload("res://resources/turret/standard_turret.tres")
@@ -18,7 +18,6 @@ enum SettingsReturnTarget { MAIN_MENU, PAUSE_MENU }
 
 var _flow_state: FlowState = FlowState.TRANSITION
 var _shop_return_flow_state: FlowState = FlowState.MAP
-var _map_screen_root: Control = null
 var _map_screen: Control = null
 var _shop_screen: Control = null
 var _main_menu: Control = null
@@ -58,10 +57,9 @@ func _setup_wave_manager() -> void:
 	WaveManager.boss_tank_scene = BOSS_TANK_SCENE
 
 func _setup_overlay_screens() -> void:
-	_map_screen_root = MAP_SCREEN_SCENE.instantiate() as Control
-	ui_layer.add_child(_map_screen_root)
-	_map_screen_root.visible = false
-	_map_screen = _map_screen_root.get_node_or_null("MapScreen")
+	_map_screen = MAP_SELECT_SCREEN_SCENE.instantiate() as Control
+	ui_layer.add_child(_map_screen)
+	_map_screen.visible = false
 
 	_shop_screen = SHOP_SCREEN_SCENE.instantiate() as Control
 	ui_layer.add_child(_shop_screen)
@@ -125,8 +123,8 @@ func _on_game_over(_won: bool) -> void:
 	InputManager.activate_menu()
 	_hide_menu_overlays()
 	_set_combat_visibility(false)
-	if _map_screen_root:
-		_map_screen_root.visible = false
+	if _map_screen:
+		_map_screen.visible = false
 	if _shop_screen:
 		_shop_screen.visible = false
 	_hide_encounter_overlay()
@@ -220,8 +218,8 @@ func _on_shop_entered() -> void:
 	InputManager.activate_shop()
 	_hide_menu_overlays()
 	_set_combat_visibility(false)
-	if _map_screen_root:
-		_map_screen_root.visible = false
+	if _map_screen:
+		_map_screen.visible = false
 	if _shop_screen:
 		_shop_screen.visible = true
 		_shop_screen.call("_show_shop")
@@ -314,8 +312,8 @@ func _show_main_menu(preserve_run: bool) -> void:
 
 func _hide_gameplay_flow() -> void:
 	_set_combat_visibility(false)
-	if _map_screen_root:
-		_map_screen_root.visible = false
+	if _map_screen:
+		_map_screen.visible = false
 	if _shop_screen:
 		_shop_screen.visible = false
 	_hide_encounter_overlay()
@@ -336,16 +334,16 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 			InputManager.activate_combat()
 			_set_combat_visibility(true)
 			_hide_encounter_overlay()
-			if _map_screen_root:
-				_map_screen_root.visible = false
+			if _map_screen:
+				_map_screen.visible = false
 			if _shop_screen:
 				_shop_screen.visible = false
 		FlowState.SHOP:
 			InputManager.activate_shop()
 			_set_combat_visibility(false)
 			_hide_encounter_overlay()
-			if _map_screen_root:
-				_map_screen_root.visible = false
+			if _map_screen:
+				_map_screen.visible = false
 			if _shop_screen:
 				_shop_screen.visible = true
 		FlowState.MAP:
@@ -354,8 +352,8 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 			_hide_encounter_overlay()
 			if _shop_screen:
 				_shop_screen.visible = false
-			if _map_screen_root:
-				_map_screen_root.visible = true
+			if _map_screen:
+				_map_screen.visible = true
 			if _map_screen and _map_screen.has_method("refresh_view"):
 				_map_screen.call("refresh_view")
 		_:
@@ -364,8 +362,8 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 			_hide_encounter_overlay()
 			if _shop_screen:
 				_shop_screen.visible = false
-			if _map_screen_root:
-				_map_screen_root.visible = false
+			if _map_screen:
+				_map_screen.visible = false
 
 func _restore_current_flow() -> void:
 	_apply_flow_state(_flow_state)

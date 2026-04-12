@@ -47,7 +47,7 @@ enum InfoTab {
 	MAP,
 }
 
-const MapScreenScene := preload("res://scenes/ui/map_screen.tscn")
+const MapViewerScene := preload("res://scenes/ui/map_viewer.tscn")
 
 @onready var title_label: Label = $MainContainer/Sidebar/SidebarContent/Root/TopBar/TitleBlock/TitleLabel
 @onready var state_label: Label = $MainContainer/Sidebar/SidebarContent/Root/TopBar/TitleBlock/StateLabel
@@ -228,28 +228,26 @@ func _ensure_embedded_map() -> void:
 		_embedded_map.visible = true
 		return
 
-	# 实例化地图场景
-	var map_instance := MapScreenScene.instantiate()
+	# 隐藏 ScrollContainer，为地图浏览腾出空间
+	var scroll := map_page.get_node_or_null("Scroll")
+	if scroll:
+		scroll.visible = false
 
-	# 配置只读模式
-	var map_screen: Control = map_instance.get_node("MapScreen") if map_instance.has_node("MapScreen") else map_instance
+	# 实例化嵌入式地图浏览器（只读、无 UI 覆盖层）
+	var map_viewer_instance := MapViewerScene.instantiate()
 	
-	# 先设置只读模式，再添加到场景树，避免实例化瞬间 UILayer 抢焦点
-	map_screen.set_read_only_mode(true)
-	map_screen.set_show_overlay_ui(false)
-	map_screen.allow_pan_in_read_only = true  # 允许只读模式平移
-
 	# 设置全屏填充
-	map_instance.set_anchors_preset(Control.PRESET_FULL_RECT)
-	map_instance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	map_instance.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	map_viewer_instance.set_anchors_preset(Control.PRESET_FULL_RECT)
+	map_viewer_instance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	map_viewer_instance.size_flags_vertical = Control.SIZE_EXPAND_FILL
 
 	# 添加到地图页容器
-	map_page.add_child(map_instance)
-	_embedded_map = map_screen
+	map_page.add_child(map_viewer_instance)
+	_embedded_map = map_viewer_instance
 
-	# 延迟一帧后居中（确保容器尺寸有效）
-	map_screen.recenter_view.call_deferred()
+	# 延迟一帧后刷新并居中（确保容器尺寸有效）
+	map_viewer_instance.refresh_view.call_deferred()
+	map_viewer_instance.recenter_view.call_deferred()
 
 func _update_tab_visibility() -> void:
 	maintenance_page.visible = _current_tab == InfoTab.MAINTENANCE

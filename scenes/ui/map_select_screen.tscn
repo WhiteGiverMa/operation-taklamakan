@@ -1,32 +1,30 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/map_screen.gd" id="1_map_screen"]
+[ext_resource type="Script" path="res://scripts/ui/map_select_screen.gd" id="1_select_screen"]
+[ext_resource type="PackedScene" path="res://scenes/ui/map_graph_view.tscn" id="2_graph_view"]
 
-[node name="root" type="Control"]
+[node name="MapSelectScreen" type="Control"]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_select_screen")
 
-[node name="MapScreen" type="Control" parent="."]
+[node name="MapGraphView" parent="." instance=ExtResource("2_graph_view")]
+layout_mode = 1
+
+[node name="UILayer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_map_screen")
+mouse_filter = 2
 
-[node name="MapContainer" type="Control" parent="MapScreen"]
-anchors_preset = 0
-
-[node name="ConnectionsLayer" type="Control" parent="MapScreen/MapContainer"]
-anchors_preset = 0
-
-[node name="NodesLayer" type="Control" parent="MapScreen/MapContainer"]
-anchors_preset = 0
-
-[node name="UILayer" type="CanvasLayer" parent="MapScreen"]
-
-[node name="LayerInfo" type="Label" parent="MapScreen/UILayer"]
+[node name="LayerInfo" type="Label" parent="UILayer"]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 300.0
@@ -34,7 +32,7 @@ offset_bottom = 60.0
 theme_override_font_sizes/font_size = 28
 text = ""
 
-[node name="CurrentLayerIndicator" type="Label" parent="MapScreen/UILayer"]
+[node name="CurrentLayerIndicator" type="Label" parent="UILayer"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -47,7 +45,7 @@ theme_override_font_sizes/font_size = 20
 text = ""
 horizontal_alignment = 2
 
-[node name="NodeInfo" type="Label" parent="MapScreen/UILayer"]
+[node name="NodeInfo" type="Label" parent="UILayer"]
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -59,7 +57,7 @@ grow_vertical = 0
 theme_override_font_sizes/font_size = 18
 text = ""
 
-[node name="ConfirmButton" type="Button" parent="MapScreen/UILayer"]
+[node name="ConfirmButton" type="Button" parent="UILayer"]
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
