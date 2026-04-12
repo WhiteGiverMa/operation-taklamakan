@@ -31,6 +31,8 @@ const CAMERA_ZOOM_IN_ACTION := preload("res://resources/input/actions/camera_zoo
 const CAMERA_ZOOM_OUT_ACTION := preload("res://resources/input/actions/camera_zoom_out.tres")
 const CAMERA_ZOOM_RESET_ACTION := preload("res://resources/input/actions/camera_zoom_reset.tres")
 const TIME_SCALE_TOGGLE_ACTION := preload("res://resources/input/actions/time_scale_toggle.tres")
+const INFO_TAB_PREV_ACTION := preload("res://resources/input/actions/info_tab_prev.tres")
+const INFO_TAB_NEXT_ACTION := preload("res://resources/input/actions/info_tab_next.tres")
 
 const COMBAT_CONTEXT := preload("res://resources/input/contexts/combat.tres")
 const TURRET_MANUAL_CONTEXT := preload("res://resources/input/contexts/turret_manual.tres")
@@ -100,6 +102,14 @@ var camera_zoom_reset_action: GUIDEAction:
 var time_scale_toggle_action: GUIDEAction:
 	get:
 		return TIME_SCALE_TOGGLE_ACTION
+
+var info_tab_prev_action: GUIDEAction:
+	get:
+		return INFO_TAB_PREV_ACTION
+
+var info_tab_next_action: GUIDEAction:
+	get:
+		return INFO_TAB_NEXT_ACTION
 
 var dev_console_toggle_action: GUIDEAction:
 	get:

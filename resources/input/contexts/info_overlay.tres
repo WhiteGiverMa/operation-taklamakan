@@ -9,6 +9,8 @@
 [ext_resource type="Script" uid="uid://x74mnwgr08a7" path="res://addons/guide/triggers/guide_trigger.gd" id="7_trigger"]
 [ext_resource type="Script" uid="uid://b52rqq28tuqpg" path="res://addons/guide/triggers/guide_trigger_pressed.gd" id="8_pressed"]
 [ext_resource type="Resource" path="res://resources/input/actions/upgrade_toggle.tres" id="9_upgrade"]
+[ext_resource type="Resource" path="res://resources/input/actions/info_tab_prev.tres" id="10_prev"]
+[ext_resource type="Resource" path="res://resources/input/actions/info_tab_next.tres" id="11_next"]
 
 [sub_resource type="Resource" id="EscapeKey"]
 script = ExtResource("3_key")
@@ -20,10 +22,26 @@ script = ExtResource("3_key")
 key = 4194306
 allow_additional_modifiers = false
 
+[sub_resource type="Resource" id="QKey"]
+script = ExtResource("3_key")
+key = 81
+allow_additional_modifiers = false
+
+[sub_resource type="Resource" id="EKey"]
+script = ExtResource("3_key")
+key = 69
+allow_additional_modifiers = false
+
 [sub_resource type="Resource" id="PressedTriggerBack"]
 script = ExtResource("8_pressed")
 
 [sub_resource type="Resource" id="PressedTriggerToggle"]
+script = ExtResource("8_pressed")
+
+[sub_resource type="Resource" id="PressedTriggerPrev"]
+script = ExtResource("8_pressed")
+
+[sub_resource type="Resource" id="PressedTriggerNext"]
 script = ExtResource("8_pressed")
 
 [sub_resource type="Resource" id="BackMapping"]
@@ -36,6 +54,16 @@ script = ExtResource("4_input_mapping")
 input = SubResource("TabKey")
 triggers = Array[ExtResource("7_trigger")]([SubResource("PressedTriggerToggle")])
 
+[sub_resource type="Resource" id="PrevMapping"]
+script = ExtResource("4_input_mapping")
+input = SubResource("QKey")
+triggers = Array[ExtResource("7_trigger")]([SubResource("PressedTriggerPrev")])
+
+[sub_resource type="Resource" id="NextMapping"]
+script = ExtResource("4_input_mapping")
+input = SubResource("EKey")
+triggers = Array[ExtResource("7_trigger")]([SubResource("PressedTriggerNext")])
+
 [sub_resource type="Resource" id="BackActionMapping"]
 script = ExtResource("6_action_mapping")
 action = ExtResource("2_back")
@@ -46,7 +74,17 @@ script = ExtResource("6_action_mapping")
 action = ExtResource("9_upgrade")
 input_mappings = Array[ExtResource("4_input_mapping")]([SubResource("ToggleMapping")])
 
+[sub_resource type="Resource" id="PrevActionMapping"]
+script = ExtResource("6_action_mapping")
+action = ExtResource("10_prev")
+input_mappings = Array[ExtResource("4_input_mapping")]([SubResource("PrevMapping")])
+
+[sub_resource type="Resource" id="NextActionMapping"]
+script = ExtResource("6_action_mapping")
+action = ExtResource("11_next")
+input_mappings = Array[ExtResource("4_input_mapping")]([SubResource("NextMapping")])
+
 [resource]
 script = ExtResource("1_context")
 display_name = "Info Overlay"
-mappings = Array[ExtResource("6_action_mapping")]([SubResource("BackActionMapping"), SubResource("ToggleActionMapping")])
+mappings = Array[ExtResource("6_action_mapping")]([SubResource("BackActionMapping"), SubResource("ToggleActionMapping"), SubResource("PrevActionMapping"), SubResource("NextActionMapping")])
