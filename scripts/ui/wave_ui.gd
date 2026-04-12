@@ -54,7 +54,7 @@ const MapScreenScene := preload("res://scenes/ui/map_screen.tscn")
 @onready var maintenance_tab_button: Button = $MainContainer/Sidebar/SidebarContent/Root/TabBar/MaintenanceTabButton
 @onready var relics_tab_button: Button = $MainContainer/Sidebar/SidebarContent/Root/TabBar/RelicsTabButton
 @onready var map_tab_button: Button = $MainContainer/Sidebar/SidebarContent/Root/TabBar/MapTabButton
-@onready var close_button: Button = $MainContainer/Sidebar/SidebarContent/Root/Spacer/CloseButton
+@onready var close_button: Button = $MainContainer/Sidebar/SidebarContent/Root/TopBar/CloseButton
 @onready var maintenance_page: Control = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage
 @onready var relics_page: Control = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage
 @onready var map_page: Control = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage
@@ -190,7 +190,6 @@ func _open_panel(force_maintenance_tab: bool) -> void:
 	if not get_tree().paused:
 		get_tree().paused = true
 		_panel_paused_tree = true
-	close_button.grab_focus()
 
 func _close_panel(restore_input: bool = true) -> void:
 	if _panel_paused_tree:
@@ -202,6 +201,9 @@ func _close_panel(restore_input: bool = true) -> void:
 		InputManager.restore_flow_context()
 
 func _on_tab_pressed(tab: InfoTab) -> void:
+	if tab == _current_tab and _is_visible:
+		_close_panel()
+		return
 	_current_tab = tab
 	_update_tab_visibility()
 	_update_all_content()
@@ -260,6 +262,7 @@ func _update_tab_visibility() -> void:
 	# 隐藏嵌入地图当不在地图页时
 	if _embedded_map != null and _current_tab != InfoTab.MAP:
 		_embedded_map.visible = false
+	call_deferred("_sync_dynamic_layouts")
 
 func _update_tab_buttons() -> void:
 	_update_tab_button_state(maintenance_tab_button, _current_tab == InfoTab.MAINTENANCE)
@@ -267,7 +270,7 @@ func _update_tab_buttons() -> void:
 	_update_tab_button_state(map_tab_button, _current_tab == InfoTab.MAP)
 
 func _update_tab_button_state(button: Button, is_active: bool) -> void:
-	button.disabled = is_active
+	button.disabled = false
 	button.modulate = Color(1.0, 1.0, 1.0, 1.0) if is_active else Color(0.82, 0.84, 0.9, 1.0)
 
 func _update_all_content() -> void:
@@ -275,6 +278,7 @@ func _update_all_content() -> void:
 	_update_maintenance_page()
 	_update_relics_page()
 	_update_map_page()
+	call_deferred("_sync_dynamic_layouts")
 
 func _update_header_state() -> void:
 	state_label.text = Localization.t(_get_panel_state_key())
@@ -372,10 +376,12 @@ func _update_upgrade_ui() -> void:
 		child.queue_free()
 	for item in INTERMISSION_UPGRADES:
 		upgrade_list.add_child(_create_upgrade_row(item))
+	call_deferred("_sync_dynamic_layouts")
 
 func _create_upgrade_row(data: Dictionary) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_BEGIN
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation", 12)
 
 	var label := Label.new()
@@ -393,11 +399,66 @@ func _create_upgrade_row(data: Dictionary) -> HBoxContainer:
 	var buy_button := Button.new()
 	buy_button.text = Localization.t("common.buy")
 	buy_button.custom_minimum_size.x = 96
+	buy_button.focus_mode = Control.FOCUS_NONE
+	buy_button.clip_text = true
 	buy_button.pressed.connect(_on_upgrade_purchase_pressed.bind(StringName(data["id"]), int(data["price"])))
 	row.add_child(buy_button)
 
 	_update_upgrade_row(StringName(data["id"]), int(data["price"]), buy_button, price_label)
 	return row
+
+func _sync_dynamic_layouts() -> void:
+	_sync_container_width(upgrade_section, upgrade_list)
+	_sync_container_width(relics_page.get_node("Scroll/Margin/Content"), relic_list)
+	_sync_container_width(map_page.get_node("Scroll/Margin/Content"), map_list)
+
+	for row in upgrade_list.get_children():
+		_sync_box_row_width(row, upgrade_list.size.x)
+	for row in relic_list.get_children():
+		_sync_label_stack_width(row, relic_list.size.x)
+	for row in map_list.get_children():
+		_sync_label_stack_width(row, map_list.size.x)
+
+	for label in [map_overview_label, map_current_node_label, map_choices_label, relic_summary_label]:
+		if is_instance_valid(label):
+			label.custom_minimum_size.x = maxf(label.get_parent().size.x, 0.0)
+
+func _sync_container_width(reference: Control, target: Control) -> void:
+	if not is_instance_valid(reference) or not is_instance_valid(target):
+		return
+	var width := reference.size.x
+	if width <= 0.0:
+		return
+	target.custom_minimum_size.x = width
+	target.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	target.reset_size()
+	var parent := target.get_parent()
+	if parent is Container:
+		parent.queue_sort()
+
+func _sync_box_row_width(row: Node, width: float) -> void:
+	if not (row is Control) or width <= 0.0:
+		return
+	var control := row as Control
+	control.custom_minimum_size.x = width
+	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for child in control.get_children():
+		if child is Label:
+			var label := child as Label
+			label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			label.custom_minimum_size.x = 0.0
+
+func _sync_label_stack_width(row: Node, width: float) -> void:
+	if not (row is Control) or width <= 0.0:
+		return
+	var control := row as Control
+	control.custom_minimum_size.x = width
+	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for child in control.get_children():
+		if child is Label:
+			var label := child as Label
+			label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			label.custom_minimum_size.x = width
 
 func _update_upgrade_row(upgrade_id: StringName, price: int, buy_button: Button, price_label: Label) -> void:
 	var is_owned := _is_upgrade_purchased(upgrade_id)
@@ -432,6 +493,7 @@ func _create_relic_row(data: Dictionary) -> VBoxContainer:
 	var container := VBoxContainer.new()
 	container.add_theme_constant_override("separation", 4)
 	container.custom_minimum_size.y = 78
+	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var relic_id := StringName(data["id"])
 	var owned := GameState.has_relic(relic_id)
@@ -441,11 +503,14 @@ func _create_relic_row(data: Dictionary) -> VBoxContainer:
 		Localization.t("info.relics.owned_tag") if owned else Localization.t("info.relics.unowned_tag")
 	]
 	title.add_theme_font_size_override("font_size", 22)
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	container.add_child(title)
 
 	var desc := Label.new()
 	desc.text = Localization.t(data["description_key"])
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	desc.modulate = Color(1, 1, 1, 1) if owned else Color(0.62, 0.62, 0.62, 1)
 	container.add_child(desc)
 
@@ -480,14 +545,17 @@ func _update_map_page() -> void:
 func _create_map_layer_row(layer_index: int, layer_nodes: Array) -> VBoxContainer:
 	var container := VBoxContainer.new()
 	container.add_theme_constant_override("separation", 6)
+	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var title := Label.new()
 	title.text = Localization.t("info.map.layer_title", "", {"layer": layer_index + 1})
 	title.add_theme_font_size_override("font_size", 21)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	container.add_child(title)
 
 	var body := Label.new()
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.text = _build_layer_summary_text(layer_nodes)
 	container.add_child(body)
 
@@ -534,7 +602,8 @@ func _apply_localization() -> void:
 	maintenance_tab_button.text = Localization.t("info.tab.maintenance")
 	relics_tab_button.text = Localization.t("info.tab.relics")
 	map_tab_button.text = Localization.t("info.tab.map")
-	close_button.text = Localization.t("common.close")
+	close_button.text = "×"
+	close_button.tooltip_text = Localization.t("common.close")
 	continue_button.text = Localization.t("common.continue")
 	repair_button.text = Localization.t("common.repair")
 	upgrade_button.text = Localization.t("common.upgrade")
