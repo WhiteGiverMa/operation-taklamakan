@@ -49,5 +49,8 @@ signal game_speed_changed(new_speed: float)
 # Upgrade events
 signal upgrade_purchased(upgrade_id: String, cost: int)
 
+# Relic events
+signal relic_purchased(relic_id: String, cost: int)
+
 ## DevMode events
 signal dev_event(event_type: String, data: Dictionary)

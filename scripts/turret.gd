@@ -475,14 +475,14 @@ func _apply_definition() -> void:
 
 ## 更新最终属性（应用全局倍率和类型专精）
 func _update_final_stats() -> void:
-	var global_mult := GameState.turret_damage_multiplier
+	var global_mult := GameState.get_global_turret_damage_multiplier()
 	var type_mult := GameState.get_turret_type_multiplier(turret_id)
 	
 	# 伤害 = 基础 × 全局倍率 × 类型专精
 	projectile_damage = _base_damage * global_mult * type_mult
 	
 	# 其他属性直接使用基础值
-	fire_rate = _base_fire_rate
+	fire_rate = _base_fire_rate * GameState.get_turret_fire_rate_multiplier()
 	projectile_speed = _base_projectile_speed
 	interaction_range = _base_interaction_range
 	auto_target_range = _base_auto_target_range

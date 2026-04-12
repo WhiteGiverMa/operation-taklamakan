@@ -233,7 +233,7 @@ func _on_shop_closed() -> void:
 
 func _apply_rest_heal() -> float:
 	if landship and landship.health_component:
-		return landship.health_component.heal(landship.max_health * 0.3)
+		return landship.health_component.heal(GameState.apply_repair_multiplier(landship.max_health * 0.3))
 	return 0.0
 
 func _show_event_placeholder() -> void:

@@ -1,7 +1,7 @@
 extends Control
 
 ## Wave intermission UI showing wave progress and intermission controls.
-## Displays Continue, Repair, and Upgrade buttons between waves.
+## Displays Continue, Repair, and upgrade preparation options between waves.
 
 @onready var wave_label: Label = $Panel/VBoxContainer/WaveLabel
 @onready var status_label: Label = $Panel/VBoxContainer/StatusLabel
@@ -12,10 +12,30 @@ extends Control
 @onready var repair_button: Button = $Panel/VBoxContainer/ButtonContainer/RepairButton
 @onready var upgrade_button: Button = $Panel/VBoxContainer/ButtonContainer/UpgradeButton
 @onready var wave_progress_bar: ProgressBar = $Panel/VBoxContainer/WaveProgressBar
+@onready var upgrade_section: VBoxContainer = $Panel/VBoxContainer/UpgradeSection
+@onready var upgrade_title_label: Label = $Panel/VBoxContainer/UpgradeSection/UpgradeTitleLabel
+@onready var upgrade_currency_label: Label = $Panel/VBoxContainer/UpgradeSection/UpgradeCurrencyLabel
+@onready var upgrade_list: VBoxContainer = $Panel/VBoxContainer/UpgradeSection/UpgradeList
+
+const INTERMISSION_UPGRADES: Array[Dictionary] = [
+	{
+		"id": "turret_damage",
+		"name_key": "shop.item.turret_damage.name",
+		"description_key": "shop.item.turret_damage.desc",
+		"price": 35,
+	},
+	{
+		"id": "fire_control",
+		"name_key": "shop.item.fire_control.name",
+		"description_key": "shop.item.fire_control.desc",
+		"price": 45,
+	}
+]
 
 var _wave_manager: Node = null
 var _is_visible: bool = false
 var _panel_open: bool = true
+var _upgrade_section_open: bool = false
 
 func _ready() -> void:
 	_hide_ui()
@@ -44,6 +64,8 @@ func _connect_signals() -> void:
 	EventBus.wave_complete.connect(_on_wave_complete)
 	EventBus.wave_all_complete.connect(_on_all_waves_complete)
 	EventBus.game_over.connect(_on_game_over)
+	EventBus.currency_changed.connect(_on_currency_changed)
+	EventBus.game_started.connect(_on_game_started)
 	
 	# Connect to WaveManager if available
 	if _wave_manager:
@@ -78,10 +100,12 @@ func _update_ui() -> void:
 				_update_intermission_ui()
 		_wave_manager.State.ACTIVE_WAVE:
 			_panel_open = true
+			_upgrade_section_open = false
 			if _is_visible:
 				_hide_ui()
 		_wave_manager.State.COMPLETE:
 			_panel_open = true
+			_upgrade_section_open = false
 			_show_completion_ui()
 
 func _update_intermission_ui() -> void:
@@ -125,6 +149,8 @@ func _show_ui() -> void:
 	continue_button.disabled = false
 	repair_button.disabled = false
 	upgrade_button.disabled = false
+	upgrade_section.visible = _upgrade_section_open
+	_update_upgrade_ui()
 
 func _hide_ui() -> void:
 	visible = false
@@ -133,6 +159,7 @@ func _hide_ui() -> void:
 func set_combat_visibility(should_show: bool) -> void:
 	if not should_show:
 		_panel_open = true
+		_upgrade_section_open = false
 		_hide_ui()
 		return
 	_update_ui()
@@ -143,6 +170,7 @@ func _toggle_intermission_panel() -> void:
 		_show_ui()
 		_update_intermission_ui()
 	else:
+		_upgrade_section_open = false
 		_hide_ui()
 
 func _show_completion_ui() -> void:
@@ -160,8 +188,10 @@ func _apply_localization() -> void:
 	continue_button.text = Localization.t("common.continue")
 	repair_button.text = Localization.t("common.repair")
 	upgrade_button.text = Localization.t("common.upgrade")
+	upgrade_title_label.text = Localization.t("wave.ui.upgrade_title")
 	if _wave_manager:
 		_update_ui()
+	_update_upgrade_ui()
 
 func _on_continue_pressed() -> void:
 	if _wave_manager:
@@ -172,7 +202,7 @@ func _on_repair_pressed() -> void:
 	var ship = get_tree().get_first_node_in_group("ship")
 	# health_component is a property, not a method - check if it exists
 	if ship and "health_component" in ship and ship.health_component:
-		var healed = ship.health_component.heal(100.0)  # Heal 100 HP
+		var healed = ship.health_component.heal(GameState.apply_repair_multiplier(100.0))
 		if healed > 0:
 			EventBus.ship_health_changed.emit(ship.health_component.current_health, ship.max_health)
 	repair_button.disabled = true
@@ -180,9 +210,9 @@ func _on_repair_pressed() -> void:
 func _on_upgrade_pressed() -> void:
 	if not _is_visible:
 		return
-	# Emit shop entered signal to show upgrade UI
-	EventBus.shop_entered.emit()
-	upgrade_button.disabled = true
+	_upgrade_section_open = not _upgrade_section_open
+	upgrade_section.visible = _upgrade_section_open
+	_update_upgrade_ui()
 
 func _on_wave_started(_wave_number: int) -> void:
 	_hide_ui()
@@ -195,10 +225,101 @@ func _on_all_waves_complete() -> void:
 
 func _on_intermission_started(_duration: float) -> void:
 	_panel_open = true
+	_upgrade_section_open = false
 	_show_ui()
 
 func _on_intermission_ended() -> void:
 	_update_ui()
 
 func _on_game_over(_won: bool) -> void:
+	_upgrade_section_open = false
 	_hide_ui()
+
+func _on_currency_changed(_new_amount: int, _delta: int) -> void:
+	if _is_visible and _upgrade_section_open:
+		_update_upgrade_ui()
+
+func _on_game_started() -> void:
+	_upgrade_section_open = false
+	_update_upgrade_ui()
+
+func _update_upgrade_ui() -> void:
+	if not is_instance_valid(upgrade_section):
+		return
+	upgrade_section.visible = _upgrade_section_open and _is_visible
+	upgrade_currency_label.text = Localization.t("shop.currency", "", {"amount": GameState.currency})
+
+	for child in upgrade_list.get_children():
+		child.queue_free()
+
+	for item in INTERMISSION_UPGRADES:
+		upgrade_list.add_child(_create_upgrade_row(item))
+
+func _create_upgrade_row(data: Dictionary) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_BEGIN
+	row.add_theme_constant_override("separation", 12)
+
+	var label := Label.new()
+	label.text = "%s\n%s" % [Localization.t(data["name_key"]), Localization.t(data["description_key"])]
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(label)
+
+	var price_label := Label.new()
+	price_label.text = "%d" % int(data["price"])
+	price_label.custom_minimum_size.x = 52
+	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	row.add_child(price_label)
+
+	var buy_button := Button.new()
+	buy_button.text = Localization.t("common.buy")
+	buy_button.custom_minimum_size.x = 96
+	buy_button.pressed.connect(_on_upgrade_purchase_pressed.bind(StringName(data["id"]), int(data["price"])))
+	row.add_child(buy_button)
+
+	_update_upgrade_row(StringName(data["id"]), int(data["price"]), buy_button, price_label)
+	return row
+
+func _update_upgrade_row(upgrade_id: StringName, price: int, buy_button: Button, price_label: Label) -> void:
+	var is_owned := _is_upgrade_purchased(upgrade_id)
+	var can_afford := GameState.can_afford(price)
+	buy_button.disabled = is_owned or not can_afford
+
+	if is_owned:
+		buy_button.text = Localization.t("common.owned")
+		price_label.add_theme_color_override("font_color", Color.GRAY)
+	elif not can_afford:
+		buy_button.text = Localization.t("common.buy")
+		price_label.add_theme_color_override("font_color", Color.RED)
+	else:
+		buy_button.text = Localization.t("common.buy")
+		price_label.remove_theme_color_override("font_color")
+
+func _on_upgrade_purchase_pressed(upgrade_id: StringName, price: int) -> void:
+	if _is_upgrade_purchased(upgrade_id):
+		return
+	if not GameState.spend_currency(price):
+		return
+
+	match upgrade_id:
+		&"turret_damage":
+			GameState.turret_damage_multiplier += 0.1
+			EventBus.turret_stats_refresh_requested.emit()
+		&"fire_control":
+			GameState.auto_fire_unlocked = true
+		_:
+			GameState.add_currency(price)
+			return
+
+	EventBus.upgrade_purchased.emit(String(upgrade_id), price)
+	_update_upgrade_ui()
+
+func _is_upgrade_purchased(upgrade_id: StringName) -> bool:
+	match upgrade_id:
+		&"turret_damage":
+			return GameState.turret_damage_multiplier > 1.0
+		&"fire_control":
+			return GameState.auto_fire_unlocked
+		_:
+			return false

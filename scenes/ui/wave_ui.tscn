@@ -86,3 +86,23 @@ text = ""
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = ""
+
+[node name="UpgradeSection" type="VBoxContainer" parent="Panel/VBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="UpgradeTitleLabel" type="Label" parent="Panel/VBoxContainer/UpgradeSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = ""
+horizontal_alignment = 1
+
+[node name="UpgradeCurrencyLabel" type="Label" parent="Panel/VBoxContainer/UpgradeSection"]
+layout_mode = 2
+text = ""
+horizontal_alignment = 1
+
+[node name="UpgradeList" type="VBoxContainer" parent="Panel/VBoxContainer/UpgradeSection"]
+layout_mode = 2
+theme_override_constants/separation = 12

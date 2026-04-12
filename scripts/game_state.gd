@@ -27,6 +27,13 @@ var auto_fire_unlocked: bool = false
 var has_active_run: bool = false
 var speed_2x_active: bool = false
 
+# Run relic state
+var owned_relic_ids: Array[StringName] = []
+var relic_turret_damage_multiplier: float = 1.0
+var relic_currency_multiplier: float = 1.0
+var relic_repair_multiplier: float = 1.0
+var relic_fire_rate_multiplier: float = 1.0
+
 # 炮塔类型专精倍率：{StringName: float}
 # 每购买某类型炮塔，该类型伤害+5%
 var turret_type_multipliers: Dictionary = {}
@@ -108,6 +115,11 @@ func _reset_run_values() -> void:
 	turret_damage_multiplier = 1.0
 	auto_fire_unlocked = false
 	turret_type_multipliers.clear()
+	owned_relic_ids.clear()
+	relic_turret_damage_multiplier = 1.0
+	relic_currency_multiplier = 1.0
+	relic_repair_multiplier = 1.0
+	relic_fire_rate_multiplier = 1.0
 	kills = 0
 	current_layer = 1
 	level = 1
@@ -127,6 +139,13 @@ func reset_to_menu() -> void:
 func add_currency(amount: int) -> void:
 	currency += amount
 
+func add_enemy_reward(amount: int) -> void:
+	if amount <= 0:
+		return
+	var adjusted_amount := int(round(float(amount) * relic_currency_multiplier))
+	adjusted_amount = maxi(adjusted_amount, amount)
+	add_currency(adjusted_amount)
+
 func spend_currency(amount: int) -> bool:
 	if currency >= amount:
 		currency -= amount
@@ -135,6 +154,40 @@ func spend_currency(amount: int) -> bool:
 
 func can_afford(amount: int) -> bool:
 	return currency >= amount
+
+func has_relic(relic_id: StringName) -> bool:
+	return relic_id in owned_relic_ids
+
+func acquire_relic(relic_id: StringName) -> bool:
+	if has_relic(relic_id):
+		return false
+	match relic_id:
+		&"gyro_sight":
+			owned_relic_ids.append(relic_id)
+			relic_turret_damage_multiplier *= 1.15
+			EventBus.turret_stats_refresh_requested.emit()
+		&"salvage_contract":
+			owned_relic_ids.append(relic_id)
+			relic_currency_multiplier *= 1.25
+		&"field_toolkit":
+			owned_relic_ids.append(relic_id)
+			relic_repair_multiplier *= 1.5
+		&"overclock_core":
+			owned_relic_ids.append(relic_id)
+			relic_fire_rate_multiplier *= 0.85
+			EventBus.turret_stats_refresh_requested.emit()
+		_:
+			return false
+	return true
+
+func get_global_turret_damage_multiplier() -> float:
+	return turret_damage_multiplier * relic_turret_damage_multiplier
+
+func get_turret_fire_rate_multiplier() -> float:
+	return relic_fire_rate_multiplier
+
+func apply_repair_multiplier(base_amount: float) -> float:
+	return base_amount * relic_repair_multiplier
 
 ## 获取指定炮塔类型的专精倍率
 func get_turret_type_multiplier(type_id: StringName) -> float:
@@ -156,7 +209,7 @@ func _on_enemy_died(_enemy: Node2D, _position: Vector2, _reward: int) -> void:
 	if _state == State.PLAYING:
 		kills += 1
 		if _reward > 0:
-			add_currency(_reward)
+			add_enemy_reward(_reward)
 
 ## 切换2倍速。仅在战斗期间（波次进行中或波间期）生效。
 func toggle_speed_2x() -> void:
