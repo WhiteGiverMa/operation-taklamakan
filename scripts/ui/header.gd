@@ -65,6 +65,7 @@ func _connect_signals() -> void:
 	EventBus.wave_started.connect(_on_wave_started)
 	EventBus.wave_complete.connect(_on_wave_complete)
 	EventBus.game_started.connect(_on_game_started)
+	EventBus.map_node_preview_selected.connect(_on_node_selected)
 	MapManager.current_node_changed.connect(_on_current_node_changed)
 	MapManager.chapter_changed.connect(_on_chapter_changed)
 

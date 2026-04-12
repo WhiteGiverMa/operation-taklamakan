@@ -34,6 +34,7 @@ signal currency_changed(new_amount: int, delta: int)
 signal node_entered(node_type: String)
 signal chapter_completed(chapter: int)
 signal shop_entered()
+signal map_node_preview_selected(node_id: String)
 
 # Game time events
 signal game_time_updated(elapsed: float)

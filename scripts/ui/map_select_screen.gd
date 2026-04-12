@@ -62,6 +62,7 @@ func _update_chapter_info() -> void:
 
 func _on_node_selected(node_id: String) -> void:
 	_selected_node_id = node_id
+	EventBus.map_node_preview_selected.emit(node_id)
 	_update_node_info()
 	_update_confirm_button()
 
@@ -157,6 +158,7 @@ func _can_enter_node(node_id: String) -> bool:
 func _visit_node(node_id: String) -> void:
 	MapManager.visit_node(node_id)
 	_selected_node_id = ""
+	EventBus.map_node_preview_selected.emit("")
 	if graph_view:
 		graph_view.refresh_view()
 
