@@ -29,7 +29,7 @@ const TYPE_ROLLS := [
 	{"weight": 10, "type": MapNodeScript.TYPE_REST},
 ]
 
-var seed: int = 0
+var map_seed: int = 0
 var layers: Array[Array] = []
 var layer_rows: Array[Array] = []
 var current_layer: int = 0
@@ -39,9 +39,9 @@ var visited_nodes: Array[String] = []
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _node_lookup: Dictionary = {}
 
-func generate(map_seed: int) -> void:
-	seed = map_seed
-	_rng.seed = seed
+func generate(new_seed: int) -> void:
+	map_seed = new_seed
+	_rng.seed = map_seed
 	layers.clear()
 	layer_rows.clear()
 	_node_lookup.clear()
@@ -313,7 +313,7 @@ func to_dictionary() -> Dictionary:
 		serialized_layers.append(serialized_nodes)
 
 	return {
-		"seed": seed,
+		"seed": map_seed,
 		"current_layer": current_layer,
 		"current_node": current_node.id if current_node != null else "",
 		"visited_nodes": visited_nodes.duplicate(),

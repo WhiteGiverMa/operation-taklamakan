@@ -62,8 +62,8 @@ func execute(input: String) -> String:
 	
 	return str(result)
 
-func register_command(name: String, callable: Callable, description: String, usage: String = "") -> void:
-	_commands[name] = {
+func register_command(cmd_name: String, callable: Callable, description: String, usage: String = "") -> void:
+	_commands[cmd_name] = {
 		"callable": callable,
 		"description": description,
 		"usage": usage
@@ -287,8 +287,8 @@ func _cmd_help(_args: Array[String]) -> String:
 	var lines: Array[String] = ["=== DevMode 命令列表 ==="]
 	var names := _commands.keys()
 	names.sort()
-	for name in names:
-		var info = _commands[name]
+	for cmd_name in names:
+		var info = _commands[cmd_name]
 		var usage: String = info.get("usage", "")
 		var desc: String = info.get("description", "")
 		if usage.is_empty():
