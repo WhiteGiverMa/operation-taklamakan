@@ -20,6 +20,7 @@ func _ready() -> void:
 	# 敌方投射物同样由 ProjectileSpawner 管理，需要提高 z_index
 	# 以确保可见于舰体和炮塔之上
 	z_index = 10
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 
 	# Enemy projectile: layer 5 (enemy_projectile)
 	collision_layer = 0

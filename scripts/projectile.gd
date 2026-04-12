@@ -20,6 +20,7 @@ func _ready() -> void:
 	# 场景树绘制顺序在陆行舰之前，需要显式提高 z_index
 	# 以确保投射物可见于舰体之上
 	z_index = 10
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 
 	collision_layer = 0
 	collision_mask = 0

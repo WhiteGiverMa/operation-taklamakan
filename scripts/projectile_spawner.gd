@@ -83,7 +83,7 @@ func _activate_projectile(projectile: Node) -> void:
 		return
 	
 	projectile.visible = true
-	projectile.process_mode = Node.PROCESS_MODE_INHERIT
+	projectile.process_mode = Node.PROCESS_MODE_PAUSABLE
 	
 	if projectile is CollisionObject2D:
 		projectile.set_deferred("monitoring", true)

@@ -10,7 +10,7 @@ signal main_menu_requested
 @onready var main_menu_button: Button = $Backdrop/Panel/MarginContainer/VBoxContainer/MainMenuButton
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
 	resume_button.pressed.connect(func() -> void: resume_requested.emit())
 	settings_button.pressed.connect(func() -> void: settings_requested.emit())
 	main_menu_button.pressed.connect(func() -> void: main_menu_requested.emit())
