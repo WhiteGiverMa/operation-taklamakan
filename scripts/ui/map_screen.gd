@@ -15,6 +15,17 @@ const LAYER_VERTICAL_GAP: float = 840.0
 const NODE_SCALE: float = 1.0
 const TOTAL_LAYERS: int = 3
 
+# Read-only mode for embedded map viewing
+var read_only_mode: bool = false
+var show_overlay_ui: bool = true
+var allow_pan_in_read_only: bool = true  # 允许只读模式下平移
+
+# Zoom settings
+var _zoom_level: float = 1.0
+const ZOOM_MIN: float = 0.5
+const ZOOM_MAX: float = 2.0
+const ZOOM_STEP: float = 0.1
+
 # Connection colors
 const COLOR_CONNECTION_ACTIVE := Color(0.8, 0.8, 0.8, 0.8)
 const COLOR_CONNECTION_INACTIVE := Color(0.4, 0.4, 0.4, 0.3)
@@ -34,13 +45,23 @@ var _selected_node_ui: MapNodeUIScript = null
 var _is_panning: bool = false
 
 func _ready() -> void:
+	mouse_filter = MOUSE_FILTER_STOP
+	gui_input.connect(_on_gui_input)
+	resized.connect(_on_resized)
 	_setup_ui()
 	_connect_signals()
 	_connect_localization()
 	_refresh_map()
+	_update_ui_layer_visibility()
 
 func _process(_delta: float) -> void:
 	if not visible:
+		if _is_panning:
+			_stop_pan()
+		return
+
+	# 只读模式下根据设置决定是否允许平移
+	if read_only_mode and not allow_pan_in_read_only:
 		if _is_panning:
 			_stop_pan()
 		return
@@ -56,8 +77,9 @@ func _process(_delta: float) -> void:
 		_stop_pan()
 
 func _setup_ui() -> void:
-	confirm_button.disabled = true
-	confirm_button.pressed.connect(_on_confirm_pressed)
+	if is_instance_valid(confirm_button):
+		confirm_button.disabled = true
+		confirm_button.pressed.connect(_on_confirm_pressed)
 	_update_layer_info()
 
 func _connect_signals() -> void:
@@ -199,6 +221,9 @@ func _update_node_states() -> void:
 			node_ui.set_selected(false)
 
 func _on_node_selected(node_ui: MapNodeUIScript) -> void:
+	if read_only_mode:
+		return
+	
 	# Deselect previous
 	if _selected_node_ui != null and _selected_node_ui != node_ui:
 		_selected_node_ui.set_selected(false)
@@ -234,6 +259,14 @@ func _update_node_info(node_ui: MapNodeUIScript) -> void:
 	node_info_label.text = info_text
 
 func _update_confirm_button() -> void:
+	# 嵌入模式下 confirm_button 可能不存在或不可用
+	if not is_instance_valid(confirm_button):
+		return
+	
+	if read_only_mode:
+		confirm_button.disabled = true
+		return
+	
 	if _selected_node_ui == null:
 		confirm_button.disabled = true
 		confirm_button.text = Localization.t("map.screen.confirm.select")
@@ -257,6 +290,9 @@ func _apply_localization() -> void:
 	_update_confirm_button()
 
 func _on_confirm_pressed() -> void:
+	if read_only_mode:
+		return
+	
 	if _selected_node_ui == null:
 		return
 	
@@ -264,6 +300,9 @@ func _on_confirm_pressed() -> void:
 		_visit_selected_node()
 
 func _visit_selected_node() -> void:
+	if read_only_mode:
+		return
+	
 	if _selected_node_ui == null:
 		return
 	
@@ -274,6 +313,9 @@ func _visit_selected_node() -> void:
 	_refresh_map()
 
 func _on_node_confirmed(node_ui: MapNodeUIScript) -> void:
+	if read_only_mode:
+		return
+	
 	# Double-click or re-click to confirm
 	if _can_enter_node(node_ui):
 		_visit_selected_node()
@@ -294,11 +336,20 @@ func _center_on_current_layer() -> void:
 	var current_layer := MapManager.current_layer
 	var target_y := float(current_layer) * LAYER_VERTICAL_GAP
 	
+	# 获取实际容器尺寸
+	var viewport_size := _get_host_size()
+	
 	# Center the map container
-	var viewport_center := Vector2(MAP_VIEWPORT_WIDTH * 0.5, MAP_VIEWPORT_HEIGHT * 0.5)
-	var layer_center := Vector2(MAP_VIEWPORT_WIDTH * 0.5, target_y + MAP_VIEWPORT_HEIGHT * 0.3)
+	var viewport_center := Vector2(viewport_size.x * 0.5, viewport_size.y * 0.5)
+	var layer_center := Vector2(viewport_size.x * 0.5, target_y + viewport_size.y * 0.3)
 	
 	map_container.position = viewport_center - layer_center
+
+func _get_host_size() -> Vector2:
+	var parent := map_container.get_parent()
+	if parent and parent is Control:
+		return parent.size
+	return Vector2(MAP_VIEWPORT_WIDTH, MAP_VIEWPORT_HEIGHT)
 
 func _start_pan() -> void:
 	_is_panning = true
@@ -308,3 +359,37 @@ func _stop_pan() -> void:
 
 func _do_pan_delta(delta: Vector2) -> void:
 	map_container.position += delta
+
+func _on_resized() -> void:
+	_center_on_current_layer()
+
+func set_read_only_mode(value: bool) -> void:
+	read_only_mode = value
+	_update_ui_layer_visibility()
+	_update_confirm_button()
+
+func set_show_overlay_ui(value: bool) -> void:
+	show_overlay_ui = value
+	_update_ui_layer_visibility()
+
+func _update_ui_layer_visibility() -> void:
+	if is_instance_valid($UILayer):
+		$UILayer.visible = show_overlay_ui and not read_only_mode
+
+func recenter_view() -> void:
+	_center_on_current_layer()
+
+func _apply_zoom() -> void:
+	map_container.scale = Vector2(_zoom_level, _zoom_level)
+	_center_on_current_layer()
+
+func _on_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_zoom_level = minf(_zoom_level + ZOOM_STEP, ZOOM_MAX)
+			_apply_zoom()
+			accept_event()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_zoom_level = maxf(_zoom_level - ZOOM_STEP, ZOOM_MIN)
+			_apply_zoom()
+			accept_event()
