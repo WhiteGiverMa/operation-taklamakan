@@ -89,7 +89,10 @@ func _update_node_info() -> void:
 		type_name = str(node.type)
 	
 	var info_text := Localization.t("map.screen.node_info.type", "", {"type": type_name}) + "\n"
-	info_text += Localization.t("map.screen.node_info.position", "", {"chapter": node.chapter_index + 1}) + "\n"
+	info_text += Localization.t("map.screen.node_info.position", "", {
+		"chapter": node.chapter_index + 1,
+		"floor": node.row_index + 1,
+	}) + "\n"
 	
 	var current_node = MapManager.current_node
 	var is_reachable: bool = current_node != null and (current_node.connections.has(_selected_node_id) or _selected_node_id == current_node.id)

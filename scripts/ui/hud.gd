@@ -103,7 +103,8 @@ const HINT_ACTIONS := [
 ]
 
 func _ready() -> void:
-	EventBus.ship_health_changed.connect(_on_ship_health_changed)
+	# 血条已迁移至 Header，隐藏 HUD 血条
+	hp_bar.visible = false
 	EventBus.game_speed_changed.connect(_on_game_speed_changed)
 	if not Localization.language_changed.is_connected(_on_language_changed):
 		Localization.language_changed.connect(_on_language_changed)
@@ -137,10 +138,6 @@ func set_input_hints_enabled(enabled: bool) -> void:
 		input_hints_panel.visible = false
 		return
 	_refresh_input_hints()
-
-func _on_ship_health_changed(current: float, maximum: float) -> void:
-	hp_bar.max_value = maximum
-	hp_bar.value = current
 
 func _on_language_changed(_locale: String) -> void:
 	_apply_localization()
