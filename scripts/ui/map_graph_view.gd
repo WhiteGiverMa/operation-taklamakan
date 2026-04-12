@@ -79,7 +79,7 @@ func _process(_delta: float) -> void:
 func _connect_signals() -> void:
 	MapManager.map_generated.connect(_on_map_generated)
 	MapManager.current_node_changed.connect(_on_current_node_changed)
-	MapManager.layer_changed.connect(_on_layer_changed)
+	MapManager.chapter_changed.connect(_on_chapter_changed)
 
 func _on_map_generated(_seed: int, _graph) -> void:
 	refresh_view()
@@ -87,16 +87,16 @@ func _on_map_generated(_seed: int, _graph) -> void:
 func _on_current_node_changed(_node) -> void:
 	_refresh_map()
 
-func _on_layer_changed(_new_layer: int) -> void:
+func _on_chapter_changed(_new_chapter: int) -> void:
 	_refresh_map()
 
 ## 刷新地图视图
 func refresh_view() -> void:
 	_refresh_map()
 
-## 重新居中到当前层
+## 重新居中到当前章
 func recenter_view() -> void:
-	_center_on_current_layer()
+	_center_on_current_chapter()
 
 ## 获取当前选中的节点ID
 func get_selected_node_id() -> String:
@@ -131,7 +131,7 @@ func _refresh_map() -> void:
 	_draw_connections(graph)
 	_draw_nodes(graph)
 	_update_node_states()
-	_center_on_current_layer()
+	_center_on_current_chapter()
 
 func _clear_map() -> void:
 	# Clear connection lines
@@ -152,10 +152,10 @@ func _draw_connections(graph) -> void:
 	if floor_graph == null:
 		return
 	
-	# Draw connections for all layers
-	for layer_index in range(TOTAL_LAYERS):
-		var layer_nodes = floor_graph.get_layer_nodes(layer_index)
-		for node in layer_nodes:
+	# Draw connections for all chapters
+	for chapter_index in range(TOTAL_LAYERS):
+		var chapter_nodes = floor_graph.get_chapter_nodes(chapter_index)
+		for node in chapter_nodes:
 			for target_id in node.connections:
 				var target_node = floor_graph.get_node(target_id)
 				if target_node != null:
@@ -190,9 +190,9 @@ func _draw_nodes(graph) -> void:
 	if floor_graph == null:
 		return
 	
-	for layer_index in range(TOTAL_LAYERS):
-		var layer_nodes = floor_graph.get_layer_nodes(layer_index)
-		for node in layer_nodes:
+	for chapter_index in range(TOTAL_LAYERS):
+		var chapter_nodes = floor_graph.get_chapter_nodes(chapter_index)
+		for node in chapter_nodes:
 			_create_node_ui(node)
 
 func _create_node_ui(node) -> void:
@@ -245,18 +245,18 @@ func _on_node_ui_confirmed(node_ui: MapNodeUIScript) -> void:
 	
 	node_confirmed.emit(node_ui.node_id)
 
-func _center_on_current_layer() -> void:
-	var current_layer := MapManager.current_layer
-	var target_y := float(current_layer) * LAYER_VERTICAL_GAP
+func _center_on_current_chapter() -> void:
+	var current_chapter := MapManager.current_chapter
+	var target_y := float(current_chapter) * LAYER_VERTICAL_GAP
 	
 	# 获取实际容器尺寸
 	var viewport_size := _get_host_size()
 	
 	# Center the map container
 	var viewport_center := Vector2(viewport_size.x * 0.5, viewport_size.y * 0.5)
-	var layer_center := Vector2(viewport_size.x * 0.5, target_y + viewport_size.y * 0.3)
+	var chapter_center := Vector2(viewport_size.x * 0.5, target_y + viewport_size.y * 0.3)
 	
-	map_container.position = viewport_center - layer_center
+	map_container.position = viewport_center - chapter_center
 
 func _get_host_size() -> Vector2:
 	var parent := map_container.get_parent()
@@ -274,13 +274,13 @@ func _do_pan_delta(delta: Vector2) -> void:
 	map_container.position += delta
 
 func _on_resized() -> void:
-	_center_on_current_layer()
+	_center_on_current_chapter()
 
 func _apply_zoom() -> void:
 	if not is_instance_valid(map_container):
 		return
 	map_container.scale = Vector2(zoom_level, zoom_level)
-	_center_on_current_layer()
+	_center_on_current_chapter()
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

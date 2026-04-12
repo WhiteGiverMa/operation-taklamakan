@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/game_over.tscn" id="4_gameover"]
 [ext_resource type="PackedScene" path="res://scenes/ui/wave_ui.tscn" id="5_waveui"]
 [ext_resource type="PackedScene" path="res://scenes/ui/victory_screen.tscn" id="6_victory"]
+[ext_resource type="PackedScene" path="res://scenes/ui/header.tscn" id="7_header"]
 
 [node name="Main" type="Node2D" unique_id=841355766]
 script = ExtResource("1_main")
@@ -14,6 +15,8 @@ script = ExtResource("1_main")
 position = Vector2(960, 540)
 
 [node name="UILayer" type="CanvasLayer" parent="." unique_id=1768761374]
+
+[node name="Header" parent="UILayer" unique_id=900100001 instance=ExtResource("7_header")]
 
 [node name="HUD" parent="UILayer" unique_id=51642622 instance=ExtResource("3_hud")]
 

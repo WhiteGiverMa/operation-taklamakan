@@ -36,7 +36,7 @@ const TYPE_IDS := {
 }
 
 var id: String = ""
-var layer_index: int = 0
+var chapter_index: int = 0
 var row_index: int = 0
 var column_index: int = 0
 var position: Vector2 = Vector2.ZERO
@@ -47,14 +47,14 @@ var visited: bool = false
 
 func _init(
 	node_id: String = "",
-	p_layer_index: int = 0,
+	p_chapter_index: int = 0,
 	p_row_index: int = 0,
 	p_column_index: int = 0,
 	p_position: Vector2 = Vector2.ZERO,
 	p_type: NodeType = NodeType.COMBAT
 ) -> void:
 	id = node_id
-	layer_index = p_layer_index
+	chapter_index = p_chapter_index
 	row_index = p_row_index
 	column_index = p_column_index
 	position = p_position
@@ -85,7 +85,7 @@ func is_terminal() -> bool:
 func to_dictionary() -> Dictionary:
 	return {
 		"id": id,
-		"layer_index": layer_index,
+		"chapter_index": chapter_index,
 		"row_index": row_index,
 		"column_index": column_index,
 		"position": [position.x, position.y],

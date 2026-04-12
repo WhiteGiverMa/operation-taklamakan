@@ -14,10 +14,10 @@ const ZOOM_MAX: float = 2.0
 const ZOOM_STEP: float = 0.1
 
 @onready var graph_view: Control = $MapGraphView
-@onready var layer_info_label: Label = $UILayer/LayerInfo
+@onready var chapter_info_label: Label = $UILayer/ChapterInfo
 @onready var node_info_label: Label = $UILayer/NodeInfo
 @onready var confirm_button: Button = $UILayer/ConfirmButton
-@onready var current_layer_indicator: Label = $UILayer/CurrentLayerIndicator
+@onready var current_chapter_indicator: Label = $UILayer/CurrentChapterIndicator
 
 var _selected_node_id: String = ""
 
@@ -26,7 +26,7 @@ func _ready() -> void:
 	_setup_ui()
 	_connect_signals()
 	_connect_localization()
-	_update_layer_info()
+	_update_chapter_info()
 
 func _setup_ui() -> void:
 	if is_instance_valid(confirm_button):
@@ -38,7 +38,7 @@ func _connect_signals() -> void:
 		graph_view.node_selected.connect(_on_node_selected)
 		graph_view.node_confirmed.connect(_on_node_confirmed)
 	
-	MapManager.layer_changed.connect(_on_layer_changed)
+	MapManager.chapter_changed.connect(_on_chapter_changed)
 
 func _connect_localization() -> void:
 	if not Localization.language_changed.is_connected(_on_language_changed):
@@ -47,18 +47,18 @@ func _connect_localization() -> void:
 func _on_language_changed(_locale: String) -> void:
 	_apply_localization()
 
-func _on_layer_changed(_new_layer: int) -> void:
-	_update_layer_info()
+func _on_chapter_changed(_new_chapter: int) -> void:
+	_update_chapter_info()
 	if graph_view:
 		graph_view.refresh_view()
 
-func _update_layer_info() -> void:
-	var current_layer := MapManager.current_layer
-	layer_info_label.text = Localization.t("map.screen.layer_info", "", {
-		"layer": current_layer + 1,
-		"total_layers": 3,
+func _update_chapter_info() -> void:
+	var current_chapter := MapManager.current_chapter
+	chapter_info_label.text = Localization.t("map.screen.chapter_info", "", {
+		"chapter": current_chapter + 1,
+		"total_chapters": 3,
 	})
-	current_layer_indicator.text = Localization.t("map.screen.current_layer", "", {"layer": current_layer + 1})
+	current_chapter_indicator.text = Localization.t("map.screen.current_chapter", "", {"chapter": current_chapter + 1})
 
 func _on_node_selected(node_id: String) -> void:
 	_selected_node_id = node_id
@@ -88,7 +88,7 @@ func _update_node_info() -> void:
 		type_name = str(node.type)
 	
 	var info_text := Localization.t("map.screen.node_info.type", "", {"type": type_name}) + "\n"
-	info_text += Localization.t("map.screen.node_info.position", "", {"layer": node.layer_index + 1}) + "\n"
+	info_text += Localization.t("map.screen.node_info.position", "", {"chapter": node.chapter_index + 1}) + "\n"
 	
 	var current_node = MapManager.current_node
 	var is_reachable: bool = current_node != null and (current_node.connections.has(_selected_node_id) or _selected_node_id == current_node.id)
@@ -168,13 +168,13 @@ func _on_confirm_pressed() -> void:
 		_visit_node(_selected_node_id)
 
 func _apply_localization() -> void:
-	_update_layer_info()
+	_update_chapter_info()
 	_update_node_info()
 	_update_confirm_button()
 
 ## 刷新视图（供外部调用）
 func refresh_view() -> void:
-	_update_layer_info()
+	_update_chapter_info()
 	if graph_view:
 		graph_view.refresh_view()
 

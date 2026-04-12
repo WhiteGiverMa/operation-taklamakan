@@ -32,8 +32,11 @@ signal currency_changed(new_amount: int, delta: int)
 
 # Map/Node events
 signal node_entered(node_type: String)
-signal layer_completed(layer: int)
+signal chapter_completed(chapter: int)
 signal shop_entered()
+
+# Game time events
+signal game_time_updated(elapsed: float)
 
 # Player events
 signal player_died()

@@ -1,0 +1,98 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/header.gd" id="1_header"]
+
+[node name="Header" type="Control"]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 48.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("1_header")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.12, 0.9)
+
+[node name="Content" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+
+[node name="LeftMargin" type="Control" parent="Content"]
+custom_minimum_size = Vector2(16, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="HealthSection" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 8
+
+[node name="HealthBar" type="ProgressBar" parent="Content/HealthSection"]
+custom_minimum_size = Vector2(200, 20)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
+
+[node name="HealthLabel" type="Label" parent="Content/HealthSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 2
+text = "100/100"
+horizontal_alignment = 1
+
+[node name="ProgressSection" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="ProgressLabel" type="Label" parent="Content/ProgressSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 2
+text = "第1章 · 第1层 · 波次 0/5"
+horizontal_alignment = 1
+
+[node name="TimeSection" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 12
+
+[node name="TimeLabel" type="Label" parent="Content/TimeSection"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 2
+text = "00:00"
+horizontal_alignment = 1
+
+[node name="SettingsButton" type="Button" parent="Content"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 20
+text = "⚙"
+
+[node name="RightMargin" type="Control" parent="Content"]
+custom_minimum_size = Vector2(16, 0)
+layout_mode = 2
+size_flags_horizontal = 0

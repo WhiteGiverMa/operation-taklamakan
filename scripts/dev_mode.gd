@@ -94,9 +94,9 @@ func _register_commands() -> void:
 	register_command("skip_wave", _cmd_skip_wave,
 		"跳过当前波间期或直接开始下一波",
 		"skip_wave")
-	register_command("skip_layer", _cmd_skip_layer,
-		"跳过当前层数",
-		"skip_layer")
+	register_command("skip_chapter", _cmd_skip_chapter,
+		"跳过当前章节",
+		"skip_chapter")
 	
 	# 生成命令
 	register_command("spawn_enemy", _cmd_spawn_enemy,
@@ -183,25 +183,25 @@ func _cmd_skip_wave(_args: Array[String]) -> String:
 		# 战斗中无法直接跳过，尝试进入下一波的公共 API 效果有限
 		return "当前处于战斗中（%s），无法直接跳过。请等待当前波次结束或击败所有敌人。" % wm_state
 	elif WaveManager.get_state() == WaveManager.State.INACTIVE:
-		WaveManager.start_combat_session(GameState.current_layer)
+		WaveManager.start_combat_session(GameState.current_chapter)
 		WaveManager.start_next_wave()
 		return "战斗会话尚未开始，已自动开启并进入第一波。当前状态: %s。" % WaveManager.get_state_name()
 	else:
 		return "当前 WaveManager 状态: %s，无法进行跳过操作。" % wm_state
 
-func _cmd_skip_layer(_args: Array[String]) -> String:
-	var old_layer := GameState.current_layer
-	var old_map_layer := MapManager.current_layer
-	# 先尝试推进地图层；只有当前节点为终点时 MapManager 才会真正推进
-	MapManager.advance_to_next_layer()
-	if MapManager.current_layer == old_map_layer:
-		# 地图层未推进（当前节点不是终点，或已是 Boss 终点）
+func _cmd_skip_chapter(_args: Array[String]) -> String:
+	var old_chapter := GameState.current_chapter
+	var old_map_chapter := MapManager.current_chapter
+	# 先尝试推进地图章；只有当前节点为终点时 MapManager 才会真正推进
+	MapManager.advance_to_next_chapter()
+	if MapManager.current_chapter == old_map_chapter:
+		# 地图章未推进（当前节点不是终点，或已是 Boss 终点）
 		if MapManager.current_node != null and MapManager.current_node.is_terminal() and MapManager.current_node.type == MapNode.TYPE_BOSS:
 			return "已到达 Boss 终点，无法继续推进。"
-		return "当前节点不是终点，无法跳过层级。请先完成当前节点。"
-	# 地图层推进成功，同步游戏状态
-	GameState.advance_layer()
-	return "层数已从 %d 推进到 %d。" % [old_layer, GameState.current_layer]
+		return "当前节点不是终点，无法跳过章节。请先完成当前节点。"
+	# 地图章推进成功，同步游戏状态
+	GameState.advance_chapter()
+	return "章节已从 %d 推进到 %d。" % [old_chapter, GameState.current_chapter]
 
 # ---------------------------------------------------------------------------
 # 生成命令实现
@@ -266,7 +266,7 @@ func _cmd_spawn_wave(args: Array[String]) -> String:
 	var wm_state := WaveManager.get_state()
 	
 	if wm_state == WaveManager.State.INACTIVE:
-		WaveManager.start_combat_session(GameState.current_layer)
+		WaveManager.start_combat_session(GameState.current_chapter)
 		WaveManager.start_next_wave()
 		if wave_num > 0:
 			return "战斗会话已启动并开始第一波（指定波次 %d 的直接跳转暂不支持，当前波次: %d）。" % [wave_num, WaveManager.current_wave]

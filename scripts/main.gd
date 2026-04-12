@@ -179,10 +179,10 @@ func _slot_has_turret(slot: Node2D) -> bool:
 func _show_map_screen() -> void:
 	_apply_flow_state(FlowState.MAP)
 
-func _start_combat_for_current_layer() -> void:
+func _start_combat_for_current_chapter() -> void:
 	_apply_flow_state(FlowState.COMBAT)
 	_clear_runtime_enemies()
-	WaveManager.start_combat_session(MapManager.current_layer + 1)
+	WaveManager.start_combat_session(MapManager.current_chapter + 1)
 
 func _set_combat_visibility(should_show: bool) -> void:
 	landship.visible = should_show
@@ -200,7 +200,7 @@ func _on_current_node_changed(node) -> void:
 
 	match node.type:
 		MapNode.TYPE_COMBAT, MapNode.TYPE_ELITE, MapNode.TYPE_BOSS, MapNode.TYPE_END:
-			_start_combat_for_current_layer()
+			_start_combat_for_current_chapter()
 		MapNode.TYPE_SHOP:
 			_on_shop_entered()
 		MapNode.TYPE_EVENT:
@@ -272,8 +272,8 @@ func _on_wave_all_complete() -> void:
 		return
 
 	if current_node.is_terminal():
-		MapManager.advance_to_next_layer()
-		GameState.advance_layer()
+		MapManager.advance_to_next_chapter()
+		GameState.advance_chapter()
 
 	_show_map_screen()
 

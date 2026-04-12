@@ -4,7 +4,7 @@ extends Node
 ## Use signals to react to state changes rather than polling.
 
 signal currency_changed(new_amount: int, delta: int)
-signal layer_changed(new_layer: int)
+signal chapter_changed(new_chapter: int)
 signal game_state_changed(state: int)
 
 enum State { MENU, PLAYING, PAUSED, GAME_OVER }
@@ -17,9 +17,12 @@ enum State { MENU, PLAYING, PAUSED, GAME_OVER }
 		if is_inside_tree():
 			EventBus.currency_changed.emit(currency, delta)
 
-@export var current_layer: int = 1
+@export var current_chapter: int = 1
 @export var kills: int = 0
 @export var level: int = 1  # Display only - represents run progression
+
+# Elapsed game time tracking
+var elapsed_time: float = 0.0
 
 # Shop upgrade state
 var turret_damage_multiplier: float = 1.0
@@ -44,7 +47,11 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	EventBus.enemy_died.connect(_on_enemy_died)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	# Accumulate elapsed time during gameplay
+	if _state == State.PLAYING:
+		elapsed_time += delta
+	
 	if _state == State.PLAYING and InputManager.pause_toggle_action.is_triggered():
 		toggle_pause()
 	if _state == State.PLAYING and InputManager.time_scale_toggle_action.is_triggered():
@@ -121,8 +128,9 @@ func _reset_run_values() -> void:
 	relic_repair_multiplier = 1.0
 	relic_fire_rate_multiplier = 1.0
 	kills = 0
-	current_layer = 1
+	current_chapter = 1
 	level = 1
+	elapsed_time = 0.0
 	_reset_speed_2x()
 
 func _restore_ship_health() -> void:
@@ -200,10 +208,10 @@ func upgrade_turret_type(type_id: StringName, amount: float = 0.05) -> void:
 	# 通知所有炮塔刷新属性
 	EventBus.turret_stats_refresh_requested.emit()
 
-func advance_layer() -> void:
-	current_layer += 1
-	level = current_layer
-	layer_changed.emit(current_layer)
+func advance_chapter() -> void:
+	current_chapter += 1
+	level = current_chapter
+	chapter_changed.emit(current_chapter)
 
 func _on_enemy_died(_enemy: Node2D, _position: Vector2, _reward: int) -> void:
 	if _state == State.PLAYING:

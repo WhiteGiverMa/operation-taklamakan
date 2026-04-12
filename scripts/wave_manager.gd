@@ -135,12 +135,12 @@ func _get_state_name(state: State) -> String:
 
 # Combat Session Management
 
-func start_combat_session(layer: int = 1) -> void:
-	_wave_sequence = _get_wave_sequence_for_layer(layer)
+func start_combat_session(chapter: int = 1) -> void:
+	_wave_sequence = _get_wave_sequence_for_chapter(chapter)
 	total_waves = _wave_sequence.size()
 	_session_progress_wave = 0
 	_current_wave_number = 0
-	print("WaveManager: Starting combat session for layer ", layer, " with ", total_waves, " waves")
+	print("WaveManager: Starting combat session for chapter ", chapter, " with ", total_waves, " waves")
 	_find_spawn_points()
 	current_wave = 0
 	set_state(State.BETWEEN_WAVES)
@@ -225,9 +225,9 @@ func _complete_all_waves() -> void:
 	all_waves_completed.emit()
 	EventBus.wave_all_complete.emit()
 	
-	# Check for victory condition: Layer 3 (index 2) boss defeated
-	# MapManager uses 0-based layers: 0=layer1, 1=layer2, 2=layer3
-	if MapManager.current_layer >= 2:
+	# Check for victory condition: Chapter 3 (index 2) boss defeated
+	# MapManager uses 0-based chapters: 0=chapter1, 1=chapter2, 2=chapter3
+	if MapManager.current_chapter >= 2:
 		await get_tree().create_timer(1.0).timeout
 		GameState.end_game(true)
 
@@ -343,8 +343,8 @@ func _populate_spawn_queue() -> void:
 	# Shuffle spawn queue for variety
 	_spawn_queue.shuffle()
 
-func _get_wave_sequence_for_layer(layer: int) -> Array[int]:
-	match layer:
+func _get_wave_sequence_for_chapter(chapter: int) -> Array[int]:
+	match chapter:
 		1:
 			return [1, 2]
 		2:

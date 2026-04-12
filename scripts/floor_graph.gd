@@ -30,9 +30,9 @@ const TYPE_ROLLS := [
 ]
 
 var map_seed: int = 0
-var layers: Array[Array] = []
-var layer_rows: Array[Array] = []
-var current_layer: int = 0
+var chapters: Array[Array] = []
+var chapter_rows: Array[Array] = []
+var current_chapter: int = 0
 var current_node: Variant = null
 var visited_nodes: Array[String] = []
 
@@ -42,36 +42,36 @@ var _node_lookup: Dictionary = {}
 func generate(new_seed: int) -> void:
 	map_seed = new_seed
 	_rng.seed = map_seed
-	layers.clear()
-	layer_rows.clear()
+	chapters.clear()
+	chapter_rows.clear()
 	_node_lookup.clear()
 	visited_nodes.clear()
-	current_layer = 0
+	current_chapter = 0
 	current_node = null
 
-	for layer_index in range(FLOOR_COUNT):
-		_generate_layer(layer_index)
+	for chapter_index in range(FLOOR_COUNT):
+		_generate_chapter(chapter_index)
 
 	var start_node: Variant = get_start_node(0)
 	if start_node != null:
 		mark_node_visited(start_node.id)
 
-func _generate_layer(layer_index: int) -> void:
+func _generate_chapter(chapter_index: int) -> void:
 	var target_count := _rng.randi_range(MIN_NODES_PER_LAYER, MAX_NODES_PER_LAYER)
 	var row_counts := _build_row_counts(target_count)
-	var layer_nodes: Array = []
+	var chapter_nodes: Array = []
 	var rows: Array[Array] = []
-	var floor_y_offset := float(layer_index) * FLOOR_VERTICAL_GAP
+	var floor_y_offset := float(chapter_index) * FLOOR_VERTICAL_GAP
 
 	var start_node: Variant = _create_node(
-		layer_index,
+		chapter_index,
 		0,
 		0,
 		Vector2(LAYER_WIDTH * 0.5, floor_y_offset),
 		MapNodeScript.TYPE_START
 	)
 	rows.append([start_node])
-	layer_nodes.append(start_node)
+	chapter_nodes.append(start_node)
 
 	for row_index in range(row_counts.size()):
 		var row_number := row_index + 1
@@ -88,28 +88,28 @@ func _generate_layer(layer_index: int) -> void:
 				row_y + jitter_y
 			)
 			var node: Variant = _create_node(
-				layer_index,
+				chapter_index,
 				row_number,
 				column_index,
 				position,
 				_draw_node_type()
 			)
 			row_nodes.append(node)
-			layer_nodes.append(node)
+			chapter_nodes.append(node)
 		rows.append(row_nodes)
 
-	var terminal_type := MapNodeScript.TYPE_BOSS if layer_index == FLOOR_COUNT - 1 else MapNodeScript.TYPE_END
+	var terminal_type := MapNodeScript.TYPE_BOSS if chapter_index == FLOOR_COUNT - 1 else MapNodeScript.TYPE_END
 	var terminal_row_index := rows.size()
 	var terminal_position := Vector2(LAYER_WIDTH * 0.5, floor_y_offset + float(terminal_row_index) * ROW_VERTICAL_SPACING)
-	var terminal_node: Variant = _create_node(layer_index, terminal_row_index, 0, terminal_position, terminal_type)
+	var terminal_node: Variant = _create_node(chapter_index, terminal_row_index, 0, terminal_position, terminal_type)
 	rows.append([terminal_node])
-	layer_nodes.append(terminal_node)
+	chapter_nodes.append(terminal_node)
 
 	_connect_rows(rows)
 	_ensure_all_nodes_have_path(rows)
 
-	layers.append(layer_nodes)
-	layer_rows.append(rows)
+	chapters.append(chapter_nodes)
+	chapter_rows.append(rows)
 
 func _build_row_counts(target_count: int) -> Array[int]:
 	var intermediate_total := target_count - 2
@@ -207,14 +207,14 @@ func _connect_nodes(source_node, target_node) -> void:
 	target_node.add_incoming_connection(source_node.id)
 
 func _create_node(
-	layer_index: int,
+	chapter_index: int,
 	row_index: int,
 	column_index: int,
 	position: Vector2,
 	node_type: int
 ) -> Variant:
-	var node_id: String = "L%s_R%s_C%s" % [layer_index, row_index, column_index]
-	var node: Variant = MapNodeScript.new(node_id, layer_index, row_index, column_index, position, node_type)
+	var node_id: String = "L%s_R%s_C%s" % [chapter_index, row_index, column_index]
+	var node: Variant = MapNodeScript.new(node_id, chapter_index, row_index, column_index, position, node_type)
 	_node_lookup[node_id] = node
 	return node
 
@@ -227,14 +227,14 @@ func _draw_node_type() -> int:
 			return entry.type
 	return MapNodeScript.TYPE_COMBAT
 
-func get_start_node(layer_index: int) -> Variant:
-	var row := get_layer_rows(layer_index)
+func get_start_node(chapter_index: int) -> Variant:
+	var row := get_chapter_rows(chapter_index)
 	if row.is_empty() or row[0].is_empty():
 		return null
 	return row[0][0]
 
-func get_terminal_node(layer_index: int) -> Variant:
-	var rows := get_layer_rows(layer_index)
+func get_terminal_node(chapter_index: int) -> Variant:
+	var rows := get_chapter_rows(chapter_index)
 	if rows.is_empty():
 		return null
 	var last_row: Array = rows[rows.size() - 1]
@@ -242,15 +242,15 @@ func get_terminal_node(layer_index: int) -> Variant:
 		return null
 	return last_row[0]
 
-func get_layer_rows(layer_index: int) -> Array[Array]:
-	if layer_index < 0 or layer_index >= layer_rows.size():
+func get_chapter_rows(chapter_index: int) -> Array[Array]:
+	if chapter_index < 0 or chapter_index >= chapter_rows.size():
 		return []
-	return layer_rows[layer_index]
+	return chapter_rows[chapter_index]
 
-func get_layer_nodes(layer_index: int) -> Array:
-	if layer_index < 0 or layer_index >= layers.size():
+func get_chapter_nodes(chapter_index: int) -> Array:
+	if chapter_index < 0 or chapter_index >= chapters.size():
 		return []
-	return layers[layer_index]
+	return chapters[chapter_index]
 
 func get_node(node_id: String) -> Variant:
 	return _node_lookup.get(node_id, null)
@@ -263,16 +263,16 @@ func mark_node_visited(node_id: String) -> Variant:
 		visited_nodes.append(node_id)
 	node.set_visited(true)
 	current_node = node
-	current_layer = node.layer_index
+	current_chapter = node.chapter_index
 	return node
 
-func get_reachable_node_ids(layer_index: int = -1) -> Array[String]:
+func get_reachable_node_ids(chapter_index: int = -1) -> Array[String]:
 	var result: Array[String] = []
 	var queue: Array[String] = []
 	var seen: Dictionary = {}
 
-	if layer_index >= 0:
-		var start_node: Variant = get_start_node(layer_index)
+	if chapter_index >= 0:
+		var start_node: Variant = get_start_node(chapter_index)
 		if start_node == null:
 			return result
 		queue.append(start_node.id)
@@ -299,25 +299,25 @@ func get_reachable_node_ids(layer_index: int = -1) -> Array[String]:
 
 func reset_progress() -> void:
 	visited_nodes.clear()
-	current_layer = 0
+	current_chapter = 0
 	current_node = get_start_node(0)
 	for node in _node_lookup.values():
 		node.visited = false
 
 func to_dictionary() -> Dictionary:
-	var serialized_layers: Array = []
-	for layer_index in range(layers.size()):
+	var serialized_chapters: Array = []
+	for chapter_index in range(chapters.size()):
 		var serialized_nodes: Array = []
-		for node in layers[layer_index]:
+		for node in chapters[chapter_index]:
 			serialized_nodes.append(node.to_dictionary())
-		serialized_layers.append(serialized_nodes)
+		serialized_chapters.append(serialized_nodes)
 
 	return {
 		"seed": map_seed,
-		"current_layer": current_layer,
+		"current_chapter": current_chapter,
 		"current_node": current_node.id if current_node != null else "",
 		"visited_nodes": visited_nodes.duplicate(),
-		"layers": serialized_layers,
+		"chapters": serialized_chapters,
 	}
 
 func serialize() -> String:

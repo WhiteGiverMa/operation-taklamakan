@@ -8,7 +8,7 @@ const MapNodeScript := preload("res://scripts/map_node.gd")
 signal map_generated(seed: int, graph)
 signal current_node_changed(node)
 signal node_visited(node)
-signal layer_changed(new_layer: int)
+signal chapter_changed(new_chapter: int)
 signal map_reset()
 
 enum EncounterType {
@@ -22,7 +22,7 @@ enum EncounterType {
 @export var default_seed: int = 12345
 
 var graph = null
-var current_layer: int = 0
+var current_chapter: int = 0
 var current_node = null
 var visited_nodes: Array[String] = []
 var last_seed: int = 0
@@ -52,37 +52,37 @@ func visit_node(node_id: String):
 		MapNodeScript.TYPE_SHOP:
 			EventBus.shop_entered.emit()
 		MapNodeScript.TYPE_END, MapNodeScript.TYPE_BOSS:
-			EventBus.layer_completed.emit(node.layer_index + 1)
+			EventBus.chapter_completed.emit(node.chapter_index + 1)
 		_:
 			EventBus.node_entered.emit(node.get_type_name())
 
 	return node
 
-func advance_to_next_layer():
+func advance_to_next_chapter():
 	if current_node == null or not current_node.is_terminal():
 		return current_node
 
-	var next_layer := mini(current_node.layer_index + 1, 2)
-	current_layer = next_layer
-	layer_changed.emit(current_layer)
+	var next_chapter := mini(current_node.chapter_index + 1, 2)
+	current_chapter = next_chapter
+	chapter_changed.emit(current_chapter)
 
 	if current_node.type == MapNodeScript.TYPE_BOSS:
 		return current_node
 
-	var next_start: Variant = graph.call("get_start_node", next_layer)
+	var next_start: Variant = graph.call("get_start_node", next_chapter)
 	if next_start != null:
 		return visit_node(next_start.id)
 	return null
 
-func go_to_layer_start(layer_index: int):
+func go_to_chapter_start(chapter_index: int):
 	if graph == null:
 		return null
 
-	var clamped_layer := clampi(layer_index, 0, 2)
-	current_layer = clamped_layer
-	layer_changed.emit(current_layer)
+	var clamped_chapter := clampi(chapter_index, 0, 2)
+	current_chapter = clamped_chapter
+	chapter_changed.emit(current_chapter)
 
-	var start_node: Variant = graph.call("get_start_node", clamped_layer)
+	var start_node: Variant = graph.call("get_start_node", clamped_chapter)
 	if start_node != null:
 		return visit_node(start_node.id)
 	return null
@@ -108,7 +108,7 @@ func get_current_choices() -> Array:
 	return choices
 
 func _sync_state_from_graph() -> void:
-	current_layer = int(graph.get("current_layer"))
+	current_chapter = int(graph.get("current_chapter"))
 	current_node = graph.get("current_node")
 	visited_nodes = (graph.get("visited_nodes") as Array[String]).duplicate()
 

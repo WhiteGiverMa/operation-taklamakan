@@ -135,7 +135,7 @@ func _connect_signals() -> void:
 	EventBus.relic_purchased.connect(_on_relic_purchased)
 	EventBus.ship_health_changed.connect(_on_ship_health_changed)
 	MapManager.current_node_changed.connect(_on_map_changed)
-	MapManager.layer_changed.connect(_on_map_layer_changed)
+	MapManager.chapter_changed.connect(_on_map_chapter_changed)
 	MapManager.map_generated.connect(_on_map_generated)
 
 	if _wave_manager:
@@ -520,7 +520,7 @@ func _update_map_page() -> void:
 	var graph = MapManager.get_graph()
 	var visited_count := MapManager.visited_nodes.size()
 	map_overview_label.text = Localization.t("info.map.overview", "", {
-		"layer": MapManager.current_layer + 1,
+		"chapter": MapManager.current_chapter + 1,
 		"visited": visited_count,
 	})
 	map_current_node_label.text = Localization.t("info.map.current_node", "", {
@@ -539,16 +539,16 @@ func _update_map_page() -> void:
 		map_list.add_child(empty_label)
 		return
 
-	for layer_index in range(3):
-		map_list.add_child(_create_map_layer_row(layer_index, graph.get_layer_nodes(layer_index)))
+	for chapter_index in range(3):
+		map_list.add_child(_create_map_chapter_row(chapter_index, graph.get_chapter_nodes(chapter_index)))
 
-func _create_map_layer_row(layer_index: int, layer_nodes: Array) -> VBoxContainer:
+func _create_map_chapter_row(chapter_index: int, chapter_nodes: Array) -> VBoxContainer:
 	var container := VBoxContainer.new()
 	container.add_theme_constant_override("separation", 6)
 	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var title := Label.new()
-	title.text = Localization.t("info.map.layer_title", "", {"layer": layer_index + 1})
+	title.text = Localization.t("info.map.chapter_title", "", {"chapter": chapter_index + 1})
 	title.add_theme_font_size_override("font_size", 21)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	container.add_child(title)
@@ -556,16 +556,16 @@ func _create_map_layer_row(layer_index: int, layer_nodes: Array) -> VBoxContaine
 	var body := Label.new()
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.text = _build_layer_summary_text(layer_nodes)
+	body.text = _build_chapter_summary_text(chapter_nodes)
 	container.add_child(body)
 
 	return container
 
-func _build_layer_summary_text(layer_nodes: Array) -> String:
-	if layer_nodes.is_empty():
+func _build_chapter_summary_text(chapter_nodes: Array) -> String:
+	if chapter_nodes.is_empty():
 		return Localization.t("info.map.none")
 	var parts: Array[String] = []
-	for node in layer_nodes:
+	for node in chapter_nodes:
 		parts.append("%s · %s" % [_get_node_display_name(node), _get_node_state_text(node)])
 	return "\n".join(parts)
 
@@ -705,7 +705,7 @@ func _on_ship_health_changed(_current: float, _maximum: float) -> void:
 func _on_map_changed(_node) -> void:
 	_on_runtime_state_changed()
 
-func _on_map_layer_changed(_new_layer: int) -> void:
+func _on_map_chapter_changed(_new_chapter: int) -> void:
 	_on_runtime_state_changed()
 
 func _on_map_generated(_seed: int, _graph) -> void:

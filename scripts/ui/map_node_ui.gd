@@ -46,7 +46,7 @@ var node_position: Vector2 = Vector2.ZERO
 var is_visited: bool = false
 var is_reachable: bool = false
 var is_selected: bool = false
-var layer_index: int = 0
+var chapter_index: int = 0
 
 var _circle_texture: ImageTexture
 
@@ -64,7 +64,7 @@ func setup(node: Variant) -> void:
 	node_type = node.type
 	node_position = node.position
 	is_visited = node.visited
-	layer_index = node.layer_index
+	chapter_index = node.chapter_index
 	
 	# Set position (will be adjusted by parent container)
 	position = node_position - Vector2(node_radius, node_radius)
