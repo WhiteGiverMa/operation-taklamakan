@@ -144,6 +144,11 @@
   "info.map.state.visited": "已探索",
   "info.map.state.reachable": "可达",
   "info.map.state.locked": "未解锁",
+  "info.sidebar.title": "综合情报",
+  "info.sidebar.close": "关闭",
+  "info.sidebar.cycle_tabs": "Q/E 切换标签页",
+  "info.map.read_only_hint": "查看模式：可拖拽平移，滚轮缩放",
+  "info.map.zoom_reset": "重置缩放",
 
   "game_over.victory": "胜利",
   "game_over.defeat": "失败",

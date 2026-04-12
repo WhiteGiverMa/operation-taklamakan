@@ -144,6 +144,11 @@
   "info.map.state.visited": "Explored",
   "info.map.state.reachable": "Reachable",
   "info.map.state.locked": "Locked",
+  "info.sidebar.title": "Intel Panel",
+  "info.sidebar.close": "Close",
+  "info.sidebar.cycle_tabs": "Q/E to cycle tabs",
+  "info.map.read_only_hint": "View Mode: Drag to pan, scroll to zoom",
+  "info.map.zoom_reset": "Reset Zoom",
 
   "game_over.victory": "VICTORY",
   "game_over.defeat": "DEFEAT",

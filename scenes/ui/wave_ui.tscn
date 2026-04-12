@@ -21,89 +21,130 @@ grow_vertical = 2
 mouse_filter = 1
 color = Color(0.03, 0.04, 0.08, 0.78)
 
-[node name="Panel" type="PanelContainer" parent="Backdrop"]
+[node name="MainContainer" type="HSplitContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -520.0
-offset_top = -320.0
-offset_right = 520.0
-offset_bottom = 320.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = 280
+collapsed = false
+
+[node name="Sidebar" type="Control" parent="MainContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="SidebarContent" type="MarginContainer" parent="MainContainer/Sidebar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Root" type="VBoxContainer" parent="MainContainer/Sidebar/SidebarContent"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="TopBar" type="VBoxContainer" parent="MainContainer/Sidebar/SidebarContent/Root"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleBlock" type="VBoxContainer" parent="MainContainer/Sidebar/SidebarContent/Root/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="MainContainer/Sidebar/SidebarContent/Root/TopBar/TitleBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = ""
+
+[node name="StateLabel" type="Label" parent="MainContainer/Sidebar/SidebarContent/Root/TopBar/TitleBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = ""
+modulate = Color(0.85, 0.89, 1, 1)
+
+[node name="TabBar" type="VBoxContainer" parent="MainContainer/Sidebar/SidebarContent/Root"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MaintenanceTabButton" type="Button" parent="MainContainer/Sidebar/SidebarContent/Root/TabBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 42)
+text = ""
+
+[node name="RelicsTabButton" type="Button" parent="MainContainer/Sidebar/SidebarContent/Root/TabBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 42)
+text = ""
+
+[node name="MapTabButton" type="Button" parent="MainContainer/Sidebar/SidebarContent/Root/TabBar"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 42)
+text = ""
+
+[node name="HintLabel" type="Label" parent="MainContainer/Sidebar/SidebarContent/Root"]
+layout_mode = 2
+text = "Q/E 切换标签页"
+autowrap_mode = 3
+modulate = Color(0.84, 0.87, 0.97, 1)
+
+[node name="Spacer" type="Control" parent="MainContainer/Sidebar/SidebarContent/Root"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CloseButton" type="Button" parent="MainContainer/Sidebar/SidebarContent/Root/Spacer"]
+custom_minimum_size = Vector2(96, 40)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+text = ""
+
+[node name="ContentArea" type="Control" parent="MainContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Panel" type="PanelContainer" parent="MainContainer/ContentArea"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="Backdrop/Panel"]
+[node name="MarginContainer" type="MarginContainer" parent="MainContainer/ContentArea/Panel"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 20
 
-[node name="Root" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="TopBar" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/Root"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="TitleBlock" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/TopBar"]
+[node name="PageContainer" type="Control" parent="MainContainer/ContentArea/Panel/MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
-
-[node name="TitleLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/TopBar/TitleBlock"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = ""
-
-[node name="StateLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/TopBar/TitleBlock"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = ""
-modulate = Color(0.85, 0.89, 1, 1)
-
-[node name="CloseButton" type="Button" parent="Backdrop/Panel/MarginContainer/Root/TopBar"]
-layout_mode = 2
-custom_minimum_size = Vector2(96, 40)
-text = ""
-
-[node name="TabBar" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/Root"]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="MaintenanceTabButton" type="Button" parent="Backdrop/Panel/MarginContainer/Root/TabBar"]
-layout_mode = 2
-custom_minimum_size = Vector2(180, 42)
-text = ""
-
-[node name="RelicsTabButton" type="Button" parent="Backdrop/Panel/MarginContainer/Root/TabBar"]
-layout_mode = 2
-custom_minimum_size = Vector2(180, 42)
-text = ""
-
-[node name="MapTabButton" type="Button" parent="Backdrop/Panel/MarginContainer/Root/TabBar"]
-layout_mode = 2
-custom_minimum_size = Vector2(180, 42)
-text = ""
-
-[node name="PageContainer" type="MarginContainer" parent="Backdrop/Panel/MarginContainer/Root"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="MaintenancePage" type="Control" parent="Backdrop/Panel/MarginContainer/Root/PageContainer"]
-layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Scroll" type="ScrollContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage"]
+[node name="MaintenancePage" type="Control" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Scroll" type="ScrollContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -112,97 +153,101 @@ grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
 
-[node name="Margin" type="MarginContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll"]
+[node name="Margin" type="MarginContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll"]
 layout_mode = 2
 theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 6
 
-[node name="Content" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin"]
+[node name="Content" type="VBoxContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="WaveLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="WaveLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = ""
 
-[node name="StatusLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="StatusLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = ""
 
-[node name="TimerLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="TimerLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 text = ""
 autowrap_mode = 3
 
-[node name="EnemyInfoLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="EnemyInfoLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 text = ""
 autowrap_mode = 3
 
-[node name="ShipHealthLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="ShipHealthLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = ""
 
-[node name="ShipHealthBar" type="ProgressBar" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="ShipHealthBar" type="ProgressBar" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 max_value = 100.0
 value = 100.0
 show_percentage = false
 
-[node name="UpgradeCurrencyLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="UpgradeCurrencyLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 text = ""
 
-[node name="MaintenanceHintLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="MaintenanceHintLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 text = ""
 autowrap_mode = 3
 modulate = Color(0.84, 0.87, 0.97, 1)
 
-[node name="ButtonContainer" type="HBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="ButtonContainer" type="HBoxContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="ContinueButton" type="Button" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer"]
+[node name="ContinueButton" type="Button" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(140, 44)
 text = ""
 
-[node name="RepairButton" type="Button" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer"]
+[node name="RepairButton" type="Button" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(140, 44)
 text = ""
 
-[node name="UpgradeButton" type="Button" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer"]
+[node name="UpgradeButton" type="Button" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(140, 44)
 text = ""
 
-[node name="UpgradeSection" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content"]
+[node name="UpgradeSection" type="VBoxContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content"]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="UpgradeTitleLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection"]
+[node name="UpgradeTitleLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = ""
 
-[node name="UpgradeList" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection"]
+[node name="UpgradeList" type="VBoxContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="RelicsPage" type="Control" parent="Backdrop/Panel/MarginContainer/Root/PageContainer"]
+[node name="RelicsPage" type="Control" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer"]
 visible = false
-layout_mode = 2
-size_flags_vertical = 3
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Scroll" type="ScrollContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage"]
+[node name="Scroll" type="ScrollContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -211,32 +256,36 @@ grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
 
-[node name="Margin" type="MarginContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage/Scroll"]
+[node name="Margin" type="MarginContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage/Scroll"]
 layout_mode = 2
 theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 6
 
-[node name="Content" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage/Scroll/Margin"]
+[node name="Content" type="VBoxContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage/Scroll/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="RelicSummaryLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage/Scroll/Margin/Content"]
+[node name="RelicSummaryLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage/Scroll/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = ""
 
-[node name="RelicList" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage/Scroll/Margin/Content"]
+[node name="RelicList" type="VBoxContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage/Scroll/Margin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="MapPage" type="Control" parent="Backdrop/Panel/MarginContainer/Root/PageContainer"]
+[node name="MapPage" type="Control" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer"]
 visible = false
-layout_mode = 2
-size_flags_vertical = 3
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Scroll" type="ScrollContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage"]
+[node name="Scroll" type="ScrollContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -245,32 +294,32 @@ grow_horizontal = 2
 grow_vertical = 2
 horizontal_scroll_mode = 0
 
-[node name="Margin" type="MarginContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll"]
+[node name="Margin" type="MarginContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll"]
 layout_mode = 2
 theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 6
 
-[node name="Content" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin"]
+[node name="Content" type="VBoxContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="MapOverviewLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content"]
+[node name="MapOverviewLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = ""
 
-[node name="MapCurrentNodeLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content"]
+[node name="MapCurrentNodeLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content"]
 layout_mode = 2
 text = ""
 autowrap_mode = 3
 
-[node name="MapChoicesLabel" type="Label" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content"]
+[node name="MapChoicesLabel" type="Label" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content"]
 layout_mode = 2
 text = ""
 autowrap_mode = 3
 
-[node name="MapList" type="VBoxContainer" parent="Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content"]
+[node name="MapList" type="VBoxContainer" parent="MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content"]
 layout_mode = 2
 theme_override_constants/separation = 12

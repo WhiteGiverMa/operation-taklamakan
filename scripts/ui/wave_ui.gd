@@ -47,39 +47,41 @@ enum InfoTab {
 	MAP,
 }
 
-@onready var title_label: Label = $Backdrop/Panel/MarginContainer/Root/TopBar/TitleBlock/TitleLabel
-@onready var state_label: Label = $Backdrop/Panel/MarginContainer/Root/TopBar/TitleBlock/StateLabel
-@onready var maintenance_tab_button: Button = $Backdrop/Panel/MarginContainer/Root/TabBar/MaintenanceTabButton
-@onready var relics_tab_button: Button = $Backdrop/Panel/MarginContainer/Root/TabBar/RelicsTabButton
-@onready var map_tab_button: Button = $Backdrop/Panel/MarginContainer/Root/TabBar/MapTabButton
-@onready var close_button: Button = $Backdrop/Panel/MarginContainer/Root/TopBar/CloseButton
-@onready var maintenance_page: Control = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage
-@onready var relics_page: Control = $Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage
-@onready var map_page: Control = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage
+const MapScreenScene := preload("res://scenes/ui/map_screen.tscn")
 
-@onready var wave_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/WaveLabel
-@onready var status_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/StatusLabel
-@onready var timer_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/TimerLabel
-@onready var enemy_info_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/EnemyInfoLabel
-@onready var ship_health_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ShipHealthLabel
-@onready var ship_health_bar: ProgressBar = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ShipHealthBar
-@onready var upgrade_currency_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeCurrencyLabel
-@onready var maintenance_hint_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/MaintenanceHintLabel
-@onready var button_container: HBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer
-@onready var continue_button: Button = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/ContinueButton
-@onready var repair_button: Button = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/RepairButton
-@onready var upgrade_button: Button = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/UpgradeButton
-@onready var upgrade_section: VBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection
-@onready var upgrade_title_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection/UpgradeTitleLabel
-@onready var upgrade_list: VBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection/UpgradeList
+@onready var title_label: Label = $MainContainer/Sidebar/SidebarContent/Root/TopBar/TitleBlock/TitleLabel
+@onready var state_label: Label = $MainContainer/Sidebar/SidebarContent/Root/TopBar/TitleBlock/StateLabel
+@onready var maintenance_tab_button: Button = $MainContainer/Sidebar/SidebarContent/Root/TabBar/MaintenanceTabButton
+@onready var relics_tab_button: Button = $MainContainer/Sidebar/SidebarContent/Root/TabBar/RelicsTabButton
+@onready var map_tab_button: Button = $MainContainer/Sidebar/SidebarContent/Root/TabBar/MapTabButton
+@onready var close_button: Button = $MainContainer/Sidebar/SidebarContent/Root/Spacer/CloseButton
+@onready var maintenance_page: Control = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage
+@onready var relics_page: Control = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage
+@onready var map_page: Control = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage
 
-@onready var relic_summary_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage/Scroll/Margin/Content/RelicSummaryLabel
-@onready var relic_list: VBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/RelicsPage/Scroll/Margin/Content/RelicList
+@onready var wave_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/WaveLabel
+@onready var status_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/StatusLabel
+@onready var timer_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/TimerLabel
+@onready var enemy_info_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/EnemyInfoLabel
+@onready var ship_health_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ShipHealthLabel
+@onready var ship_health_bar: ProgressBar = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ShipHealthBar
+@onready var upgrade_currency_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeCurrencyLabel
+@onready var maintenance_hint_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/MaintenanceHintLabel
+@onready var button_container: HBoxContainer = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer
+@onready var continue_button: Button = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/ContinueButton
+@onready var repair_button: Button = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/RepairButton
+@onready var upgrade_button: Button = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/UpgradeButton
+@onready var upgrade_section: VBoxContainer = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection
+@onready var upgrade_title_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection/UpgradeTitleLabel
+@onready var upgrade_list: VBoxContainer = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeSection/UpgradeList
 
-@onready var map_overview_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content/MapOverviewLabel
-@onready var map_current_node_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content/MapCurrentNodeLabel
-@onready var map_choices_label: Label = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content/MapChoicesLabel
-@onready var map_list: VBoxContainer = $Backdrop/Panel/MarginContainer/Root/PageContainer/MapPage/Scroll/Margin/Content/MapList
+@onready var relic_summary_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage/Scroll/Margin/Content/RelicSummaryLabel
+@onready var relic_list: VBoxContainer = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage/Scroll/Margin/Content/RelicList
+
+@onready var map_overview_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content/MapOverviewLabel
+@onready var map_current_node_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content/MapCurrentNodeLabel
+@onready var map_choices_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content/MapChoicesLabel
+@onready var map_list: VBoxContainer = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content/MapList
 
 var _wave_manager: Node = null
 var _is_visible: bool = false
@@ -87,6 +89,7 @@ var _combat_visible: bool = false
 var _upgrade_section_open: bool = false
 var _current_tab: InfoTab = InfoTab.MAINTENANCE
 var _panel_paused_tree: bool = false
+var _embedded_map: Control = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -107,6 +110,12 @@ func _process(_delta: float) -> void:
 	if _is_visible and InputManager.ui_back_action.is_triggered():
 		_close_panel()
 		return
+	# Q/E 标签切换（仅在面板可见时）
+	if _is_visible:
+		if InputManager.info_tab_prev_action.is_triggered():
+			_cycle_tab(-1)
+		if InputManager.info_tab_next_action.is_triggered():
+			_cycle_tab(+1)
 
 func _connect_signals() -> void:
 	continue_button.pressed.connect(_on_continue_pressed)
@@ -197,10 +206,62 @@ func _on_tab_pressed(tab: InfoTab) -> void:
 	_update_tab_visibility()
 	_update_all_content()
 
+func _cycle_tab(direction: int) -> void:
+	var tabs := [InfoTab.MAINTENANCE, InfoTab.RELICS, InfoTab.MAP]
+	var current_index := tabs.find(_current_tab)
+	var new_index := wrapi(current_index + direction, 0, tabs.size())
+	_current_tab = tabs[new_index]
+	_update_tab_visibility()
+	_update_tab_buttons()
+
+	# 切换到地图页时确保嵌入地图存在并刷新
+	if _current_tab == InfoTab.MAP:
+		_ensure_embedded_map()
+		if _embedded_map:
+			_embedded_map.recenter_view.call_deferred()
+
+func _ensure_embedded_map() -> void:
+	# 如果已存在，直接显示
+	if _embedded_map != null:
+		_embedded_map.visible = true
+		return
+
+	# 实例化地图场景
+	var map_instance := MapScreenScene.instantiate()
+
+	# 配置只读模式
+	var map_screen: Control = map_instance.get_node("MapScreen") if map_instance.has_node("MapScreen") else map_instance
+	map_screen.set_read_only_mode(true)
+	map_screen.set_show_overlay_ui(false)
+	map_screen.allow_pan_in_read_only = true  # 允许只读模式平移
+
+	# 设置全屏填充
+	map_instance.set_anchors_preset(Control.PRESET_FULL_RECT)
+	map_instance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	map_instance.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	# 添加到地图页容器
+	map_page.add_child(map_instance)
+	_embedded_map = map_screen
+
+	# 延迟一帧后居中（确保容器尺寸有效）
+	map_screen.recenter_view.call_deferred()
+
 func _update_tab_visibility() -> void:
 	maintenance_page.visible = _current_tab == InfoTab.MAINTENANCE
 	relics_page.visible = _current_tab == InfoTab.RELICS
 	map_page.visible = _current_tab == InfoTab.MAP
+	_update_tab_buttons()
+
+	# 切换到地图页时确保嵌入地图存在
+	if _current_tab == InfoTab.MAP:
+		_ensure_embedded_map()
+
+	# 隐藏嵌入地图当不在地图页时
+	if _embedded_map != null and _current_tab != InfoTab.MAP:
+		_embedded_map.visible = false
+
+func _update_tab_buttons() -> void:
 	_update_tab_button_state(maintenance_tab_button, _current_tab == InfoTab.MAINTENANCE)
 	_update_tab_button_state(relics_tab_button, _current_tab == InfoTab.RELICS)
 	_update_tab_button_state(map_tab_button, _current_tab == InfoTab.MAP)
