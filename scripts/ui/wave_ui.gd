@@ -233,6 +233,8 @@ func _ensure_embedded_map() -> void:
 
 	# 配置只读模式
 	var map_screen: Control = map_instance.get_node("MapScreen") if map_instance.has_node("MapScreen") else map_instance
+	
+	# 先设置只读模式，再添加到场景树，避免实例化瞬间 UILayer 抢焦点
 	map_screen.set_read_only_mode(true)
 	map_screen.set_show_overlay_ui(false)
 	map_screen.allow_pan_in_read_only = true  # 允许只读模式平移

@@ -373,8 +373,19 @@ func set_show_overlay_ui(value: bool) -> void:
 	_update_ui_layer_visibility()
 
 func _update_ui_layer_visibility() -> void:
-	if is_instance_valid($UILayer):
-		$UILayer.visible = show_overlay_ui and not read_only_mode
+	# 使用 get_node_or_null 支持在 add_child 之前调用（场景树外节点查找）
+	var ui_layer := get_node_or_null("UILayer")
+	if ui_layer == null:
+		return
+	
+	var should_show := show_overlay_ui and not read_only_mode
+	ui_layer.visible = should_show
+	
+	# 禁用 UILayer 中所有控件的焦点，避免嵌入模式下 Tab 键被抢走
+	# 这是 Godot 内置的焦点导航行为，必须在 visible=false 时同步禁用焦点
+	for child in ui_layer.get_children():
+		if child is Control:
+			child.focus_mode = Control.FOCUS_NONE if not should_show else Control.FOCUS_ALL
 
 func recenter_view() -> void:
 	_center_on_current_layer()
