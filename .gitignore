@@ -31,3 +31,11 @@ exports/
 
 # Agent Harness
 .sisyphus/
+
+# Backup files
+*.bak
+*.bak.*
+*~
+
+# Root-level MCP script (canonical copy is in addons/godot_mcp/)
+/mcp_interaction_server.gd
