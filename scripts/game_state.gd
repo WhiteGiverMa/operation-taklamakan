@@ -8,6 +8,7 @@ signal chapter_changed(new_chapter: int)
 signal game_state_changed(state: int)
 
 enum State { MENU, PLAYING, PAUSED, GAME_OVER }
+enum TimeMode { GAME_TIME, REAL_TIME }
 
 @export var currency: int = 50:
 	set(value):
@@ -23,6 +24,8 @@ enum State { MENU, PLAYING, PAUSED, GAME_OVER }
 
 # Elapsed game time tracking
 var elapsed_time: float = 0.0
+var real_elapsed_time: float = 0.0
+var time_mode: TimeMode = TimeMode.GAME_TIME
 
 # Shop upgrade state
 var turret_damage_multiplier: float = 1.0
@@ -42,14 +45,18 @@ var relic_fire_rate_multiplier: float = 1.0
 var turret_type_multipliers: Dictionary = {}
 
 var _state: State = State.MENU
+var _real_time_run_started_at_msec: int = 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	EventBus.enemy_died.connect(_on_enemy_died)
+	if SettingsManager:
+		set_time_mode(int(SettingsManager.time_mode))
 
 func _process(delta: float) -> void:
-	# Accumulate elapsed time during gameplay
-	if _state == State.PLAYING:
+	if has_active_run:
+		_update_real_elapsed_time()
+	if _should_accumulate_game_time():
 		elapsed_time += delta
 	
 	if _state == State.PLAYING and InputManager.pause_toggle_action.is_triggered():
@@ -65,12 +72,31 @@ func set_state(new_state: State) -> void:
 	game_state_changed.emit(_state)
 	EventBus.game_paused.emit(_state == State.PAUSED)
 
+func set_time_mode(new_mode: int) -> void:
+	if new_mode == TimeMode.REAL_TIME:
+		time_mode = TimeMode.REAL_TIME
+	else:
+		time_mode = TimeMode.GAME_TIME
+
+func get_elapsed_time() -> float:
+	if time_mode == TimeMode.REAL_TIME:
+		return real_elapsed_time
+	return elapsed_time
+
+func get_game_elapsed_time() -> float:
+	return elapsed_time
+
+func get_real_elapsed_time() -> float:
+	return real_elapsed_time
+
 func start_game() -> void:
 	_reset_run_values()
 	MapManager.reset_map()
 	WaveManager.end_combat_session()
 	_restore_ship_health()
 	has_active_run = true
+	_real_time_run_started_at_msec = Time.get_ticks_msec()
+	real_elapsed_time = 0.0
 	get_tree().paused = false
 	set_state(State.PLAYING)
 	EventBus.game_started.emit()
@@ -95,6 +121,7 @@ func toggle_pause() -> void:
 func end_game(won: bool) -> void:
 	if _state == State.GAME_OVER:
 		return
+	_update_real_elapsed_time()
 	_reset_speed_2x()
 	WaveManager.end_combat_session()
 	has_active_run = false
@@ -106,6 +133,8 @@ func reset_game() -> void:
 	start_game()
 
 func return_to_menu(preserve_run: bool = true) -> void:
+	if has_active_run:
+		_update_real_elapsed_time()
 	_reset_speed_2x()
 	has_active_run = has_active_run and preserve_run
 	set_state(State.MENU)
@@ -131,6 +160,8 @@ func _reset_run_values() -> void:
 	current_chapter = 1
 	level = 1
 	elapsed_time = 0.0
+	real_elapsed_time = 0.0
+	_real_time_run_started_at_msec = 0
 	_reset_speed_2x()
 
 func _restore_ship_health() -> void:
@@ -234,6 +265,16 @@ func toggle_speed_2x() -> void:
 func _is_combat_active() -> bool:
 	var wm_state := WaveManager.get_state()
 	return wm_state == WaveManager.State.ACTIVE_WAVE or wm_state == WaveManager.State.BETWEEN_WAVES
+
+func _should_accumulate_game_time() -> bool:
+	if _state != State.PLAYING:
+		return false
+	return _is_combat_active()
+
+func _update_real_elapsed_time() -> void:
+	if _real_time_run_started_at_msec <= 0:
+		return
+	real_elapsed_time = maxf(float(Time.get_ticks_msec() - _real_time_run_started_at_msec) / 1000.0, 0.0)
 
 ## 重置倍速状态到1x
 func _reset_speed_2x() -> void:

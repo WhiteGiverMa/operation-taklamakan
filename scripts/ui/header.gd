@@ -40,7 +40,7 @@ func _ready() -> void:
 	_initialize_state()
 	_apply_localization()
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if not visible:
 		return
 	_update_time_display()
@@ -95,7 +95,7 @@ func _initialize_state() -> void:
 		_total_waves = WaveManager.total_waves
 	
 	# 初始化时间
-	_elapsed_time = GameState.elapsed_time
+	_elapsed_time = GameState.get_elapsed_time()
 	
 	_refresh_all_displays()
 
@@ -196,8 +196,8 @@ func _update_floor_display() -> void:
 		_current_floor = 1
 
 func _update_time_display() -> void:
-	_elapsed_time = GameState.elapsed_time
-	var minutes := int(_elapsed_time) / 60
+	_elapsed_time = GameState.get_elapsed_time()
+	var minutes := int(_elapsed_time / 60.0)
 	var seconds := int(_elapsed_time) % 60
 	time_label.text = "%02d:%02d" % [minutes, seconds]
 

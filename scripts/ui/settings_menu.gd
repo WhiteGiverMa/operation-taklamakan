@@ -14,6 +14,8 @@ var _updating_ui := false
 @onready var window_mode_option: OptionButton = $Backdrop/Panel/MarginContainer/VBoxContainer/Content/WindowModeRow/WindowModeOption
 @onready var vsync_toggle: CheckButton = $Backdrop/Panel/MarginContainer/VBoxContainer/Content/VSyncRow/VSyncToggle
 @onready var gameplay_section_label: Label = $Backdrop/Panel/MarginContainer/VBoxContainer/Content/GameplaySectionLabel
+@onready var time_mode_label: Label = $Backdrop/Panel/MarginContainer/VBoxContainer/Content/TimeModeRow/TimeModeLabel
+@onready var time_mode_option: OptionButton = $Backdrop/Panel/MarginContainer/VBoxContainer/Content/TimeModeRow/TimeModeOption
 @onready var dev_mode_label: Label = $Backdrop/Panel/MarginContainer/VBoxContainer/Content/DevModeRow/DevModeLabel
 @onready var dev_mode_toggle: CheckButton = $Backdrop/Panel/MarginContainer/VBoxContainer/Content/DevModeRow/DevModeToggle
 @onready var manual_fire_mode_toggle: CheckButton = $Backdrop/Panel/MarginContainer/VBoxContainer/Content/ManualFireModeRow/ManualFireModeToggle
@@ -30,6 +32,7 @@ func _ready() -> void:
 	master_volume_slider.step = 1.0
 	language_option.item_selected.connect(_on_language_selected)
 	window_mode_option.item_selected.connect(_on_window_mode_selected)
+	time_mode_option.item_selected.connect(_on_time_mode_selected)
 	vsync_toggle.toggled.connect(_on_vsync_toggled)
 	dev_mode_toggle.toggled.connect(_on_dev_mode_toggled)
 	manual_fire_mode_toggle.toggled.connect(_on_manual_fire_mode_toggled)
@@ -55,6 +58,11 @@ func _on_window_mode_selected(index: int) -> void:
 	if _updating_ui:
 		return
 	SettingsManager.set_window_mode_setting(index)
+
+func _on_time_mode_selected(index: int) -> void:
+	if _updating_ui:
+		return
+	SettingsManager.set_time_mode_setting(index)
 
 func _on_vsync_toggled(toggled_on: bool) -> void:
 	if _updating_ui:
@@ -89,6 +97,7 @@ func _refresh_from_settings() -> void:
 	var language_index := LANGUAGE_OPTIONS.find(SettingsManager.language)
 	language_option.selected = max(language_index, 0)
 	window_mode_option.selected = int(SettingsManager.window_mode)
+	time_mode_option.selected = int(SettingsManager.time_mode)
 	vsync_toggle.button_pressed = SettingsManager.vsync_enabled
 	dev_mode_toggle.button_pressed = SettingsManager.dev_mode_enabled
 	manual_fire_mode_toggle.button_pressed = SettingsManager.manual_fire_full_auto
@@ -103,6 +112,7 @@ func _apply_localization() -> void:
 	window_mode_label.text = Localization.t("settings.window_mode")
 	vsync_toggle.text = Localization.t("settings.vsync")
 	gameplay_section_label.text = Localization.t("settings.gameplay_section")
+	time_mode_label.text = Localization.t("settings.time_mode")
 	dev_mode_label.text = "DevMode"
 	dev_mode_toggle.text = ""
 	manual_fire_mode_toggle.text = Localization.t("settings.manual_fire_full_auto")
@@ -110,6 +120,7 @@ func _apply_localization() -> void:
 	back_button.text = Localization.t("common.back")
 	_language_items()
 	_window_mode_items()
+	_time_mode_items()
 	_refresh_from_settings()
 
 func _language_items() -> void:
@@ -121,6 +132,11 @@ func _window_mode_items() -> void:
 	window_mode_option.clear()
 	window_mode_option.add_item(Localization.t("common.windowed"))
 	window_mode_option.add_item(Localization.t("common.fullscreen"))
+
+func _time_mode_items() -> void:
+	time_mode_option.clear()
+	time_mode_option.add_item(Localization.t("settings.time_mode.game"))
+	time_mode_option.add_item(Localization.t("settings.time_mode.real"))
 
 func _update_volume_label() -> void:
 	var percent := int(round(master_volume_slider.value))
