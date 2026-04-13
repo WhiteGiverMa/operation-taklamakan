@@ -34,6 +34,7 @@
 | `camera_zoom_out` | `InputManager.camera_zoom_out_action` | 相机缩小 |
 | `camera_zoom_reset` | `InputManager.camera_zoom_reset_action` | 相机重置 |
 | `input_hints_toggle` | `InputManager.input_hints_toggle_action` | 显示/隐藏输入提示 |
+| `wave_continue` | `InputManager.wave_continue_action` | 波间期继续下一波（Y 键） |
 
 ### 资源路径
 
@@ -52,7 +53,8 @@ res://resources/input/
 │   ├── camera_zoom_in.tres    # 放大（滚轮上/RT）
 │   ├── camera_zoom_out.tres   # 缩小（滚轮下/LT）
 │   ├── camera_zoom_reset.tres # 重置（中键点击/L3）
-│   └── input_hints_toggle.tres # 输入提示开关（O）
+│   ├── input_hints_toggle.tres # 输入提示开关（O）
+│   └── wave_continue.tres     # 波间期继续（Y）
 │
 └── contexts/
     ├── combat.tres            # 战斗玩法上下文

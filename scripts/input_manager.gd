@@ -33,6 +33,7 @@ const CAMERA_ZOOM_RESET_ACTION := preload("res://resources/input/actions/camera_
 const TIME_SCALE_TOGGLE_ACTION := preload("res://resources/input/actions/time_scale_toggle.tres")
 const INFO_TAB_PREV_ACTION := preload("res://resources/input/actions/info_tab_prev.tres")
 const INFO_TAB_NEXT_ACTION := preload("res://resources/input/actions/info_tab_next.tres")
+const WAVE_CONTINUE_ACTION := preload("res://resources/input/actions/wave_continue.tres")
 
 const COMBAT_CONTEXT := preload("res://resources/input/contexts/combat.tres")
 const TURRET_MANUAL_CONTEXT := preload("res://resources/input/contexts/turret_manual.tres")
@@ -110,6 +111,10 @@ var info_tab_prev_action: GUIDEAction:
 var info_tab_next_action: GUIDEAction:
 	get:
 		return INFO_TAB_NEXT_ACTION
+
+var wave_continue_action: GUIDEAction:
+	get:
+		return WAVE_CONTINUE_ACTION
 
 var dev_console_toggle_action: GUIDEAction:
 	get:

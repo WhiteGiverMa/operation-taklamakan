@@ -116,6 +116,10 @@ func _process(_delta: float) -> void:
 			_cycle_tab(-1)
 		if InputManager.info_tab_next_action.is_triggered():
 			_cycle_tab(+1)
+		# Y 键继续下一波（仅在整备页且可操作时）
+		if _current_tab == InfoTab.MAINTENANCE and _can_perform_maintenance():
+			if InputManager.wave_continue_action.is_triggered():
+				_on_continue_pressed()
 
 func _connect_signals() -> void:
 	continue_button.pressed.connect(_on_continue_pressed)
