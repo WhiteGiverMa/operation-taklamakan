@@ -3,6 +3,8 @@ extends Control
 ## 综合信息界面：整备 / 藏品 / 地图
 ## 波间期自动打开并允许操作整备；战斗进行中可手动打开查看，但整备功能只读。
 
+const FloorGraphScript := preload("res://scripts/floor_graph.gd")
+
 const INTERMISSION_UPGRADES: Array[Dictionary] = [
 	{
 		"id": "turret_damage",
@@ -543,7 +545,7 @@ func _update_map_page() -> void:
 		map_list.add_child(empty_label)
 		return
 
-	for chapter_index in range(3):
+	for chapter_index in range(FloorGraphScript.CHAPTER_COUNT):
 		map_list.add_child(_create_map_chapter_row(chapter_index, graph.get_chapter_nodes(chapter_index)))
 
 func _create_map_chapter_row(chapter_index: int, chapter_nodes: Array) -> VBoxContainer:

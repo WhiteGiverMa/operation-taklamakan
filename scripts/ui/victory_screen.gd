@@ -1,6 +1,6 @@
 extends Control
 
-## Victory screen shown when player defeats Layer 3 Boss.
+## Victory screen shown when player defeats Chapter 3 Boss.
 
 @onready var result_label: Label = $VBoxContainer/ResultLabel
 @onready var stats_label: Label = $VBoxContainer/StatsLabel

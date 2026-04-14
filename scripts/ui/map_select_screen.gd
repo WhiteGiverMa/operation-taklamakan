@@ -7,6 +7,7 @@ extends Control
 const MapNodeScript := preload("res://scripts/map_node.gd")
 const MapGraphViewScript := preload("res://scripts/ui/map_graph_view.gd")
 const MapGraphViewScene := preload("res://scenes/ui/map_graph_view.tscn")
+const FloorGraphScript := preload("res://scripts/floor_graph.gd")
 
 # Zoom constants (passed to graph view)
 const ZOOM_MIN: float = 0.5
@@ -56,7 +57,7 @@ func _update_chapter_info() -> void:
 	var current_chapter := MapManager.current_chapter
 	chapter_info_label.text = Localization.t("map.screen.chapter_info", "", {
 		"chapter": current_chapter + 1,
-		"total_chapters": 3,
+		"total_chapters": FloorGraphScript.CHAPTER_COUNT,
 	})
 	current_chapter_indicator.text = Localization.t("map.screen.current_chapter", "", {"chapter": current_chapter + 1})
 

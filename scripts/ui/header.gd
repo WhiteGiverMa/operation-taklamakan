@@ -84,7 +84,7 @@ func _initialize_state() -> void:
 		_max_health = ship.health_component.max_health
 	
 	# 初始化章节
-	_current_chapter = GameState.current_chapter + 1
+	_update_chapter_display()
 	
 	# 初始化层
 	_update_floor_display()
@@ -132,7 +132,7 @@ func _on_current_node_changed(_node) -> void:
 	_update_progress_display()
 
 func _on_chapter_changed(_new_chapter: int) -> void:
-	_current_chapter = GameState.current_chapter + 1
+	_update_chapter_display()
 	_update_progress_display()
 
 func _on_node_selected(node_id: String) -> void:
@@ -194,6 +194,9 @@ func _update_floor_display() -> void:
 		_current_floor = current_node.row_index + 1
 	else:
 		_current_floor = 1
+
+func _update_chapter_display() -> void:
+	_current_chapter = MapManager.current_chapter + 1 if MapManager else 1
 
 func _update_time_display() -> void:
 	_elapsed_time = GameState.get_elapsed_time()
