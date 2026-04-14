@@ -1,6 +1,6 @@
 extends Control
 
-## Simple HUD showing ship HP bar at top-left.
+## Combat HUD. Ship HP bar is now a standalone widget scene.
 
 const ENEMY_ARROW_TEXTURE_PATH := "res://assets/ui/arrows/arrow_IsosRt_red.png"
 const ENEMY_INDICATOR_SIZE := Vector2(28.0, 28.0)
@@ -14,7 +14,6 @@ const ENEMY_INDICATOR_LOW_THREAT_COLOR := Color(1.0, 0.93, 0.52, 1.0)
 const ENEMY_INDICATOR_HIGH_THREAT_COLOR := Color(0.75, 0.12, 0.08, 1.0)
 const ENEMY_INDICATOR_THREAT_COUNT_MAX: int = 6
 
-@onready var hp_bar: ProgressBar = $HPBar
 @onready var enemy_indicators: Control = $EnemyIndicators
 @onready var input_hints_panel: PanelContainer = $InputHintsPanel
 @onready var input_hints_title: Label = $InputHintsPanel/MarginContainer/VBoxContainer/TitleLabel
@@ -103,8 +102,6 @@ const HINT_ACTIONS := [
 ]
 
 func _ready() -> void:
-	# 血条已迁移至 Header，隐藏 HUD 血条
-	hp_bar.visible = false
 	EventBus.game_speed_changed.connect(_on_game_speed_changed)
 	if not Localization.language_changed.is_connected(_on_language_changed):
 		Localization.language_changed.connect(_on_language_changed)

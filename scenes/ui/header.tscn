@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/header.gd" id="1_header"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ship_health_widget.tscn" id="2_ship_health_widget"]
 
 [node name="Header" type="Control"]
 layout_mode = 3
@@ -34,26 +35,9 @@ custom_minimum_size = Vector2(16, 0)
 layout_mode = 2
 size_flags_horizontal = 0
 
-[node name="HealthSection" type="HBoxContainer" parent="Content"]
+[node name="ShipHealthWidget" parent="Content" instance=ExtResource("2_ship_health_widget")]
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_constants/separation = 8
-
-[node name="HealthBar" type="ProgressBar" parent="Content/HealthSection"]
-custom_minimum_size = Vector2(200, 20)
-layout_mode = 2
-max_value = 100.0
-value = 100.0
-show_percentage = false
-
-[node name="HealthLabel" type="Label" parent="Content/HealthSection"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
-theme_override_constants/outline_size = 2
-text = "100/100"
-horizontal_alignment = 1
 
 [node name="ProgressSection" type="HBoxContainer" parent="Content"]
 layout_mode = 2

@@ -5,8 +5,6 @@ extends Control
 
 # === 配置常量 ===
 const BAR_HEIGHT: float = 48.0
-const HEALTH_BAR_WIDTH: float = 200.0
-const HEALTH_BAR_HEIGHT: float = 20.0
 const TIME_LABEL_WIDTH: float = 80.0
 const SETTINGS_BUTTON_SIZE: float = 36.0
 const HORIZONTAL_PADDING: float = 16.0
@@ -14,9 +12,7 @@ const VERTICAL_PADDING: float = 8.0
 
 # === 节点引用 ===
 @onready var background: ColorRect = $Background
-@onready var health_section: HBoxContainer = $Content/HealthSection
-@onready var health_bar: ProgressBar = $Content/HealthSection/HealthBar
-@onready var health_label: Label = $Content/HealthSection/HealthLabel
+@onready var ship_health_widget: Control = $Content/ShipHealthWidget
 @onready var progress_section: HBoxContainer = $Content/ProgressSection
 @onready var progress_label: Label = $Content/ProgressSection/ProgressLabel
 @onready var time_section: HBoxContainer = $Content/TimeSection
@@ -24,8 +20,6 @@ const VERTICAL_PADDING: float = 8.0
 @onready var settings_button: Button = $Content/SettingsButton
 
 # === 运行时状态 ===
-var _current_health: float = 100.0
-var _max_health: float = 100.0
 var _current_chapter: int = 1
 var _current_floor: int = 1
 var _current_wave: int = 0
@@ -61,7 +55,6 @@ func _setup_ui() -> void:
 	settings_button.pressed.connect(_on_settings_pressed)
 
 func _connect_signals() -> void:
-	EventBus.ship_health_changed.connect(_on_ship_health_changed)
 	EventBus.wave_started.connect(_on_wave_started)
 	EventBus.wave_complete.connect(_on_wave_complete)
 	EventBus.game_started.connect(_on_game_started)
@@ -77,11 +70,7 @@ func _on_language_changed(_locale: String) -> void:
 	_apply_localization()
 
 func _initialize_state() -> void:
-	# 初始化血量
-	var ship := _get_ship()
-	if ship and "health_component" in ship and ship.health_component:
-		_current_health = ship.health_component.current_health
-		_max_health = ship.health_component.max_health
+	ship_health_widget.sync_from_ship(_get_ship())
 	
 	# 初始化章节
 	_update_chapter_display()
@@ -107,11 +96,6 @@ func _apply_localization() -> void:
 	_refresh_all_displays()
 
 # === 信号处理 ===
-
-func _on_ship_health_changed(current: float, maximum: float) -> void:
-	_current_health = current
-	_max_health = maximum
-	_update_health_display()
 
 func _on_wave_started(wave_number: int) -> void:
 	_current_wave = wave_number
@@ -149,17 +133,8 @@ func _on_settings_pressed() -> void:
 # === 显示更新 ===
 
 func _refresh_all_displays() -> void:
-	_update_health_display()
 	_update_progress_display()
 	_update_time_display()
-
-func _update_health_display() -> void:
-	health_bar.max_value = _max_health
-	health_bar.value = _current_health
-	
-	var current_int := int(round(_current_health))
-	var max_int := int(round(_max_health))
-	health_label.text = "%d/%d" % [current_int, max_int]
 
 func _update_progress_display() -> void:
 	# 格式：第X章 · 第Y层 · 波次 Z/W
