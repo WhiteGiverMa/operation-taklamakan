@@ -3,6 +3,11 @@ extends Node
 ## Global event bus for decoupled cross-system communication.
 ## All signals are typed for compile-time validation.
 
+enum SettingsReturnTarget {
+	MAIN_MENU,
+	PAUSE_MENU,
+}
+
 # Enemy events
 signal enemy_spawned(enemy: Node2D)
 signal enemy_died(enemy: Node2D, position: Vector2, reward: int)
@@ -49,6 +54,7 @@ signal game_paused(is_paused: bool)
 signal game_over(won: bool)
 signal game_started()
 signal game_speed_changed(new_speed: float)
+signal settings_requested(return_target: int)
 
 # Upgrade events
 signal upgrade_purchased(upgrade_id: String, cost: int)
