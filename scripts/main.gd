@@ -273,7 +273,6 @@ func _on_wave_all_complete() -> void:
 
 	if current_node.is_terminal():
 		MapManager.advance_to_next_chapter()
-		GameState.advance_chapter()
 
 	_show_map_screen()
 

@@ -183,14 +183,14 @@ func _cmd_skip_wave(_args: Array[String]) -> String:
 		# 战斗中无法直接跳过，尝试进入下一波的公共 API 效果有限
 		return "当前处于战斗中（%s），无法直接跳过。请等待当前波次结束或击败所有敌人。" % wm_state
 	elif WaveManager.get_state() == WaveManager.State.INACTIVE:
-		WaveManager.start_combat_session(GameState.current_chapter)
+		WaveManager.start_combat_session(GameState.get_wave_chapter())
 		WaveManager.start_next_wave()
 		return "战斗会话尚未开始，已自动开启并进入第一波。当前状态: %s。" % WaveManager.get_state_name()
 	else:
 		return "当前 WaveManager 状态: %s，无法进行跳过操作。" % wm_state
 
 func _cmd_skip_chapter(_args: Array[String]) -> String:
-	var old_chapter := GameState.current_chapter
+	var old_chapter := GameState.get_display_chapter()
 	var old_map_chapter := MapManager.current_chapter
 	# 先尝试推进地图章；只有当前节点为终点时 MapManager 才会真正推进
 	MapManager.advance_to_next_chapter()
@@ -199,9 +199,7 @@ func _cmd_skip_chapter(_args: Array[String]) -> String:
 		if MapManager.current_node != null and MapManager.current_node.is_terminal() and MapManager.current_node.type == MapNode.TYPE_BOSS:
 			return "已到达 Boss 终点，无法继续推进。"
 		return "当前节点不是终点，无法跳过章节。请先完成当前节点。"
-	# 地图章推进成功，同步游戏状态
-	GameState.advance_chapter()
-	return "章节已从 %d 推进到 %d。" % [old_chapter, GameState.current_chapter]
+	return "章节已从 %d 推进到 %d。" % [old_chapter, GameState.get_display_chapter()]
 
 # ---------------------------------------------------------------------------
 # 生成命令实现
@@ -266,7 +264,7 @@ func _cmd_spawn_wave(args: Array[String]) -> String:
 	var wm_state := WaveManager.get_state()
 	
 	if wm_state == WaveManager.State.INACTIVE:
-		WaveManager.start_combat_session(GameState.current_chapter)
+		WaveManager.start_combat_session(GameState.get_wave_chapter())
 		WaveManager.start_next_wave()
 		if wave_num > 0:
 			return "战斗会话已启动并开始第一波（指定波次 %d 的直接跳转暂不支持，当前波次: %d）。" % [wave_num, WaveManager.current_wave]

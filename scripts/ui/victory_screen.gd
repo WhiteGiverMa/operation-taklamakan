@@ -34,7 +34,7 @@ func _apply_localization() -> void:
 	result_label.text = Localization.t("victory.title")
 	stats_label.text = Localization.t("victory.stats", "", {
 		"kills": GameState.kills,
-		"chapter": GameState.current_chapter,
+		"chapter": GameState.get_display_chapter(),
 	})
 	restart_button.text = Localization.t("common.restart")
 

@@ -18,9 +18,9 @@ enum TimeMode { GAME_TIME, REAL_TIME }
 		if is_inside_tree():
 			EventBus.currency_changed.emit(currency, delta)
 
-@export var current_chapter: int = 1
+@export var current_chapter: int = 0
 @export var kills: int = 0
-@export var level: int = 1  # Display only - represents run progression
+@export var level: int = 1  # Display only - 1-based chapter progression
 
 # Elapsed game time tracking
 var elapsed_time: float = 0.0
@@ -50,6 +50,8 @@ var _real_time_run_started_at_msec: int = 0
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	EventBus.enemy_died.connect(_on_enemy_died)
+	if MapManager and not MapManager.chapter_changed.is_connected(_on_map_chapter_changed):
+		MapManager.chapter_changed.connect(_on_map_chapter_changed)
 	if SettingsManager:
 		set_time_mode(int(SettingsManager.time_mode))
 
@@ -92,6 +94,7 @@ func get_real_elapsed_time() -> float:
 func start_game() -> void:
 	_reset_run_values()
 	MapManager.reset_map()
+	_sync_chapter_from_map(true)
 	WaveManager.end_combat_session()
 	_restore_ship_health()
 	has_active_run = true
@@ -157,7 +160,7 @@ func _reset_run_values() -> void:
 	relic_repair_multiplier = 1.0
 	relic_fire_rate_multiplier = 1.0
 	kills = 0
-	current_chapter = 1
+	current_chapter = 0
 	level = 1
 	elapsed_time = 0.0
 	real_elapsed_time = 0.0
@@ -240,9 +243,26 @@ func upgrade_turret_type(type_id: StringName, amount: float = 0.05) -> void:
 	EventBus.turret_stats_refresh_requested.emit()
 
 func advance_chapter() -> void:
-	current_chapter += 1
-	level = current_chapter
-	chapter_changed.emit(current_chapter)
+	_sync_chapter_from_map()
+
+func get_display_chapter() -> int:
+	return current_chapter + 1
+
+func get_wave_chapter() -> int:
+	return get_display_chapter()
+
+func _on_map_chapter_changed(_new_chapter: int) -> void:
+	_sync_chapter_from_map()
+
+func _sync_chapter_from_map(force_emit: bool = false) -> void:
+	if not MapManager:
+		return
+	var new_chapter := MapManager.current_chapter
+	var changed := current_chapter != new_chapter
+	current_chapter = new_chapter
+	level = get_display_chapter()
+	if changed or force_emit:
+		chapter_changed.emit(current_chapter)
 
 func _on_enemy_died(_enemy: Node2D, _position: Vector2, _reward: int) -> void:
 	if _state == State.PLAYING:
