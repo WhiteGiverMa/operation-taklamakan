@@ -1,14 +1,14 @@
 class_name FloorGraph
 extends RefCounted
 
-## Generates and stores a deterministic three-floor route graph.
-## Each floor contains a start node, 10-15 intermediate nodes, and a terminal node.
+## Generates and stores a deterministic three-chapter route graph.
+## Each chapter contains a start node, 10-15 intermediate nodes, and a terminal node.
 
 const MapNodeScript := preload("res://scripts/map_node.gd")
 
-const FLOOR_COUNT: int = 3
-const MIN_NODES_PER_LAYER: int = 10
-const MAX_NODES_PER_LAYER: int = 15
+const CHAPTER_COUNT: int = 3
+const MIN_NODES_PER_CHAPTER: int = 10
+const MAX_NODES_PER_CHAPTER: int = 15
 const ROW_COUNT: int = 6
 const MIN_INTERMEDIATE_ROWS: int = 3
 const MAX_INTERMEDIATE_ROWS: int = 5
@@ -16,7 +16,7 @@ const MIN_ROW_WIDTH: int = 1
 const MAX_ROW_WIDTH: int = 5
 const LAYER_WIDTH: float = 960.0
 const LAYER_HEIGHT: float = 720.0
-const FLOOR_VERTICAL_GAP: float = 840.0
+const CHAPTER_VERTICAL_GAP: float = 840.0
 const ROW_VERTICAL_SPACING: float = 132.0
 const COLUMN_HORIZONTAL_SPACING: float = 160.0
 const ROW_JITTER_X: float = 28.0
@@ -49,7 +49,7 @@ func generate(new_seed: int) -> void:
 	current_chapter = 0
 	current_node = null
 
-	for chapter_index in range(FLOOR_COUNT):
+	for chapter_index in range(CHAPTER_COUNT):
 		_generate_chapter(chapter_index)
 
 	var start_node: Variant = get_start_node(0)
@@ -57,17 +57,17 @@ func generate(new_seed: int) -> void:
 		mark_node_visited(start_node.id)
 
 func _generate_chapter(chapter_index: int) -> void:
-	var target_count := _rng.randi_range(MIN_NODES_PER_LAYER, MAX_NODES_PER_LAYER)
+	var target_count := _rng.randi_range(MIN_NODES_PER_CHAPTER, MAX_NODES_PER_CHAPTER)
 	var row_counts := _build_row_counts(target_count)
 	var chapter_nodes: Array = []
 	var rows: Array[Array] = []
-	var floor_y_offset := float(chapter_index) * FLOOR_VERTICAL_GAP
+	var chapter_y_offset := float(chapter_index) * CHAPTER_VERTICAL_GAP
 
 	var start_node: Variant = _create_node(
 		chapter_index,
 		0,
 		0,
-		Vector2(LAYER_WIDTH * 0.5, floor_y_offset),
+		Vector2(LAYER_WIDTH * 0.5, chapter_y_offset),
 		MapNodeScript.TYPE_START
 	)
 	rows.append([start_node])
@@ -77,7 +77,7 @@ func _generate_chapter(chapter_index: int) -> void:
 		var row_number := row_index + 1
 		var row_width: int = row_counts[row_index]
 		var row_nodes: Array = []
-		var row_y := floor_y_offset + float(row_number) * ROW_VERTICAL_SPACING
+		var row_y := chapter_y_offset + float(row_number) * ROW_VERTICAL_SPACING
 		var total_width := float(max(row_width - 1, 0)) * COLUMN_HORIZONTAL_SPACING
 		var row_x_start := (LAYER_WIDTH - total_width) * 0.5
 		for column_index in range(row_width):
@@ -98,9 +98,9 @@ func _generate_chapter(chapter_index: int) -> void:
 			chapter_nodes.append(node)
 		rows.append(row_nodes)
 
-	var terminal_type := MapNodeScript.TYPE_BOSS if chapter_index == FLOOR_COUNT - 1 else MapNodeScript.TYPE_END
+	var terminal_type := MapNodeScript.TYPE_BOSS if chapter_index == CHAPTER_COUNT - 1 else MapNodeScript.TYPE_END
 	var terminal_row_index := rows.size()
-	var terminal_position := Vector2(LAYER_WIDTH * 0.5, floor_y_offset + float(terminal_row_index) * ROW_VERTICAL_SPACING)
+	var terminal_position := Vector2(LAYER_WIDTH * 0.5, chapter_y_offset + float(terminal_row_index) * ROW_VERTICAL_SPACING)
 	var terminal_node: Variant = _create_node(chapter_index, terminal_row_index, 0, terminal_position, terminal_type)
 	rows.append([terminal_node])
 	chapter_nodes.append(terminal_node)
@@ -277,10 +277,10 @@ func get_reachable_node_ids(chapter_index: int = -1) -> Array[String]:
 			return result
 		queue.append(start_node.id)
 	else:
-		for floor_index in range(FLOOR_COUNT):
-			var floor_start: Variant = get_start_node(floor_index)
-			if floor_start != null:
-				queue.append(floor_start.id)
+		for chapter_idx in range(CHAPTER_COUNT):
+			var chapter_start: Variant = get_start_node(chapter_idx)
+			if chapter_start != null:
+				queue.append(chapter_start.id)
 
 	while not queue.is_empty():
 		var node_id: String = queue.pop_front()

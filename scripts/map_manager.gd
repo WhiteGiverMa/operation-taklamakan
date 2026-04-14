@@ -62,7 +62,8 @@ func advance_to_next_chapter():
 	if current_node == null or not current_node.is_terminal():
 		return current_node
 
-	var next_chapter := mini(current_node.chapter_index + 1, 2)
+	var max_chapter_index := FloorGraphScript.CHAPTER_COUNT - 1
+	var next_chapter := mini(current_node.chapter_index + 1, max_chapter_index)
 	current_chapter = next_chapter
 	chapter_changed.emit(current_chapter)
 
@@ -78,7 +79,7 @@ func go_to_chapter_start(chapter_index: int):
 	if graph == null:
 		return null
 
-	var clamped_chapter := clampi(chapter_index, 0, 2)
+	var clamped_chapter := clampi(chapter_index, 0, FloorGraphScript.CHAPTER_COUNT - 1)
 	current_chapter = clamped_chapter
 	chapter_changed.emit(current_chapter)
 
