@@ -24,7 +24,7 @@
 | `set_gold` | `<amount>` | 将金币设置为指定数值，amount 可为 0 或正整数 | `set_gold 5000` |
 | `heal` | 无 | 将陆行舰恢复至满血 | `heal` |
 | `skip_wave` | 无 | 跳过当前波间期并开始下一波；若战斗未开始则自动启动 | `skip_wave` |
-| `skip_layer` | 无 | 跳过当前层数，推进到下一层 | `skip_layer` |
+| `skip_chapter` | 无 | 跳过当前章节，推进到下一章 | `skip_chapter` |
 
 ### 生成命令
 
@@ -112,12 +112,12 @@
 - **返回值**：操作结果和当前状态
 - **示例**：`skip_wave` → "波间期已跳过，当前 WaveManager 状态: BETWEEN_WAVES -> 已开始下一波。"
 
-### skip_layer
+### skip_chapter
 
-跳过当前层数，推进到下一层。
+跳过当前章节，推进到下一章。
 
-- **返回值**：推进前后的层数
-- **示例**：`skip_layer` → "层数已从 1 推进到 2。"
+- **返回值**：推进前后的章节
+- **示例**：`skip_chapter` → "章节已从 1 推进到 2。"
 
 ### spawn_enemy
 
@@ -180,7 +180,7 @@
 2. **资源调整**：用 `add_gold` 和 `heal` 快速进入测试状态
 3. **战斗测试**：用 `spawn_enemy` 测试特定敌人行为
 4. **可视化调试**：用 `toggle_*` 命令检查物理和逻辑边界
-5. **流程跳转**：用 `skip_wave` 和 `skip_layer` 快速到达目标阶段
+5. **流程跳转**：用 `skip_wave` 和 `skip_chapter` 快速到达目标阶段
 
 ---
 
