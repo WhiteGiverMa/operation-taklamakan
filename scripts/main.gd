@@ -14,7 +14,6 @@ const ENCOUNTER_OVERLAY_SCENE := preload("res://scenes/ui/encounter_overlay.tscn
 const DEV_MODE_SCENE := preload("res://scenes/ui/dev_mode.tscn")
 
 enum FlowState { MAP, COMBAT, SHOP, TRANSITION }
-enum SettingsReturnTarget { MAIN_MENU, PAUSE_MENU }
 
 var _flow_state: FlowState = FlowState.TRANSITION
 var _shop_return_flow_state: FlowState = FlowState.MAP
@@ -25,13 +24,12 @@ var _settings_menu: Control = null
 var _pause_menu: Control = null
 var _encounter_overlay: Control = null
 var _dev_mode_panel: Control = null
-var _settings_return_target: SettingsReturnTarget = SettingsReturnTarget.MAIN_MENU
+var _settings_return_target: int = EventBus.SettingsReturnTarget.MAIN_MENU
 
 @onready var landship: Landship = $Landship
 @onready var ui_layer: CanvasLayer = $UILayer
-@onready var hud: Control = $UILayer/HUD
+@onready var hud_root: Control = $UILayer/HudRoot
 @onready var game_over_screen: Control = $UILayer/GameOver
-@onready var wave_ui: Control = $UILayer/WaveUI
 
 func _ready() -> void:
 	_setup_wave_manager()
@@ -106,6 +104,7 @@ func _connect_signals() -> void:
 	EventBus.shop_entered.connect(_on_shop_entered)
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.game_over.connect(_on_game_over)
+	EventBus.settings_requested.connect(_on_settings_requested)
 	GameState.game_state_changed.connect(_on_game_state_changed)
 	if game_over_screen and game_over_screen.has_signal("main_menu_requested"):
 		game_over_screen.main_menu_requested.connect(_on_game_over_main_menu_requested)
@@ -123,6 +122,8 @@ func _on_game_over(_won: bool) -> void:
 	InputManager.activate_menu()
 	_hide_menu_overlays()
 	_set_combat_visibility(false)
+	if hud_root and hud_root.has_method("set_header_visibility"):
+		hud_root.call("set_header_visibility", false)
 	if _map_screen:
 		_map_screen.visible = false
 	if _shop_screen:
@@ -187,12 +188,8 @@ func _start_combat_for_current_chapter() -> void:
 func _set_combat_visibility(should_show: bool) -> void:
 	landship.visible = should_show
 	landship.process_mode = Node.PROCESS_MODE_INHERIT if should_show else Node.PROCESS_MODE_DISABLED
-	hud.visible = should_show
-	hud.call("set_input_hints_enabled", should_show)
-	if wave_ui and wave_ui.has_method("set_combat_visibility"):
-		wave_ui.call("set_combat_visibility", should_show)
-	elif wave_ui:
-		wave_ui.visible = should_show
+	if hud_root and hud_root.has_method("set_combat_visibility"):
+		hud_root.call("set_combat_visibility", should_show)
 
 func _on_current_node_changed(node) -> void:
 	if node == null:
@@ -296,6 +293,8 @@ func _show_main_menu(preserve_run: bool) -> void:
 		return
 	InputManager.activate_menu()
 	_hide_gameplay_flow()
+	if hud_root and hud_root.has_method("set_header_visibility"):
+		hud_root.call("set_header_visibility", false)
 	_hide_menu_overlays()
 	
 	# 清理所有投射物和敌人（返回主菜单时）
@@ -311,6 +310,8 @@ func _show_main_menu(preserve_run: bool) -> void:
 
 func _hide_gameplay_flow() -> void:
 	_set_combat_visibility(false)
+	if hud_root and hud_root.has_method("set_header_visibility"):
+		hud_root.call("set_header_visibility", false)
 	if _map_screen:
 		_map_screen.visible = false
 	if _shop_screen:
@@ -332,6 +333,8 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 		FlowState.COMBAT:
 			InputManager.activate_combat()
 			_set_combat_visibility(true)
+			if hud_root and hud_root.has_method("set_header_visibility"):
+				hud_root.call("set_header_visibility", true)
 			_hide_encounter_overlay()
 			if _map_screen:
 				_map_screen.visible = false
@@ -340,6 +343,8 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 		FlowState.SHOP:
 			InputManager.activate_shop()
 			_set_combat_visibility(false)
+			if hud_root and hud_root.has_method("set_header_visibility"):
+				hud_root.call("set_header_visibility", true)
 			_hide_encounter_overlay()
 			if _map_screen:
 				_map_screen.visible = false
@@ -348,6 +353,8 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 		FlowState.MAP:
 			InputManager.activate_map()
 			_set_combat_visibility(false)
+			if hud_root and hud_root.has_method("set_header_visibility"):
+				hud_root.call("set_header_visibility", true)
 			_hide_encounter_overlay()
 			if _shop_screen:
 				_shop_screen.visible = false
@@ -358,6 +365,8 @@ func _apply_flow_state(next_flow_state: FlowState) -> void:
 		_:
 			InputManager.restore_flow_context()
 			_set_combat_visibility(false)
+			if hud_root and hud_root.has_method("set_header_visibility"):
+				hud_root.call("set_header_visibility", false)
 			_hide_encounter_overlay()
 			if _shop_screen:
 				_shop_screen.visible = false
@@ -378,12 +387,7 @@ func _on_main_menu_new_game_requested() -> void:
 	GameState.start_game()
 
 func _on_main_menu_settings_requested() -> void:
-	_settings_return_target = SettingsReturnTarget.MAIN_MENU
-	InputManager.activate_settings()
-	if _main_menu:
-		_main_menu.visible = false
-	if _settings_menu:
-		_settings_menu.visible = true
+	_open_settings(EventBus.SettingsReturnTarget.MAIN_MENU)
 
 func _on_pause_resume_requested() -> void:
 	_hide_menu_overlays()
@@ -392,10 +396,15 @@ func _on_pause_resume_requested() -> void:
 	_restore_current_flow()
 
 func _on_pause_settings_requested() -> void:
-	_settings_return_target = SettingsReturnTarget.PAUSE_MENU
+	_open_settings(EventBus.SettingsReturnTarget.PAUSE_MENU)
+
+func _on_settings_requested(return_target: int) -> void:
+	_open_settings(return_target)
+
+func _open_settings(return_target: int) -> void:
+	_settings_return_target = return_target
 	InputManager.activate_settings()
-	if _pause_menu:
-		_pause_menu.visible = false
+	_hide_menu_overlays()
 	if _settings_menu:
 		_settings_menu.visible = true
 
@@ -406,7 +415,7 @@ func _on_settings_back_requested() -> void:
 	if _settings_menu:
 		_settings_menu.visible = false
 	match _settings_return_target:
-		SettingsReturnTarget.PAUSE_MENU:
+		EventBus.SettingsReturnTarget.PAUSE_MENU:
 			InputManager.activate_pause()
 			if _pause_menu:
 				_pause_menu.visible = true
