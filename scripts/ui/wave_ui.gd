@@ -86,6 +86,7 @@ const MapViewerScene := preload("res://scenes/ui/map_viewer.tscn")
 @onready var map_list: VBoxContainer = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage/Scroll/Margin/Content/MapList
 
 var _wave_manager: Node = null
+var _hud_presenter: Node = null
 var _is_visible: bool = false
 var _combat_visible: bool = false
 var _upgrade_section_open: bool = false
@@ -136,13 +137,7 @@ func _connect_signals() -> void:
 	EventBus.wave_complete.connect(_on_wave_complete)
 	EventBus.wave_all_complete.connect(_on_all_waves_complete)
 	EventBus.game_over.connect(_on_game_over)
-	EventBus.currency_changed.connect(_on_runtime_state_changed)
 	EventBus.game_started.connect(_on_game_started)
-	EventBus.relic_purchased.connect(_on_relic_purchased)
-	EventBus.ship_health_changed.connect(_on_ship_health_changed)
-	MapManager.current_node_changed.connect(_on_map_changed)
-	MapManager.chapter_changed.connect(_on_map_chapter_changed)
-	MapManager.map_generated.connect(_on_map_generated)
 
 	if _wave_manager:
 		if not _wave_manager.intermission_started.is_connected(_on_intermission_started):
@@ -161,6 +156,17 @@ func _on_language_changed(_locale: String) -> void:
 
 func _find_wave_manager() -> void:
 	_wave_manager = WaveManager
+
+func set_hud_presenter(presenter: Node) -> void:
+	var presenter_changed := Callable(self, "_on_presenter_state_changed")
+	if _hud_presenter and _hud_presenter.has_signal("presentation_changed") and _hud_presenter.is_connected("presentation_changed", presenter_changed):
+		_hud_presenter.disconnect("presentation_changed", presenter_changed)
+
+	_hud_presenter = presenter
+	if _hud_presenter and _hud_presenter.has_signal("presentation_changed") and not _hud_presenter.is_connected("presentation_changed", presenter_changed):
+		_hud_presenter.connect("presentation_changed", presenter_changed)
+
+	_update_all_content()
 
 func set_combat_visibility(should_show: bool) -> void:
 	_combat_visible = should_show
@@ -306,9 +312,10 @@ func _update_maintenance_page() -> void:
 	if not _wave_manager:
 		return
 
-	var current_wave: int = _wave_manager.current_wave
-	var total_waves: int = _wave_manager.total_waves
-	var wave_state: int = _wave_manager.get_state()
+	var overview := _get_wave_overview_state()
+	var current_wave: int = int(overview.get("current_wave", 0))
+	var total_waves: int = int(overview.get("total_waves", 0))
+	var wave_state: int = int(overview.get("wave_state", -1))
 
 	match wave_state:
 		_wave_manager.State.ACTIVE_WAVE:
@@ -332,12 +339,12 @@ func _update_maintenance_page() -> void:
 			status_label.text = Localization.t("info.state.inactive")
 			timer_label.text = ""
 
-	enemy_info_label.text = _get_next_wave_info_text()
+	enemy_info_label.text = _get_next_wave_info_text(overview.get("next_wave_enemy_counts", {}))
 	_update_ship_health_display()
-	upgrade_currency_label.text = Localization.t("shop.currency", "", {"amount": GameState.currency})
-	maintenance_hint_label.text = Localization.t("info.maintenance.actions_locked") if _is_maintenance_read_only() else Localization.t("info.maintenance.actions_available")
+	upgrade_currency_label.text = Localization.t("shop.currency", "", {"amount": int(overview.get("currency", GameState.currency))})
+	maintenance_hint_label.text = Localization.t("info.maintenance.actions_locked") if bool(overview.get("read_only", _is_maintenance_read_only())) else Localization.t("info.maintenance.actions_available")
 
-	var maintenance_enabled := _can_perform_maintenance()
+	var maintenance_enabled := bool(overview.get("maintenance_enabled", _can_perform_maintenance()))
 	continue_button.disabled = not maintenance_enabled
 	repair_button.disabled = not maintenance_enabled
 	upgrade_button.disabled = false
@@ -345,12 +352,18 @@ func _update_maintenance_page() -> void:
 	upgrade_section.visible = _upgrade_section_open
 	_update_upgrade_ui()
 
-func _get_next_wave_info_text() -> String:
-	if not _wave_manager or not _wave_manager.wave_set or not _wave_manager.wave_set.has_method("get_wave"):
+func _get_next_wave_info_text(enemy_counts: Dictionary = {}) -> String:
+	if enemy_counts.is_empty() and _hud_presenter and _hud_presenter.has_method("get_wave_overview_state"):
+		enemy_counts = _hud_presenter.call("get_wave_overview_state").get("next_wave_enemy_counts", {})
+
+	if enemy_counts.is_empty() and (not _wave_manager or not _wave_manager.wave_set or not _wave_manager.wave_set.has_method("get_wave")):
 		return Localization.t("wave.ui.next_wave_unknown")
-	var next_wave_data = _wave_manager.wave_set.get_wave(_wave_manager.current_wave + 1)
-	if next_wave_data and next_wave_data.has_method("get_enemy_counts"):
-		var enemy_counts = next_wave_data.get_enemy_counts()
+	if enemy_counts.is_empty():
+		var next_wave_data = _wave_manager.wave_set.get_wave(_wave_manager.current_wave + 1)
+		if next_wave_data and next_wave_data.has_method("get_enemy_counts"):
+			enemy_counts = next_wave_data.get_enemy_counts()
+
+	if not enemy_counts.is_empty():
 		return Localization.t("wave.ui.next_wave_enemies", "", {
 			"tanks": enemy_counts.get("tank", 0),
 			"dogs": enemy_counts.get("mechanical_dog", 0),
@@ -359,10 +372,10 @@ func _get_next_wave_info_text() -> String:
 	return Localization.t("wave.ui.next_wave_unknown")
 
 func _update_ship_health_display() -> void:
-	var ship = get_tree().get_first_node_in_group("ship")
-	if ship and "health_component" in ship and ship.health_component:
-		var current_health: float = ship.health_component.current_health
-		var max_health: float = ship.health_component.max_health
+	var ship_health := _get_ship_health_state()
+	if bool(ship_health.get("has_ship", false)):
+		var current_health: float = float(ship_health.get("current", 0.0))
+		var max_health: float = float(ship_health.get("maximum", 100.0))
 		ship_health_bar.max_value = max_health
 		ship_health_bar.value = current_health
 		ship_health_label.text = Localization.t("info.maintenance.ship_health", "", {
@@ -486,10 +499,8 @@ func _update_upgrade_row(upgrade_id: StringName, price: int, buy_button: Button,
 		price_label.remove_theme_color_override("font_color")
 
 func _update_relics_page() -> void:
-	relic_summary_label.text = Localization.t("info.relics.summary", "", {
-		"owned": GameState.owned_relic_ids.size(),
-		"total": RELIC_ITEMS.size(),
-	})
+	var relic_state := _get_relics_state()
+	relic_summary_label.text = Localization.t("info.relics.summary", "", relic_state)
 	for child in relic_list.get_children():
 		child.queue_free()
 	for relic_data in RELIC_ITEMS:
@@ -523,17 +534,20 @@ func _create_relic_row(data: Dictionary) -> VBoxContainer:
 	return container
 
 func _update_map_page() -> void:
-	var graph = MapManager.get_graph()
-	var visited_count := MapManager.visited_nodes.size()
+	var map_state := _get_map_overview_state()
+	var graph = map_state.get("graph")
+	var visited_count := int(map_state.get("visited_count", 0))
+	var current_chapter := int(map_state.get("current_chapter", MapManager.current_chapter if MapManager else 0))
+	var reachable_count := int(map_state.get("reachable_count", 0))
 	map_overview_label.text = Localization.t("info.map.overview", "", {
-		"chapter": MapManager.current_chapter + 1,
+		"chapter": current_chapter + 1,
 		"visited": visited_count,
 	})
 	map_current_node_label.text = Localization.t("info.map.current_node", "", {
 		"node": _get_current_node_text(),
 	})
 	map_choices_label.text = Localization.t("info.map.reachable", "", {
-		"count": MapManager.get_current_choices().size(),
+		"count": reachable_count,
 	})
 
 	for child in map_list.get_children():
@@ -699,23 +713,65 @@ func _on_game_started() -> void:
 	_update_all_content()
 
 func _on_runtime_state_changed(_value_a = null, _value_b = null) -> void:
-	if _is_visible:
+	if _is_visible or _combat_visible:
 		_update_all_content()
 
-func _on_relic_purchased(_relic_id: String, _cost: int) -> void:
-	_on_runtime_state_changed()
-
-func _on_ship_health_changed(_current: float, _maximum: float) -> void:
-	_on_runtime_state_changed()
-
-func _on_map_changed(_node) -> void:
-	_on_runtime_state_changed()
-
-func _on_map_chapter_changed(_new_chapter: int) -> void:
-	_on_runtime_state_changed()
-
-func _on_map_generated(_seed: int, _graph) -> void:
+func _on_presenter_state_changed() -> void:
 	_on_runtime_state_changed()
 
 func _on_wave_progress_updated(_enemies_remaining: int, _total_enemies: int) -> void:
 	_on_runtime_state_changed()
+
+func _get_wave_overview_state() -> Dictionary:
+	if _hud_presenter and _hud_presenter.has_method("get_wave_overview_state"):
+		return _hud_presenter.call("get_wave_overview_state")
+
+	return {
+		"wave_state": _wave_manager.get_state() if _wave_manager else -1,
+		"current_wave": _wave_manager.current_wave if _wave_manager else 0,
+		"total_waves": _wave_manager.total_waves if _wave_manager else 0,
+		"currency": GameState.currency,
+		"read_only": _is_maintenance_read_only(),
+		"maintenance_enabled": _can_perform_maintenance(),
+		"ship_health": _get_ship_health_state(),
+		"next_wave_enemy_counts": {},
+	}
+
+func _get_ship_health_state() -> Dictionary:
+	if _hud_presenter and _hud_presenter.has_method("get_ship_health_state"):
+		return _hud_presenter.call("get_ship_health_state")
+
+	var ship = get_tree().get_first_node_in_group("ship")
+	if ship and "health_component" in ship and ship.health_component:
+		return {
+			"current": ship.health_component.current_health,
+			"maximum": ship.health_component.max_health,
+			"has_ship": true,
+		}
+
+	return {
+		"current": 0.0,
+		"maximum": 100.0,
+		"has_ship": false,
+	}
+
+func _get_relics_state() -> Dictionary:
+	if _hud_presenter and _hud_presenter.has_method("get_relics_state"):
+		return _hud_presenter.call("get_relics_state", RELIC_ITEMS.size())
+
+	return {
+		"owned": GameState.owned_relic_ids.size(),
+		"total": RELIC_ITEMS.size(),
+	}
+
+func _get_map_overview_state() -> Dictionary:
+	if _hud_presenter and _hud_presenter.has_method("get_map_overview_state"):
+		return _hud_presenter.call("get_map_overview_state")
+
+	return {
+		"graph": MapManager.get_graph(),
+		"current_chapter": MapManager.current_chapter,
+		"visited_count": MapManager.visited_nodes.size(),
+		"current_node": MapManager.current_node,
+		"reachable_count": MapManager.get_current_choices().size(),
+	}
