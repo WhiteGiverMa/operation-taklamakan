@@ -9,10 +9,10 @@
 | 任务 | 位置 | 说明 |
 |------|----------|-------|
 | 主控编排 | `main.gd` | 地图/战斗/商店/过渡粘合 |
-| 全局状态 | `game_state.gd` | 货币、层数、重置、自动开火解锁 |
+| 全局状态 | `game_state.gd` | 货币、章节、重置、自动开火解锁 |
 | 全局事件 | `event_bus.gd` | 类型化跨系统信号 |
 | 波次流程 | `wave_manager.gd` | 生成队列、间歇、胜利触发 |
-| 地图状态 | `map_manager.gd`, `floor_graph.gd`, `map_node.gd` | 层图与遍历 |
+| 地图状态 | `map_manager.gd`, `floor_graph.gd`, `map_node.gd` | 章节图与遍历 |
 | 玩家/舰船 | `player.gd`, `ship/landship.gd` | 移动、维修、舰船 HP |
 | 战斗单元 | `tank.gd`, `mechanical_dog.gd`, `turret.gd`, `projectile*.gd` | 核心战斗行为 |
 | 商店 | `shop_screen.gd`, `shop_item.gd` | 固定升级 |
@@ -37,7 +37,7 @@
 
 ## 风险热点
 
-- `wave_manager.gd`：硬编码的层/波次映射和场景生成假设
+- `wave_manager.gd`：硬编码的章节/波次映射和场景生成假设
 - `main.gd`：中心流程粘合；改动会影响地图/战斗/商店
 - `shop_screen.gd`：在一处修改舰船状态、升级和炮塔安装
 - `ui/map_screen.gd`：大型 UI 控制器，包含选择 + 平移 + 遍历行为
