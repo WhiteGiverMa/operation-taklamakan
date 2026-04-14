@@ -6,7 +6,7 @@ enum LayoutMode {
 }
 
 @onready var presenter: Node = $Presenter
-@onready var header: Control = $Header
+@onready var classic_header_layout: Control = $ClassicHeaderLayout
 @onready var hud: Control = $HUD
 @onready var wave_ui: Control = $WaveUI
 
@@ -15,7 +15,7 @@ var _header_requested_visible: bool = true
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_inject_presenter(header)
+	_inject_presenter(classic_header_layout)
 	_inject_presenter(hud)
 	_inject_presenter(wave_ui)
 	_apply_header_visibility()
@@ -46,7 +46,7 @@ func _inject_presenter(target: Node) -> void:
 
 func _apply_header_visibility() -> void:
 	var should_show := _header_requested_visible and _layout_mode == LayoutMode.CLASSIC
-	if header and header.has_method("set_header_visibility"):
-		header.call("set_header_visibility", should_show)
-	elif header:
-		header.visible = should_show
+	if classic_header_layout and classic_header_layout.has_method("set_header_visibility"):
+		classic_header_layout.call("set_header_visibility", should_show)
+	elif classic_header_layout:
+		classic_header_layout.visible = should_show
