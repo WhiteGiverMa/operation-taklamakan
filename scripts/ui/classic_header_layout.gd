@@ -1,23 +1,17 @@
 extends Control
 
-## 杀戮尖塔风格的顶部信息栏
+## 经典顶部 HUD 布局
 ## 显示：血量 | 章节/层/波进度 | 游戏时间 | 设置按钮
 
 # === 配置常量 ===
 const BAR_HEIGHT: float = 48.0
-const TIME_LABEL_WIDTH: float = 80.0
-const SETTINGS_BUTTON_SIZE: float = 36.0
-const HORIZONTAL_PADDING: float = 16.0
-const VERTICAL_PADDING: float = 8.0
 
 # === 节点引用 ===
 @onready var background: ColorRect = $Background
 @onready var ship_health_widget: Control = $Content/ShipHealthWidget
-@onready var progress_section: HBoxContainer = $Content/ProgressSection
-@onready var progress_label: Label = $Content/ProgressSection/ProgressLabel
-@onready var time_section: HBoxContainer = $Content/TimeSection
-@onready var time_label: Label = $Content/TimeSection/TimeLabel
-@onready var settings_button: Button = $Content/SettingsButton
+@onready var run_progress_widget: Control = $Content/RunProgressWidget
+@onready var timer_widget: Control = $Content/TimerWidget
+@onready var settings_entry_widget: Control = $Content/SettingsEntryWidget
 
 # === 运行时状态 ===
 var _hud_presenter: Node = null
@@ -45,10 +39,8 @@ func _setup_ui() -> void:
 	# 设置背景
 	background.color = Color(0.08, 0.08, 0.12, 0.9)
 	
-	# 设置按钮
-	settings_button.text = "⚙"
-	settings_button.tooltip_text = Localization.t("header.settings.tooltip")
-	settings_button.pressed.connect(_on_settings_pressed)
+	if settings_entry_widget.has_signal("pressed") and not settings_entry_widget.is_connected("pressed", Callable(self, "_on_settings_pressed")):
+		settings_entry_widget.connect("pressed", _on_settings_pressed)
 
 func _connect_localization() -> void:
 	if not Localization.language_changed.is_connected(_on_language_changed):
@@ -69,7 +61,6 @@ func set_hud_presenter(presenter: Node) -> void:
 	_refresh_all_displays()
 
 func _apply_localization() -> void:
-	settings_button.tooltip_text = Localization.t("header.settings.tooltip")
 	_refresh_all_displays()
 
 # === 信号处理 ===
@@ -91,44 +82,21 @@ func _refresh_all_displays() -> void:
 
 func _update_progress_display() -> void:
 	var header_state := _get_header_state()
-	var current_chapter := int(header_state.get("chapter", 1))
-	var current_floor := int(header_state.get("floor", 1))
-	var selected_floor := int(header_state.get("selected_floor", -1))
-	var current_wave := int(header_state.get("current_wave", 0))
-	var total_waves := int(header_state.get("total_waves", 0))
-
-	# 格式：第X章 · 第Y层 · 波次 Z/W
-	var parts: Array[String] = []
-	
-	# 章节
-	parts.append(Localization.t("header.progress.chapter", "", {"chapter": current_chapter}))
-	
-	# 层（显示选中或当前）
-	var floor_to_show := current_floor
-	if selected_floor > 0:
-		floor_to_show = selected_floor
-		# 选中时变色提示
-		progress_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))
-	else:
-		progress_label.remove_theme_color_override("font_color")
-	
-	parts.append(Localization.t("header.progress.floor", "", {"floor": floor_to_show}))
-	
-	# 波次
-	if total_waves > 0:
-		parts.append(Localization.t("header.progress.wave", "", {
-			"current": current_wave,
-			"total": total_waves
-		}))
-	
-	progress_label.text = " · ".join(parts)
+	if run_progress_widget.has_method("set_progress_state"):
+		run_progress_widget.call(
+			"set_progress_state",
+			int(header_state.get("chapter", 1)),
+			int(header_state.get("floor", 1)),
+			int(header_state.get("selected_floor", -1)),
+			int(header_state.get("current_wave", 0)),
+			int(header_state.get("total_waves", 0))
+		)
 
 func _update_time_display() -> void:
 	var header_state := _get_header_state()
 	_elapsed_time = float(header_state.get("elapsed_time", 0.0))
-	var minutes := int(_elapsed_time / 60.0)
-	var seconds := int(_elapsed_time) % 60
-	time_label.text = "%02d:%02d" % [minutes, seconds]
+	if timer_widget.has_method("set_elapsed_time"):
+		timer_widget.call("set_elapsed_time", _elapsed_time)
 
 func _get_header_state() -> Dictionary:
 	if _hud_presenter and _hud_presenter.has_method("get_header_state"):

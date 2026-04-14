@@ -1,0 +1,60 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/classic_header_layout.gd" id="1_classic_header_layout"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ship_health_widget.tscn" id="2_ship_health_widget"]
+[ext_resource type="PackedScene" path="res://scenes/ui/run_progress_widget.tscn" id="3_run_progress_widget"]
+[ext_resource type="PackedScene" path="res://scenes/ui/timer_widget.tscn" id="4_timer_widget"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings_entry_widget.tscn" id="5_settings_entry_widget"]
+
+[node name="ClassicHeaderLayout" type="Control"]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 48.0
+grow_horizontal = 2
+mouse_filter = 2
+script = ExtResource("1_classic_header_layout")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.12, 0.9)
+
+[node name="Content" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+
+[node name="LeftMargin" type="Control" parent="Content"]
+custom_minimum_size = Vector2(16, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="ShipHealthWidget" parent="Content" instance=ExtResource("2_ship_health_widget")]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="RunProgressWidget" parent="Content" instance=ExtResource("3_run_progress_widget")]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TimerWidget" parent="Content" instance=ExtResource("4_timer_widget")]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="SettingsEntryWidget" parent="Content" instance=ExtResource("5_settings_entry_widget")]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="RightMargin" type="Control" parent="Content"]
+custom_minimum_size = Vector2(16, 0)
+layout_mode = 2
+size_flags_horizontal = 0
