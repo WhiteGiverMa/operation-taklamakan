@@ -11,7 +11,7 @@ extends Control
 @onready var gold_add_button: Button = $Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/GoldRow/GoldAddButton
 @onready var heal_button: Button = $Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/HealthRow/HealButton
 @onready var skip_wave_button: Button = $Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/SkipRow/SkipWaveButton
-@onready var skip_floor_button: Button = $Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/SkipRow/SkipFloorButton
+@onready var skip_chapter_button: Button = $Panel/MarginContainer/VBoxContainer/TabContainer/ResourcesTab/ResourcesVBox/SkipRow/SkipChapterButton
 
 # SpawnTab
 @onready var enemy_type_option: OptionButton = $Panel/MarginContainer/VBoxContainer/TabContainer/SpawnTab/SpawnVBox/EnemyTypeRow/EnemyTypeOption
@@ -57,7 +57,7 @@ func _ready() -> void:
 	gold_custom_input.text_submitted.connect(_on_gold_add_pressed)
 	heal_button.pressed.connect(_on_heal_pressed)
 	skip_wave_button.pressed.connect(_on_skip_wave_pressed)
-	skip_floor_button.pressed.connect(_on_skip_floor_pressed)
+	skip_chapter_button.pressed.connect(_on_skip_chapter_pressed)
 
 	# 连接 SpawnTab 信号
 	spawn_enemy_button.pressed.connect(_on_spawn_enemy_pressed)
@@ -107,8 +107,8 @@ func _on_heal_pressed() -> void:
 func _on_skip_wave_pressed() -> void:
 	_execute_and_log("skip_wave")
 
-func _on_skip_floor_pressed() -> void:
-	_execute_and_log("skip_layer")
+func _on_skip_chapter_pressed() -> void:
+	_execute_and_log("skip_chapter")
 
 # SpawnTab handlers
 func _on_spawn_enemy_pressed() -> void:
@@ -120,13 +120,13 @@ func _on_clear_enemies_pressed() -> void:
 	_execute_and_log("clear_enemies")
 
 # DebugTab handlers
-func _on_toggle_collision(toggled: bool) -> void:
+func _on_toggle_collision(_toggled: bool) -> void:
 	_execute_and_log("toggle_collision")
 
-func _on_toggle_paths(toggled: bool) -> void:
+func _on_toggle_paths(_toggled: bool) -> void:
 	_execute_and_log("toggle_paths")
 
-func _on_toggle_ranges(toggled: bool) -> void:
+func _on_toggle_ranges(_toggled: bool) -> void:
 	_execute_and_log("toggle_ranges")
 
 # ConsoleTab handlers
