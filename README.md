@@ -22,11 +22,11 @@
 
 ## 概述
 
-玩家在固定的陆行舰上活动，通过移动、接管炮台、购买升级、承受并击退敌方波次，完成 3 层结构的路线推进流程。
+玩家在固定的陆行舰上活动，通过移动、接管炮台、购买升级、承受并击退敌方波次，完成 3 章结构的路线推进流程。
 
 ### 核心玩法
 
-- **地图推进**：3 层 Roguelike 结构，包含战斗、精英、商店、休整、Boss 节点
+- **地图推进**：3 章 Roguelike 结构，包含战斗、精英、商店、休整、Boss 节点
 - **炮塔系统**：手动接管 / 自动火控、韧性瘫痪机制、三种炮塔类型
 - **玩家行为**：WASD 移动、炮台交互、船体/炮台维修
 - **商店系统**：固定升级商品 + 随机炮塔商品
@@ -77,11 +77,11 @@ operation-taklamakan/
 │
 ├── scripts/                   # GDScript 逻辑层
 │   ├── main.gd               # 主流程编排
-│   ├── game_state.gd         # 全局状态（货币、层数、升级）
+│   ├── game_state.gd         # 全局状态（货币、章节、升级）
 │   ├── event_bus.gd          # 类型化跨系统信号
 │   ├── wave_manager.gd       # 波次生成与完成逻辑
-│   ├── map_manager.gd        # 地图状态与层推进
-│   ├── floor_graph.gd        # 层图数据结构
+│   ├── map_manager.gd        # 地图状态与章节推进
+│   ├── floor_graph.gd        # 章节图数据结构
 │   ├── map_node.gd           # 地图节点数据类
 │   ├── player.gd             # 玩家角色控制
 │   ├── turret.gd             # 炮台控制（手动/自动/韧性）
@@ -290,7 +290,7 @@ EventBus (类型化信号中心)
   ├── wave_completed()
   ├── combat_ended()
   ├── map_node_selected(node: MapNode)
-  ├── floor_completed()
+  ├── chapter_completed(chapter: int)
   ├── game_victory()
   └── game_over()
 ```
@@ -319,7 +319,7 @@ EventBus (类型化信号中心)
 ### 反模式（避免）
 
 - 不要把 `turret_ui.gd` 当作升级流程的权威来源
-- 不要硬编码波次/层数映射
+- 不要硬编码波次/章节映射
 - 不要在更多地方硬编码父相对 UI 节点查找
 - 不要假设 `WaveSet.get_wave()` 是零基数（它是 1 基数）
 - 不要在 EventBus 或 GameState 已有职责时添加隐藏全局耦合
@@ -383,7 +383,7 @@ EventBus (类型化信号中心)
 - 无传统单元测试框架
 - 无 CI/CD 流水线
 - 无导出预设与打包测试
-- 波次/层数映射存在硬编码
+- 波次/章节映射存在硬编码
 - `wave_manager.gd` 结构较脆弱
 - 存档/读档功能未实现
 
@@ -393,7 +393,7 @@ EventBus (类型化信号中心)
 
 ### 代码质量
 
-- [ ] 提取波次/层数映射为配置资源
+- [ ] 提取波次/章节映射为配置资源
 - [ ] 重构 `wave_manager.gd`，降低硬编码依赖
 - [ ] 统一 UI 节点查找模式，减少父相对依赖
 - [ ] 添加单元测试框架（GUT 或 gdUnit4）
