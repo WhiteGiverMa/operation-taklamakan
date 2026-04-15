@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/speed_indicator_widget.gd" id="1_speed_indicator"]
+
+[node name="SpeedIndicatorWidget" type="Control"]
+script = ExtResource("1_speed_indicator")
+
+[node name="SpeedLabel" type="Label" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 48.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 28
+text = ""
+
+[node name="NotificationLabel" type="Label" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -80.0
+offset_right = 150.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NotificationTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true

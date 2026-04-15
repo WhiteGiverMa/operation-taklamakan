@@ -1,7 +1,11 @@
+## 经典顶部 HUD 布局 - 职责：
+## - 管理顶部栏的 UI 排列
+## - 从 HudPresenter 获取数据并渲染
+## - 不直接访问 GameState/WaveManager/MapManager
+## - 通过 signal 接收数据变更通知
+##
+## 显示内容：血量 | 章节/层/波进度 | 游戏时间 | 设置按钮
 extends Control
-
-## 经典顶部 HUD 布局
-## 显示：血量 | 章节/层/波进度 | 游戏时间 | 设置按钮
 
 # === 配置常量 ===
 const BAR_HEIGHT: float = 48.0
@@ -99,9 +103,12 @@ func _update_time_display() -> void:
 		timer_widget.call("set_elapsed_time", _elapsed_time)
 
 func _get_header_state() -> Dictionary:
+	# 首选：通过 Presenter 获取数据
 	if _hud_presenter and _hud_presenter.has_method("get_header_state"):
 		return _hud_presenter.call("get_header_state")
 
+	# NOTE: 以下 fallback 是遗留代码，违反了"不直接访问全局单例"原则
+	# 应在重构中移除，确保 Presenter 始终可用
 	var current_floor := 1
 	var current_node = MapManager.current_node
 	if current_node:

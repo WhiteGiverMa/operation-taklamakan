@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/enemy_indicator_layer.tscn" id="2_enemy_indicator"]
+[ext_resource type="PackedScene" path="res://scenes/ui/input_hints_widget.tscn" id="3_input_hints"]
+[ext_resource type="PackedScene" path="res://scenes/ui/speed_indicator_widget.tscn" id="4_speed_indicator"]
 
 [node name="HUD" type="Control"]
 layout_mode = 3
@@ -12,7 +15,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_hud")
 
-[node name="EnemyIndicators" type="Control" parent="."]
+[node name="EnemyIndicatorLayer" parent="." instance=ExtResource("2_enemy_indicator")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,183 +24,22 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="InputHintsPanel" type="PanelContainer" parent="."]
+[node name="InputHintsWidget" parent="." instance=ExtResource("3_input_hints")]
 visible = false
 layout_mode = 1
-anchor_left = 1.0
-anchor_top = 0.0
+anchors_preset = 15
 anchor_right = 1.0
-anchor_bottom = 0.0
-offset_left = -420.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = 336.0
-grow_horizontal = 0
-
-[node name="MarginContainer" type="MarginContainer" parent="InputHintsPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
-
-[node name="VBoxContainer" type="VBoxContainer" parent="InputHintsPanel/MarginContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="TitleLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = ""
-
-[node name="HintLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-autowrap_mode = 3
-modulate = Color(0.82, 0.85, 0.9, 1)
-text = ""
-
-[node name="Rows" type="VBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="MovementRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/MovementRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
-text = ""
-
-[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/MovementRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-horizontal_alignment = 2
-text = ""
-
-[node name="RepairRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/RepairRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
-text = ""
-
-[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/RepairRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-horizontal_alignment = 2
-text = ""
-
-[node name="InteractRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/InteractRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
-text = ""
-
-[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/InteractRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-horizontal_alignment = 2
-text = ""
-
-[node name="FireRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/FireRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
-text = ""
-
-[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/FireRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-horizontal_alignment = 2
-text = ""
-
-[node name="PauseRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/PauseRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
-text = ""
-
-[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/PauseRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-horizontal_alignment = 2
-text = ""
-
-[node name="ToggleRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/ToggleRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
-text = ""
-
-[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/ToggleRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-horizontal_alignment = 2
-text = ""
-
-[node name="SpeedToggleRow" type="HBoxContainer" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="ActionLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/SpeedToggleRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
-text = ""
-
-[node name="InputLabel" type="Label" parent="InputHintsPanel/MarginContainer/VBoxContainer/Rows/SpeedToggleRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-horizontal_alignment = 2
-text = ""
-
-[node name="SpeedIndicator" type="Label" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -100.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = 46.0
-grow_horizontal = 0
-horizontal_alignment = 2
-theme_override_font_sizes/font_size = 24
-theme_override_colors/font_color = Color(1.0, 0.85, 0.2, 1.0)
-theme_override_colors/font_outline_color = Color(0.1, 0.05, 0.0, 0.9)
-theme_override_constants/outline_size = 3
-
-[node name="SpeedNotification" type="Label" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -200.0
-offset_top = 80.0
-offset_right = 200.0
-offset_bottom = 110.0
+anchor_bottom = 1.0
 grow_horizontal = 2
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(1.0, 0.92, 0.5, 1.0)
-theme_override_colors/font_outline_color = Color(0.1, 0.05, 0.0, 0.9)
-theme_override_constants/outline_size = 3
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="SpeedNotificationTimer" type="Timer" parent="."]
-one_shot = true
+[node name="SpeedIndicatorWidget" parent="." instance=ExtResource("4_speed_indicator")]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

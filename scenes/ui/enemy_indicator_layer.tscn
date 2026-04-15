@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/enemy_indicator_layer.gd" id="1_enemy_indicator"]
+
+[node name="EnemyIndicatorLayer" type="Control"]
+script = ExtResource("1_enemy_indicator")
+mouse_filter = 2
+
+[node name="IndicatorsContainer" type="Control" parent="."]
+mouse_filter = 2

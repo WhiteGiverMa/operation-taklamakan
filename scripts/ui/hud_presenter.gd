@@ -1,3 +1,8 @@
+## HUD 数据聚合层 - 职责：
+## - 收集和格式化展示数据
+## - 提供统一的展示数据接口（get_xxx_state）
+## - 监听全局事件并通知 UI 刷新
+## - 不包含 UI 渲染逻辑
 extends Node
 
 signal presentation_changed
@@ -84,6 +89,14 @@ func get_map_overview_state() -> Dictionary:
 		"current_node": MapManager.current_node,
 		"reachable_count": MapManager.get_current_choices().size(),
 	}
+
+func get_wave_state() -> int:
+	if not WaveManager:
+		return -1
+	return WaveManager.get_state()
+
+func get_game_state() -> int:
+	return GameState.get_state()
 
 func is_maintenance_read_only() -> bool:
 	if not WaveManager:

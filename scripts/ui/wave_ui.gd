@@ -5,44 +5,6 @@ extends Control
 
 const FloorGraphScript := preload("res://scripts/floor_graph.gd")
 
-const INTERMISSION_UPGRADES: Array[Dictionary] = [
-	{
-		"id": "turret_damage",
-		"name_key": "shop.item.turret_damage.name",
-		"description_key": "shop.item.turret_damage.desc",
-		"price": 35,
-	},
-	{
-		"id": "fire_control",
-		"name_key": "shop.item.fire_control.name",
-		"description_key": "shop.item.fire_control.desc",
-		"price": 45,
-	}
-]
-
-const RELIC_ITEMS: Array[Dictionary] = [
-	{
-		"id": "gyro_sight",
-		"name_key": "shop.relic.gyro_sight.name",
-		"description_key": "shop.relic.gyro_sight.desc",
-	},
-	{
-		"id": "salvage_contract",
-		"name_key": "shop.relic.salvage_contract.name",
-		"description_key": "shop.relic.salvage_contract.desc",
-	},
-	{
-		"id": "field_toolkit",
-		"name_key": "shop.relic.field_toolkit.name",
-		"description_key": "shop.relic.field_toolkit.desc",
-	},
-	{
-		"id": "overclock_core",
-		"name_key": "shop.relic.overclock_core.name",
-		"description_key": "shop.relic.overclock_core.desc",
-	}
-]
-
 enum InfoTab {
 	MAINTENANCE,
 	RELICS,
@@ -50,6 +12,8 @@ enum InfoTab {
 }
 
 const MapViewerScene := preload("res://scenes/ui/map_viewer.tscn")
+const MaintenancePageControllerScript := preload("res://scripts/ui/maintenance_page_controller.gd")
+const RelicsPageControllerScript := preload("res://scripts/ui/relics_page_controller.gd")
 
 @onready var title_label: Label = $MainContainer/Sidebar/SidebarContent/Root/TopBar/TitleBlock/TitleLabel
 @onready var state_label: Label = $MainContainer/Sidebar/SidebarContent/Root/TopBar/TitleBlock/StateLabel
@@ -61,15 +25,6 @@ const MapViewerScene := preload("res://scenes/ui/map_viewer.tscn")
 @onready var relics_page: Control = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/RelicsPage
 @onready var map_page: Control = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MapPage
 
-@onready var wave_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/WaveLabel
-@onready var status_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/StatusLabel
-@onready var timer_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/TimerLabel
-@onready var enemy_info_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/EnemyInfoLabel
-@onready var ship_health_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ShipHealthLabel
-@onready var ship_health_bar: ProgressBar = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ShipHealthBar
-@onready var upgrade_currency_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/UpgradeCurrencyLabel
-@onready var maintenance_hint_label: Label = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/MaintenanceHintLabel
-@onready var button_container: HBoxContainer = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer
 @onready var continue_button: Button = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/ContinueButton
 @onready var repair_button: Button = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/RepairButton
 @onready var upgrade_button: Button = $MainContainer/ContentArea/Panel/MarginContainer/PageContainer/MaintenancePage/Scroll/Margin/Content/ButtonContainer/UpgradeButton
@@ -89,10 +44,12 @@ var _wave_manager: Node = null
 var _hud_presenter: Node = null
 var _is_visible: bool = false
 var _combat_visible: bool = false
-var _upgrade_section_open: bool = false
 var _current_tab: InfoTab = InfoTab.MAINTENANCE
 var _panel_paused_tree: bool = false
 var _embedded_map: Control = null
+
+var maintenance_controller: Control
+var relics_controller: Control
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -101,6 +58,7 @@ func _ready() -> void:
 	_connect_signals()
 	_connect_localization()
 	_apply_localization()
+	_setup_page_controllers()
 	_update_tab_visibility()
 	_update_all_content()
 
@@ -156,6 +114,40 @@ func _on_language_changed(_locale: String) -> void:
 
 func _find_wave_manager() -> void:
 	_wave_manager = WaveManager
+	if maintenance_controller and maintenance_controller.has_method("set_wave_manager"):
+		maintenance_controller.call("set_wave_manager", _wave_manager)
+
+func _setup_page_controllers() -> void:
+	maintenance_controller = MaintenancePageControllerScript.new()
+	maintenance_controller.name = "MaintenancePageController"
+	var maintenance_content: Control = maintenance_page.get_node("Scroll/Margin/Content")
+	maintenance_controller.wave_label = maintenance_content.get_node("WaveLabel")
+	maintenance_controller.status_label = maintenance_content.get_node("StatusLabel")
+	maintenance_controller.timer_label = maintenance_content.get_node("TimerLabel")
+	maintenance_controller.enemy_info_label = maintenance_content.get_node("EnemyInfoLabel")
+	maintenance_controller.ship_health_label = maintenance_content.get_node("ShipHealthLabel")
+	maintenance_controller.ship_health_bar = maintenance_content.get_node("ShipHealthBar")
+	maintenance_controller.upgrade_currency_label = maintenance_content.get_node("UpgradeCurrencyLabel")
+	maintenance_controller.maintenance_hint_label = maintenance_content.get_node("MaintenanceHintLabel")
+	maintenance_controller.button_container = maintenance_content.get_node("ButtonContainer")
+	maintenance_controller.continue_button = continue_button
+	maintenance_controller.repair_button = repair_button
+	maintenance_controller.upgrade_button = upgrade_button
+	maintenance_controller.upgrade_section = upgrade_section
+	maintenance_controller.upgrade_title_label = upgrade_title_label
+	maintenance_controller.upgrade_list = upgrade_list
+	maintenance_controller.set_wave_manager(_wave_manager)
+	maintenance_controller.set_hud_presenter(_hud_presenter)
+	maintenance_controller.connect("content_update_requested", _on_maintenance_content_update_requested)
+	add_child(maintenance_controller)
+
+	relics_controller = RelicsPageControllerScript.new()
+	relics_controller.name = "RelicsPageController"
+	var relics_content: Control = relics_page.get_node("Scroll/Margin/Content")
+	relics_controller.relic_summary_label = relic_summary_label
+	relics_controller.relic_list = relic_list
+	relics_controller.set_hud_presenter(_hud_presenter)
+	add_child(relics_controller)
 
 func set_hud_presenter(presenter: Node) -> void:
 	var presenter_changed := Callable(self, "_on_presenter_state_changed")
@@ -165,6 +157,11 @@ func set_hud_presenter(presenter: Node) -> void:
 	_hud_presenter = presenter
 	if _hud_presenter and _hud_presenter.has_signal("presentation_changed") and not _hud_presenter.is_connected("presentation_changed", presenter_changed):
 		_hud_presenter.connect("presentation_changed", presenter_changed)
+
+	if maintenance_controller and maintenance_controller.has_method("set_hud_presenter"):
+		maintenance_controller.call("set_hud_presenter", presenter)
+	if relics_controller and relics_controller.has_method("set_hud_presenter"):
+		relics_controller.call("set_hud_presenter", presenter)
 
 	_update_all_content()
 
@@ -184,12 +181,20 @@ func _toggle_panel() -> void:
 		_open_panel(false)
 
 func _can_toggle_panel() -> bool:
-	if not _combat_visible or not _wave_manager:
+	if not _combat_visible:
 		return false
-	if GameState.get_state() != GameState.State.PLAYING:
+	var game_state := GameState.get_state()
+	if _hud_presenter and _hud_presenter.has_method("get_game_state"):
+		game_state = _hud_presenter.call("get_game_state")
+	if game_state != GameState.State.PLAYING:
 		return false
-	var wave_state: int = _wave_manager.get_state()
-	return wave_state == _wave_manager.State.ACTIVE_WAVE or wave_state == _wave_manager.State.BETWEEN_WAVES
+
+	var wave_state := -1
+	if _hud_presenter and _hud_presenter.has_method("get_wave_state"):
+		wave_state = _hud_presenter.call("get_wave_state")
+	elif _wave_manager:
+		wave_state = _wave_manager.get_state()
+	return wave_state == WaveManager.State.ACTIVE_WAVE or wave_state == WaveManager.State.BETWEEN_WAVES
 
 func _open_panel(force_maintenance_tab: bool) -> void:
 	if force_maintenance_tab:
@@ -247,7 +252,7 @@ func _ensure_embedded_map() -> void:
 
 	# 实例化嵌入式地图浏览器（只读、无 UI 覆盖层）
 	var map_viewer_instance := MapViewerScene.instantiate()
-	
+
 	# 设置全屏填充
 	map_viewer_instance.set_anchors_preset(Control.PRESET_FULL_RECT)
 	map_viewer_instance.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -287,8 +292,10 @@ func _update_tab_button_state(button: Button, is_active: bool) -> void:
 
 func _update_all_content() -> void:
 	_update_header_state()
-	_update_maintenance_page()
-	_update_relics_page()
+	if maintenance_controller and maintenance_controller.has_method("update_page"):
+		maintenance_controller.call("update_page", _get_wave_overview_state(), _get_ship_health_state())
+	if relics_controller and relics_controller.has_method("update_page"):
+		relics_controller.call("update_page", _get_relics_state())
 	_update_map_page()
 	call_deferred("_sync_dynamic_layouts")
 
@@ -296,135 +303,21 @@ func _update_header_state() -> void:
 	state_label.text = Localization.t(_get_panel_state_key())
 
 func _get_panel_state_key() -> String:
-	if not _wave_manager:
-		return "info.state.inactive"
-	match _wave_manager.get_state():
-		_wave_manager.State.ACTIVE_WAVE:
+	var wave_state := -1
+	if _hud_presenter and _hud_presenter.has_method("get_wave_state"):
+		wave_state = _hud_presenter.call("get_wave_state")
+	elif _wave_manager:
+		wave_state = _wave_manager.get_state()
+
+	match wave_state:
+		WaveManager.State.ACTIVE_WAVE:
 			return "info.state.read_only"
-		_wave_manager.State.BETWEEN_WAVES:
+		WaveManager.State.BETWEEN_WAVES:
 			return "info.state.editable"
-		_wave_manager.State.COMPLETE:
+		WaveManager.State.COMPLETE:
 			return "info.state.complete"
 		_:
 			return "info.state.inactive"
-
-func _update_maintenance_page() -> void:
-	if not _wave_manager:
-		return
-
-	var overview := _get_wave_overview_state()
-	var current_wave: int = int(overview.get("current_wave", 0))
-	var total_waves: int = int(overview.get("total_waves", 0))
-	var wave_state: int = int(overview.get("wave_state", -1))
-
-	match wave_state:
-		_wave_manager.State.ACTIVE_WAVE:
-			wave_label.text = Localization.t("info.maintenance.wave_active", "", {"wave": current_wave, "total": total_waves})
-			status_label.text = Localization.t("info.maintenance.active_wave")
-			timer_label.text = Localization.t("info.maintenance.actions_locked")
-		_wave_manager.State.BETWEEN_WAVES:
-			if current_wave <= 0:
-				wave_label.text = Localization.t("wave.ui.pre_battle_title")
-				status_label.text = Localization.t("wave.ui.pre_battle_status")
-			else:
-				wave_label.text = Localization.t("wave.ui.complete_title", "", {"wave": current_wave, "total": total_waves})
-				status_label.text = Localization.t("wave.ui.intermission_status")
-			timer_label.text = Localization.t("wave.ui.waiting_for_continue")
-		_wave_manager.State.COMPLETE:
-			wave_label.text = Localization.t("wave.ui.all_complete")
-			status_label.text = Localization.t("wave.ui.combat_finished")
-			timer_label.text = Localization.t("wave.ui.victory")
-		_:
-			wave_label.text = Localization.t("info.maintenance.wave_idle")
-			status_label.text = Localization.t("info.state.inactive")
-			timer_label.text = ""
-
-	enemy_info_label.text = _get_next_wave_info_text(overview.get("next_wave_enemy_counts", {}))
-	_update_ship_health_display()
-	upgrade_currency_label.text = Localization.t("shop.currency", "", {"amount": int(overview.get("currency", GameState.currency))})
-	maintenance_hint_label.text = Localization.t("info.maintenance.actions_locked") if bool(overview.get("read_only", _is_maintenance_read_only())) else Localization.t("info.maintenance.actions_available")
-
-	var maintenance_enabled := bool(overview.get("maintenance_enabled", _can_perform_maintenance()))
-	continue_button.disabled = not maintenance_enabled
-	repair_button.disabled = not maintenance_enabled
-	upgrade_button.disabled = false
-	button_container.modulate = Color(1, 1, 1, 1) if maintenance_enabled else Color(0.72, 0.72, 0.72, 1)
-	upgrade_section.visible = _upgrade_section_open
-	_update_upgrade_ui()
-
-func _get_next_wave_info_text(enemy_counts: Dictionary = {}) -> String:
-	if enemy_counts.is_empty() and _hud_presenter and _hud_presenter.has_method("get_wave_overview_state"):
-		enemy_counts = _hud_presenter.call("get_wave_overview_state").get("next_wave_enemy_counts", {})
-
-	if enemy_counts.is_empty() and (not _wave_manager or not _wave_manager.wave_set or not _wave_manager.wave_set.has_method("get_wave")):
-		return Localization.t("wave.ui.next_wave_unknown")
-	if enemy_counts.is_empty():
-		var next_wave_data = _wave_manager.wave_set.get_wave(_wave_manager.current_wave + 1)
-		if next_wave_data and next_wave_data.has_method("get_enemy_counts"):
-			enemy_counts = next_wave_data.get_enemy_counts()
-
-	if not enemy_counts.is_empty():
-		return Localization.t("wave.ui.next_wave_enemies", "", {
-			"tanks": enemy_counts.get("tank", 0),
-			"dogs": enemy_counts.get("mechanical_dog", 0),
-			"bosses": enemy_counts.get("boss_tank", 0),
-		})
-	return Localization.t("wave.ui.next_wave_unknown")
-
-func _update_ship_health_display() -> void:
-	var ship_health := _get_ship_health_state()
-	if bool(ship_health.get("has_ship", false)):
-		var current_health: float = float(ship_health.get("current", 0.0))
-		var max_health: float = float(ship_health.get("maximum", 100.0))
-		ship_health_bar.max_value = max_health
-		ship_health_bar.value = current_health
-		ship_health_label.text = Localization.t("info.maintenance.ship_health", "", {
-			"current": int(round(current_health)),
-			"maximum": int(round(max_health)),
-		})
-		return
-	ship_health_bar.max_value = 100.0
-	ship_health_bar.value = 0.0
-	ship_health_label.text = Localization.t("info.maintenance.ship_health", "", {"current": 0, "maximum": 0})
-
-func _update_upgrade_ui() -> void:
-	if not is_instance_valid(upgrade_section):
-		return
-	upgrade_section.visible = _upgrade_section_open
-	for child in upgrade_list.get_children():
-		child.queue_free()
-	for item in INTERMISSION_UPGRADES:
-		upgrade_list.add_child(_create_upgrade_row(item))
-	call_deferred("_sync_dynamic_layouts")
-
-func _create_upgrade_row(data: Dictionary) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.alignment = BoxContainer.ALIGNMENT_BEGIN
-	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_theme_constant_override("separation", 12)
-
-	var label := Label.new()
-	label.text = "%s\n%s" % [Localization.t(data["name_key"]), Localization.t(data["description_key"])]
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(label)
-
-	var price_label := Label.new()
-	price_label.text = "%d" % int(data["price"])
-	price_label.custom_minimum_size.x = 52
-	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	row.add_child(price_label)
-
-	var buy_button := Button.new()
-	buy_button.text = Localization.t("common.buy")
-	buy_button.custom_minimum_size.x = 96
-	buy_button.focus_mode = Control.FOCUS_NONE
-	buy_button.clip_text = true
-	buy_button.pressed.connect(_on_upgrade_purchase_pressed.bind(StringName(data["id"]), int(data["price"])))
-	row.add_child(buy_button)
-
-	_update_upgrade_row(StringName(data["id"]), int(data["price"]), buy_button, price_label)
-	return row
 
 func _sync_dynamic_layouts() -> void:
 	_sync_container_width(upgrade_section, upgrade_list)
@@ -479,140 +372,16 @@ func _sync_label_stack_width(row: Node, width: float) -> void:
 			label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			label.custom_minimum_size.x = width
 
-func _update_upgrade_row(upgrade_id: StringName, price: int, buy_button: Button, price_label: Label) -> void:
-	var is_owned := _is_upgrade_purchased(upgrade_id)
-	var can_afford := GameState.can_afford(price)
-	var read_only := _is_maintenance_read_only()
-	buy_button.disabled = is_owned or not can_afford or read_only
-
-	if is_owned:
-		buy_button.text = Localization.t("common.owned")
-		price_label.add_theme_color_override("font_color", Color.GRAY)
-	elif read_only:
-		buy_button.text = Localization.t("info.maintenance.locked_button")
-		price_label.add_theme_color_override("font_color", Color.DIM_GRAY)
-	elif not can_afford:
-		buy_button.text = Localization.t("common.buy")
-		price_label.add_theme_color_override("font_color", Color.RED)
-	else:
-		buy_button.text = Localization.t("common.buy")
-		price_label.remove_theme_color_override("font_color")
-
-func _update_relics_page() -> void:
-	var relic_state := _get_relics_state()
-	relic_summary_label.text = Localization.t("info.relics.summary", "", relic_state)
-	for child in relic_list.get_children():
-		child.queue_free()
-	for relic_data in RELIC_ITEMS:
-		relic_list.add_child(_create_relic_row(relic_data))
-
-func _create_relic_row(data: Dictionary) -> VBoxContainer:
-	var container := VBoxContainer.new()
-	container.add_theme_constant_override("separation", 4)
-	container.custom_minimum_size.y = 78
-	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var relic_id := StringName(data["id"])
-	var owned := GameState.has_relic(relic_id)
-	var title := Label.new()
-	title.text = "%s  [%s]" % [
-		Localization.t(data["name_key"]),
-		Localization.t("info.relics.owned_tag") if owned else Localization.t("info.relics.unowned_tag")
-	]
-	title.add_theme_font_size_override("font_size", 22)
-	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	container.add_child(title)
-
-	var desc := Label.new()
-	desc.text = Localization.t(data["description_key"])
-	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	desc.modulate = Color(1, 1, 1, 1) if owned else Color(0.62, 0.62, 0.62, 1)
-	container.add_child(desc)
-
-	return container
-
-func _update_map_page() -> void:
-	var map_state := _get_map_overview_state()
-	var graph = map_state.get("graph")
-	var visited_count := int(map_state.get("visited_count", 0))
-	var current_chapter := int(map_state.get("current_chapter", MapManager.current_chapter if MapManager else 0))
-	var reachable_count := int(map_state.get("reachable_count", 0))
-	map_overview_label.text = Localization.t("info.map.overview", "", {
-		"chapter": current_chapter + 1,
-		"visited": visited_count,
-	})
-	map_current_node_label.text = Localization.t("info.map.current_node", "", {
-		"node": _get_current_node_text(),
-	})
-	map_choices_label.text = Localization.t("info.map.reachable", "", {
-		"count": reachable_count,
-	})
-
-	for child in map_list.get_children():
-		child.queue_free()
-
-	if graph == null:
-		var empty_label := Label.new()
-		empty_label.text = Localization.t("info.map.none")
-		map_list.add_child(empty_label)
-		return
-
-	for chapter_index in range(FloorGraphScript.CHAPTER_COUNT):
-		map_list.add_child(_create_map_chapter_row(chapter_index, graph.get_chapter_nodes(chapter_index)))
-
-func _create_map_chapter_row(chapter_index: int, chapter_nodes: Array) -> VBoxContainer:
-	var container := VBoxContainer.new()
-	container.add_theme_constant_override("separation", 6)
-	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	var title := Label.new()
-	title.text = Localization.t("info.map.chapter_title", "", {"chapter": chapter_index + 1})
-	title.add_theme_font_size_override("font_size", 21)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	container.add_child(title)
-
-	var body := Label.new()
-	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.text = _build_chapter_summary_text(chapter_nodes)
-	container.add_child(body)
-
-	return container
-
-func _build_chapter_summary_text(chapter_nodes: Array) -> String:
-	if chapter_nodes.is_empty():
-		return Localization.t("info.map.none")
-	var parts: Array[String] = []
-	for node in chapter_nodes:
-		parts.append("%s · %s" % [_get_node_display_name(node), _get_node_state_text(node)])
-	return "\n".join(parts)
-
-func _get_current_node_text() -> String:
-	if MapManager.current_node == null:
-		return Localization.t("map.node_type.unknown")
-	return _get_node_display_name(MapManager.current_node)
-
-func _get_node_display_name(node) -> String:
-	var type_key := "map.node_type.%s" % String(node.get_type_name())
-	return Localization.t(type_key)
-
-func _get_node_state_text(node) -> String:
-	if MapManager.current_node != null and node.id == MapManager.current_node.id:
-		return Localization.t("info.map.state.current")
-	if node.visited:
-		return Localization.t("info.map.state.visited")
-	if MapManager.current_node != null and MapManager.current_node.connections.has(node.id):
-		return Localization.t("info.map.state.reachable")
-	return Localization.t("info.map.state.locked")
-
 func _is_maintenance_read_only() -> bool:
+	if _hud_presenter and _hud_presenter.has_method("is_maintenance_read_only"):
+		return _hud_presenter.call("is_maintenance_read_only")
 	if not _wave_manager:
 		return true
 	return _wave_manager.get_state() == _wave_manager.State.ACTIVE_WAVE
 
 func _can_perform_maintenance() -> bool:
+	if _hud_presenter and _hud_presenter.has_method("can_perform_maintenance"):
+		return _hud_presenter.call("can_perform_maintenance")
 	if not _wave_manager:
 		return false
 	return _wave_manager.get_state() == _wave_manager.State.BETWEEN_WAVES
@@ -646,68 +415,50 @@ func _on_repair_pressed() -> void:
 		if healed > 0:
 			EventBus.ship_health_changed.emit(ship.health_component.current_health, ship.max_health)
 	repair_button.disabled = true
-	_update_maintenance_page()
+	if maintenance_controller and maintenance_controller.has_method("update_page"):
+		maintenance_controller.call("update_page", _get_wave_overview_state(), _get_ship_health_state())
 
 func _on_upgrade_pressed() -> void:
 	if not _is_visible:
 		return
-	_upgrade_section_open = not _upgrade_section_open
-	_update_maintenance_page()
+	if maintenance_controller and maintenance_controller.has_method("toggle_upgrade_section"):
+		maintenance_controller.call("toggle_upgrade_section")
+	if maintenance_controller and maintenance_controller.has_method("update_page"):
+		maintenance_controller.call("update_page", _get_wave_overview_state(), _get_ship_health_state())
+	call_deferred("_sync_dynamic_layouts")
 
-func _on_upgrade_purchase_pressed(upgrade_id: StringName, price: int) -> void:
-	if _is_maintenance_read_only():
-		return
-	if _is_upgrade_purchased(upgrade_id):
-		return
-	if not GameState.spend_currency(price):
-		return
-
-	match upgrade_id:
-		&"turret_damage":
-			GameState.turret_damage_multiplier += 0.1
-			EventBus.turret_stats_refresh_requested.emit()
-		&"fire_control":
-			GameState.auto_fire_unlocked = true
-		_:
-			GameState.add_currency(price)
-			return
-
-	EventBus.upgrade_purchased.emit(String(upgrade_id), price)
+func _on_maintenance_content_update_requested() -> void:
 	_update_all_content()
 
-func _is_upgrade_purchased(upgrade_id: StringName) -> bool:
-	match upgrade_id:
-		&"turret_damage":
-			return GameState.turret_damage_multiplier > 1.0
-		&"fire_control":
-			return GameState.auto_fire_unlocked
-		_:
-			return false
-
 func _on_wave_started(_wave_number: int) -> void:
-	_upgrade_section_open = false
+	if maintenance_controller and maintenance_controller.has_method("set_upgrade_section_open"):
+		maintenance_controller.call("set_upgrade_section_open", false)
 	_close_panel()
 
 func _on_wave_complete(_wave_number: int) -> void:
 	_open_panel(true)
 
 func _on_all_waves_complete() -> void:
-	_upgrade_section_open = false
+	if maintenance_controller and maintenance_controller.has_method("set_upgrade_section_open"):
+		maintenance_controller.call("set_upgrade_section_open", false)
 	_update_all_content()
 
 func _on_intermission_started(_duration: float) -> void:
-	_upgrade_section_open = false
+	if maintenance_controller and maintenance_controller.has_method("set_upgrade_section_open"):
+		maintenance_controller.call("set_upgrade_section_open", false)
 	_open_panel(true)
 
 func _on_intermission_ended() -> void:
 	_update_all_content()
 
 func _on_game_over(_won: bool) -> void:
-	_upgrade_section_open = false
+	if maintenance_controller and maintenance_controller.has_method("set_upgrade_section_open"):
+		maintenance_controller.call("set_upgrade_section_open", false)
 	_close_panel()
 
 func _on_game_started() -> void:
-	_upgrade_section_open = false
+	if maintenance_controller and maintenance_controller.has_method("set_upgrade_section_open"):
+		maintenance_controller.call("set_upgrade_section_open", false)
 	_current_tab = InfoTab.MAINTENANCE
 	_update_tab_visibility()
 	_update_all_content()
@@ -725,30 +476,11 @@ func _on_wave_progress_updated(_enemies_remaining: int, _total_enemies: int) -> 
 func _get_wave_overview_state() -> Dictionary:
 	if _hud_presenter and _hud_presenter.has_method("get_wave_overview_state"):
 		return _hud_presenter.call("get_wave_overview_state")
-
-	return {
-		"wave_state": _wave_manager.get_state() if _wave_manager else -1,
-		"current_wave": _wave_manager.current_wave if _wave_manager else 0,
-		"total_waves": _wave_manager.total_waves if _wave_manager else 0,
-		"currency": GameState.currency,
-		"read_only": _is_maintenance_read_only(),
-		"maintenance_enabled": _can_perform_maintenance(),
-		"ship_health": _get_ship_health_state(),
-		"next_wave_enemy_counts": {},
-	}
+	return {}
 
 func _get_ship_health_state() -> Dictionary:
 	if _hud_presenter and _hud_presenter.has_method("get_ship_health_state"):
 		return _hud_presenter.call("get_ship_health_state")
-
-	var ship = get_tree().get_first_node_in_group("ship")
-	if ship and "health_component" in ship and ship.health_component:
-		return {
-			"current": ship.health_component.current_health,
-			"maximum": ship.health_component.max_health,
-			"has_ship": true,
-		}
-
 	return {
 		"current": 0.0,
 		"maximum": 100.0,
@@ -757,21 +489,88 @@ func _get_ship_health_state() -> Dictionary:
 
 func _get_relics_state() -> Dictionary:
 	if _hud_presenter and _hud_presenter.has_method("get_relics_state"):
-		return _hud_presenter.call("get_relics_state", RELIC_ITEMS.size())
-
+		return _hud_presenter.call("get_relics_state", RelicsPageControllerScript.RELIC_ITEMS.size())
 	return {
-		"owned": GameState.owned_relic_ids.size(),
-		"total": RELIC_ITEMS.size(),
+		"owned": 0,
+		"total": RelicsPageControllerScript.RELIC_ITEMS.size(),
 	}
 
 func _get_map_overview_state() -> Dictionary:
 	if _hud_presenter and _hud_presenter.has_method("get_map_overview_state"):
 		return _hud_presenter.call("get_map_overview_state")
+	return {}
 
-	return {
-		"graph": MapManager.get_graph(),
-		"current_chapter": MapManager.current_chapter,
-		"visited_count": MapManager.visited_nodes.size(),
-		"current_node": MapManager.current_node,
-		"reachable_count": MapManager.get_current_choices().size(),
-	}
+func _update_map_page() -> void:
+	var map_state := _get_map_overview_state()
+	var graph = map_state.get("graph")
+	var visited_count := int(map_state.get("visited_count", 0))
+	var current_chapter := int(map_state.get("current_chapter", 0))
+	var reachable_count := int(map_state.get("reachable_count", 0))
+	var current_node = map_state.get("current_node", null)
+	map_overview_label.text = Localization.t("info.map.overview", "", {
+		"chapter": current_chapter + 1,
+		"visited": visited_count,
+	})
+	map_current_node_label.text = Localization.t("info.map.current_node", "", {
+		"node": _get_current_node_text(current_node),
+	})
+	map_choices_label.text = Localization.t("info.map.reachable", "", {
+		"count": reachable_count,
+	})
+
+	for child in map_list.get_children():
+		child.queue_free()
+
+	if graph == null:
+		var empty_label := Label.new()
+		empty_label.text = Localization.t("info.map.none")
+		map_list.add_child(empty_label)
+		return
+
+	for chapter_index in range(FloorGraphScript.CHAPTER_COUNT):
+		map_list.add_child(_create_map_chapter_row(chapter_index, graph.get_chapter_nodes(chapter_index), current_node))
+
+func _create_map_chapter_row(chapter_index: int, chapter_nodes: Array, current_node = null) -> VBoxContainer:
+	var container := VBoxContainer.new()
+	container.add_theme_constant_override("separation", 6)
+	container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var title := Label.new()
+	title.text = Localization.t("info.map.chapter_title", "", {"chapter": chapter_index + 1})
+	title.add_theme_font_size_override("font_size", 21)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	container.add_child(title)
+
+	var body := Label.new()
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.text = _build_chapter_summary_text(chapter_nodes, current_node)
+	container.add_child(body)
+
+	return container
+
+func _build_chapter_summary_text(chapter_nodes: Array, current_node = null) -> String:
+	if chapter_nodes.is_empty():
+		return Localization.t("info.map.none")
+	var parts: Array[String] = []
+	for node in chapter_nodes:
+		parts.append("%s · %s" % [_get_node_display_name(node), _get_node_state_text(node, current_node)])
+	return "\n".join(parts)
+
+func _get_current_node_text(current_node = null) -> String:
+	if current_node == null:
+		return Localization.t("map.node_type.unknown")
+	return _get_node_display_name(current_node)
+
+func _get_node_display_name(node) -> String:
+	var type_key := "map.node_type.%s" % String(node.get_type_name())
+	return Localization.t(type_key)
+
+func _get_node_state_text(node, current_node = null) -> String:
+	if current_node != null and node.id == current_node.id:
+		return Localization.t("info.map.state.current")
+	if node.visited:
+		return Localization.t("info.map.state.visited")
+	if current_node != null and current_node.connections.has(node.id):
+		return Localization.t("info.map.state.reachable")
+	return Localization.t("info.map.state.locked")
