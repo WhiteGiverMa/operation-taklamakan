@@ -3,6 +3,8 @@ extends CharacterBody2D
 
 ## 舰上 AI 队友：优先维修瘫痪炮塔；空闲时自动索敌射击。
 
+const WEAPON_DEF := preload("res://scripts/resources/weapon_definition.gd")
+
 signal repair_started(turret: Turret)
 signal repair_completed(turret: Turret)
 
@@ -13,10 +15,8 @@ signal repair_completed(turret: Turret)
 @export var repair_stop_distance: float = 44.0
 @export var idle_anchor: Vector2 = Vector2(0.0, 90.0)
 @export var idle_reposition_tolerance: float = 12.0
-@export var weapon_damage: float = 6.0
-@export var weapon_fire_rate: float = 0.45
-@export var weapon_projectile_speed: float = 600.0
-@export var attack_range: float = 900.0
+@export var weapon_definition: Resource
+@export var repair_scan_interval: float = 0.2
 
 const SHIP_BOUNDS_X: float = 380.0
 const SHIP_BOUNDS_Y: float = 180.0
@@ -30,17 +30,25 @@ enum MaidState {
 }
 
 var _state: MaidState = MaidState.IDLE
+var _weapon_damage: float = 6.0
+var _weapon_fire_rate: float = 0.45
+var _weapon_projectile_speed: float = 600.0
+var _attack_range: float = 900.0
 var _knockback_velocity: Vector2 = Vector2.ZERO
 var _impact_cooldown_timer: float = 0.0
 var _can_fire: bool = true
 var _fire_timer: float = 0.0
 var _repair_timer: float = 0.0
+var _repair_scan_timer: float = 0.0
+var _repair_state_announced: bool = false
 var _repair_target: Turret
 var _combat_target: Node2D
+var _tracked_turrets: Array[Turret] = []
 
 @onready var visual: ColorRect = $Visual
 @onready var barrel: Node2D = $Barrel
 @onready var muzzle: Marker2D = $Barrel/Muzzle
+@onready var repair_indicator: ColorRect = $RepairIndicator
 
 
 func _ready() -> void:
@@ -49,6 +57,10 @@ func _ready() -> void:
 	set_collision_layer_value(6, true)
 	set_collision_mask_value(3, true)
 	set_collision_mask_value(5, true)
+	_apply_weapon_definition()
+	_register_existing_turrets()
+	if not EventBus.turret_placed.is_connected(_on_turret_placed):
+		EventBus.turret_placed.connect(_on_turret_placed, CONNECT_REFERENCE_COUNTED)
 	_update_visual_state()
 
 
@@ -56,8 +68,7 @@ func _physics_process(delta: float) -> void:
 	_update_impact_cooldown(delta)
 	_update_fire_cooldown(delta)
 	_knockback_velocity = _knockback_velocity.move_toward(Vector2.ZERO, knockback_decay * delta)
-
-	_refresh_repair_target()
+	_update_repair_scan(delta)
 	_refresh_combat_target()
 	_update_state()
 	_process_state(delta)
@@ -78,7 +89,71 @@ func receive_impact(data: DamageData) -> bool:
 	if _knockback_velocity.length() > max_knockback_speed:
 		_knockback_velocity = _knockback_velocity.normalized() * max_knockback_speed
 	_repair_timer = 0.0
+	_repair_state_announced = false
 	return true
+
+
+func _apply_weapon_definition() -> void:
+	if weapon_definition == null:
+		return
+	if not (weapon_definition is WEAPON_DEF):
+		push_warning("[BattleMaid] weapon_definition 不是 WeaponDefinition，继续使用默认武器参数")
+		return
+	_weapon_damage = weapon_definition.damage
+	_weapon_fire_rate = weapon_definition.fire_rate
+	_weapon_projectile_speed = weapon_definition.projectile_speed
+	_attack_range = weapon_definition.attack_range
+
+
+func _register_existing_turrets() -> void:
+	var ship := get_parent() as Landship
+	if ship == null:
+		return
+	for slot in ship.get_turret_slots():
+		for child in slot.get_children():
+			if child is Turret:
+				_track_turret(child as Turret)
+	_refresh_repair_target()
+
+
+func _track_turret(turret: Turret) -> void:
+	if turret == null or not is_instance_valid(turret):
+		return
+	if _tracked_turrets.has(turret):
+		return
+	_tracked_turrets.append(turret)
+	if turret.toughness_component != null:
+		if not turret.toughness_component.paralysis_started.is_connected(_on_turret_paralysis_started):
+			turret.toughness_component.paralysis_started.connect(_on_turret_paralysis_started.bind(turret), CONNECT_REFERENCE_COUNTED)
+		if not turret.toughness_component.paralysis_ended.is_connected(_on_turret_paralysis_ended):
+			turret.toughness_component.paralysis_ended.connect(_on_turret_paralysis_ended.bind(turret), CONNECT_REFERENCE_COUNTED)
+
+
+func _on_turret_placed(turret: Node2D, _slot_index: int) -> void:
+	if turret is Turret:
+		_track_turret(turret as Turret)
+		_refresh_repair_target()
+
+
+func _on_turret_paralysis_started(turret: Turret) -> void:
+	_track_turret(turret)
+	_refresh_repair_target()
+
+
+func _on_turret_paralysis_ended(turret: Turret) -> void:
+	if turret == _repair_target and turret.toughness_component != null and not turret.toughness_component.is_paralyzed():
+		_repair_target = null
+		_repair_timer = 0.0
+		_repair_state_announced = false
+	_refresh_repair_target()
+
+
+func _update_repair_scan(delta: float) -> void:
+	_repair_scan_timer -= delta
+	if _repair_scan_timer > 0.0:
+		return
+	_repair_scan_timer = repair_scan_interval
+	_refresh_repair_target()
 
 
 func _update_impact_cooldown(delta: float) -> void:
@@ -94,30 +169,22 @@ func _update_fire_cooldown(delta: float) -> void:
 
 
 func _refresh_repair_target() -> void:
-	var ship := get_parent() as Landship
-	if ship == null:
-		_repair_target = null
-		return
-
 	var closest: Turret = null
 	var closest_distance := INF
-	for slot in ship.get_turret_slots():
-		for child in slot.get_children():
-			if not (child is Turret):
-				continue
-			var turret := child as Turret
-			if turret == null or not is_instance_valid(turret):
-				continue
-			if turret.toughness_component == null or not turret.toughness_component.is_paralyzed():
-				continue
-			var distance := global_position.distance_to(turret.global_position)
-			if distance < closest_distance:
-				closest = turret
-				closest_distance = distance
+	for turret in _tracked_turrets:
+		if turret == null or not is_instance_valid(turret):
+			continue
+		if turret.toughness_component == null or not turret.toughness_component.is_paralyzed():
+			continue
+		var distance := global_position.distance_to(turret.global_position)
+		if distance < closest_distance:
+			closest = turret
+			closest_distance = distance
 
 	_repair_target = closest
 	if _repair_target == null:
 		_repair_timer = 0.0
+		_repair_state_announced = false
 
 
 func _refresh_combat_target() -> void:
@@ -132,7 +199,7 @@ func _refresh_combat_target() -> void:
 			continue
 		var enemy := candidate as Node2D
 		var distance := global_position.distance_to(enemy.global_position)
-		if distance > attack_range:
+		if distance > _attack_range:
 			continue
 		if distance < closest_distance:
 			closest = enemy
@@ -161,34 +228,40 @@ func _set_state(next_state: MaidState) -> void:
 		return
 	if next_state != MaidState.REPAIRING:
 		_repair_timer = 0.0
+		_repair_state_announced = false
 	_state = next_state
 
 
 func _process_state(delta: float) -> void:
 	match _state:
 		MaidState.MOVING_TO_REPAIR:
+			if _repair_target == null or not is_instance_valid(_repair_target):
+				velocity = _knockback_velocity
+				return
 			_move_toward_global(_repair_target.global_position)
 			_aim_at(_repair_target.global_position)
 		MaidState.REPAIRING:
 			velocity = _knockback_velocity
 			if _repair_target == null or not is_instance_valid(_repair_target):
 				_repair_timer = 0.0
+				_repair_state_announced = false
 				return
 			_aim_at(_repair_target.global_position)
+			if not _repair_state_announced:
+				repair_started.emit(_repair_target)
+				_repair_state_announced = true
 			_repair_timer += delta
 			if _repair_timer >= _repair_target.repair_duration:
 				var repaired := _repair_target.toughness_component.repair_full()
 				if repaired > 0.0:
 					repair_completed.emit(_repair_target)
 				_repair_timer = 0.0
+				_repair_state_announced = false
 				_repair_target = null
 		MaidState.COMBAT:
 			_move_toward_local(idle_anchor)
 		MaidState.IDLE:
 			_move_toward_local(idle_anchor)
-
-	if _state == MaidState.REPAIRING and _repair_timer <= delta:
-		repair_started.emit(_repair_target)
 
 
 func _move_toward_global(target_global: Vector2) -> void:
@@ -214,7 +287,7 @@ func _handle_attack() -> void:
 	if _combat_target == null or not is_instance_valid(_combat_target):
 		return
 
-	var lead_position := _calculate_lead_position(muzzle.global_position, _combat_target, weapon_projectile_speed)
+	var lead_position := _calculate_lead_position(muzzle.global_position, _combat_target, _weapon_projectile_speed)
 	_aim_at(lead_position)
 	_fire_at_position(lead_position)
 
@@ -265,7 +338,7 @@ func _calculate_lead_position(origin: Vector2, enemy: Node2D, projectile_speed: 
 
 func _fire_at_position(target_position: Vector2) -> void:
 	_can_fire = false
-	_fire_timer = weapon_fire_rate
+	_fire_timer = _weapon_fire_rate
 
 	var direction := target_position - muzzle.global_position
 	if direction.length_squared() <= 0.001:
@@ -273,13 +346,13 @@ func _fire_at_position(target_position: Vector2) -> void:
 	var normalized_direction := direction.normalized()
 	var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
 	if spawner != null and spawner.has_method("spawn_projectile"):
-		spawner.spawn_projectile(muzzle.global_position, normalized_direction, weapon_projectile_speed, weapon_damage, self)
+		spawner.spawn_projectile(muzzle.global_position, normalized_direction, _weapon_projectile_speed, _weapon_damage, self)
 	else:
 		push_warning("[BattleMaid] ProjectileSpawner 不可用，使用回退逻辑")
 		var projectile_scene := preload("res://scenes/projectile.tscn")
 		var projectile := projectile_scene.instantiate() as Node2D
 		projectile.global_position = muzzle.global_position
-		projectile.setup(normalized_direction, weapon_projectile_speed, weapon_damage, self)
+		projectile.setup(normalized_direction, _weapon_projectile_speed, _weapon_damage, self)
 		get_tree().root.add_child(projectile)
 
 
@@ -321,3 +394,12 @@ func _update_visual_state() -> void:
 			visual.color = Color(0.85, 0.45, 0.8, 1.0)
 		_:
 			visual.color = Color(0.9, 0.65, 0.85, 1.0)
+
+	repair_indicator.visible = _state == MaidState.REPAIRING
+	if repair_indicator.visible:
+		var progress_ratio := 0.0
+		if _repair_target != null and is_instance_valid(_repair_target) and _repair_target.repair_duration > 0.0:
+			progress_ratio = clampf(_repair_timer / _repair_target.repair_duration, 0.0, 1.0)
+		repair_indicator.modulate.a = 0.35 + progress_ratio * 0.65
+	else:
+		repair_indicator.modulate.a = 0.0

@@ -4,23 +4,22 @@ extends CharacterBody2D
 ## Moves with WASD in local coordinates relative to parent ship
 ## Constrained to ship bounds
 
+const WEAPON_DEF := preload("res://scripts/resources/weapon_definition.gd")
+
 @export var speed: float = 250.0
 @export var knockback_decay: float = 1400.0
 @export var max_knockback_speed: float = 520.0
 @export var impact_cooldown: float = 0.18
+@export var weapon_definition: Resource
 
 # Ship bounds (half-extents)
 const SHIP_BOUNDS_X: float = 380.0
 const SHIP_BOUNDS_Y: float = 180.0
-
-# 武器相关常量
-# 使用 ProjectileSpawner 代替直接实例化
-# const PROJECTILE_SCENE := preload("res://scenes/projectile.tscn")
-const WEAPON_DAMAGE := 8.0
-const WEAPON_FIRE_RATE := 0.2
-const WEAPON_PROJECTILE_SPEED := 600.0
 const FIRE_INPUT_BUFFER := 0.12
 
+var _weapon_damage: float = 8.0
+var _weapon_fire_rate: float = 0.2
+var _weapon_projectile_speed: float = 600.0
 var _knockback_velocity: Vector2 = Vector2.ZERO
 var _impact_cooldown_timer: float = 0.0
 
@@ -38,6 +37,7 @@ func _ready() -> void:
 	set_collision_layer_value(6, true)
 	set_collision_mask_value(3, true)
 	set_collision_mask_value(5, true)
+	_apply_weapon_definition()
 	if not InputManager.fire_action.just_triggered.is_connected(_on_fire_action_just_triggered):
 		InputManager.fire_action.just_triggered.connect(_on_fire_action_just_triggered)
 
@@ -79,6 +79,16 @@ func receive_impact(data: DamageData) -> bool:
 
 func is_player() -> bool:
 	return true
+
+func _apply_weapon_definition() -> void:
+	if weapon_definition == null:
+		return
+	if not (weapon_definition is WEAPON_DEF):
+		push_warning("[Player] weapon_definition 不是 WeaponDefinition，继续使用默认武器参数")
+		return
+	_weapon_damage = weapon_definition.damage
+	_weapon_fire_rate = weapon_definition.fire_rate
+	_weapon_projectile_speed = weapon_definition.projectile_speed
 
 func _global_vector_to_local(global_vector: Vector2) -> Vector2:
 	var parent_2d := get_parent() as Node2D
@@ -163,7 +173,7 @@ func _handle_player_shooting() -> void:
 	_fire_projectile(direction)
 	_fire_buffer_timer = 0.0
 	_can_fire = false
-	_fire_timer = WEAPON_FIRE_RATE
+	_fire_timer = _weapon_fire_rate
 
 func _fire_projectile(direction: Vector2) -> void:
 	# 使用 ProjectileSpawner 生成投射物
@@ -172,8 +182,8 @@ func _fire_projectile(direction: Vector2) -> void:
 		spawner.spawn_projectile(
 			global_position,
 			direction,
-			WEAPON_PROJECTILE_SPEED,
-			WEAPON_DAMAGE,
+			_weapon_projectile_speed,
+			_weapon_damage,
 			self
 		)
 	else:
@@ -182,5 +192,5 @@ func _fire_projectile(direction: Vector2) -> void:
 		var projectile_scene := preload("res://scenes/projectile.tscn")
 		var projectile := projectile_scene.instantiate() as Node2D
 		projectile.global_position = global_position
-		projectile.setup(direction, WEAPON_PROJECTILE_SPEED, WEAPON_DAMAGE, self)
+		projectile.setup(direction, _weapon_projectile_speed, _weapon_damage, self)
 		get_tree().root.add_child(projectile)
