@@ -1,12 +1,14 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_r7eix"]
+[ext_resource type="Resource" path="res://resources/weapons/player_sidearm.tres" id="2_weapon"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_player"]
 radius = 15.0
 
 [node name="root" type="CharacterBody2D" unique_id=618174746]
 script = ExtResource("1_r7eix")
+weapon_definition = ExtResource("2_weapon")
 
 [node name="Visual" type="ColorRect" parent="." unique_id=76579810]
 offset_left = -10.0
