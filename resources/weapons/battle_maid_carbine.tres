@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/weapon_definition.gd" id="1_weapon"]
+
+[resource]
+script = ExtResource("1_weapon")
+id = &"battle_maid_carbine"
+display_name = "Battle Maid Carbine"
+description = "战斗女仆用于掩护射击的轻型卡宾枪。"
+damage = 6.0
+fire_rate = 0.45
+projectile_speed = 600.0
+attack_range = 900.0
+muzzle_flash_color = Color(0.95, 0.55, 0.85, 1)
