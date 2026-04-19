@@ -50,13 +50,8 @@ func _handle_player_collisions() -> void:
 	if _collision_impact_timer > 0.0:
 		return
 
-	for i in get_slide_collision_count():
-		var collision := get_slide_collision(i)
-		var collider := collision.get_collider()
-		if collider != null and collider.has_method(&"receive_impact"):
-			if _apply_player_impact(collider):
-				_collision_impact_timer = collision_impact_cooldown
-				return
+	if _try_apply_player_impact_from_slide_collisions():
+		_collision_impact_timer = collision_impact_cooldown
 
 func _fire_at_target(target_pos: Vector2) -> void:
 	_can_fire = false

@@ -48,12 +48,29 @@ func _find_target() -> void:
 	_target = TARGET_LOCATOR.find_primary_ship(get_tree())
 
 
+func _ensure_target() -> void:
+	if _target != null and is_instance_valid(_target):
+		return
+	_find_target()
+
+
 func _get_target_position() -> Vector2:
+	_ensure_target()
 	return TARGET_LOCATOR.resolve_position(_target, get_viewport())
 
 
 func _apply_player_impact(collider: Object) -> bool:
 	return IMPACT_HELPER.apply_receive_impact(collider, self, global_position, velocity, player_knockback_force)
+
+
+func _try_apply_player_impact_from_slide_collisions() -> bool:
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider()
+		if collider != null and collider.has_method(&"receive_impact"):
+			if _apply_player_impact(collider):
+				return true
+	return false
 
 
 func take_damage(data: DamageData) -> float:
