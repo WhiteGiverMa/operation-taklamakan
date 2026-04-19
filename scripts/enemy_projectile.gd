@@ -106,10 +106,8 @@ func _recycle_to_pool() -> void:
 	
 	# 尝试通过 ProjectileSpawner 回收
 	if is_inside_tree():
-		var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
-		if spawner and spawner.has_method("return_to_pool"):
-			spawner.return_to_pool(self, true)
-			return
+		ProjectileSpawner.return_to_pool(self, true)
+		return
 	
 	# 回退：直接销毁
 	queue_free()
