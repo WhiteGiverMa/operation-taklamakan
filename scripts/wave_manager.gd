@@ -1,5 +1,7 @@
 extends Node
 
+const ENEMY_SPAWN_QUEUE_BUILDER := preload("res://scripts/enemy_spawn_queue_builder.gd")
+
 ## Wave manager with state machine for wave progression and enemy spawning.
 ## Handles INACTIVE, BETWEEN_WAVES, ACTIVE_WAVE, and COMPLETE states.
 
@@ -314,37 +316,15 @@ func _generate_wave_config(wave_num: int) -> void:
 	print("WaveManager: Wave ", wave_num, " config - Tanks: ", tank_count, ", Dogs: ", dog_count)
 
 func _populate_spawn_queue() -> void:
-	_spawn_queue.clear()
-	
-	var tank_count: int = _current_wave_config.get("tank_count", 0)
-	var dog_count: int = _current_wave_config.get("dog_count", 0)
-	var boss_tank_count: int = _current_wave_config.get("boss_tank_count", 0)
-	
-	# Add tanks to queue
-	for i in range(tank_count):
-		_spawn_queue.append({
-			"type": "tank",
-			"scene": tank_scene,
-			"spawn_point": randi() % _spawn_points.size() if not _spawn_points.is_empty() else 0
-		})
-	
-	# Add dogs to queue
-	for i in range(dog_count):
-		_spawn_queue.append({
-			"type": "mechanical_dog",
-			"scene": mechanical_dog_scene,
-			"spawn_point": randi() % _spawn_points.size() if not _spawn_points.is_empty() else 0
-		})
-
-	for i in range(boss_tank_count):
-		_spawn_queue.append({
-			"type": "boss_tank",
-			"scene": boss_tank_scene,
-			"spawn_point": randi() % _spawn_points.size() if not _spawn_points.is_empty() else 0
-		})
-	
-	# Shuffle spawn queue for variety
-	_spawn_queue.shuffle()
+	_spawn_queue = ENEMY_SPAWN_QUEUE_BUILDER.build_queue(
+		_current_wave_config,
+		{
+			"tank": tank_scene,
+			"mechanical_dog": mechanical_dog_scene,
+			"boss_tank": boss_tank_scene,
+		},
+		_spawn_points.size()
+	)
 
 func _get_wave_sequence_for_chapter(chapter: int) -> Array[int]:
 	if chapter_wave_plan != null and chapter_wave_plan.has_method("get_sequence"):
