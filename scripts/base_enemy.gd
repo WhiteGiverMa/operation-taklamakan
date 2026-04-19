@@ -4,6 +4,8 @@ extends CharacterBody2D
 ## 敌人基础类：封装目标查找、受伤反馈、血条与死亡事件。
 
 const FLOATING_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
+const TARGET_LOCATOR := preload("res://scripts/target_locator.gd")
+const IMPACT_HELPER := preload("res://scripts/impact_helper.gd")
 const HEALTH_BAR_DISPLAY_DURATION: float = 1.5
 
 @export var currency_reward: int = 0
@@ -43,36 +45,15 @@ func _update_enemy_feedback(delta: float) -> void:
 
 
 func _find_target() -> void:
-	var landship := get_tree().get_first_node_in_group("ship") as Node2D
-	if landship != null:
-		_target = landship
-		return
-
-	landship = get_tree().root.find_child("Landship", true, false) as Node2D
-	_target = landship
+	_target = TARGET_LOCATOR.find_primary_ship(get_tree())
 
 
 func _get_target_position() -> Vector2:
-	if _target != null and is_instance_valid(_target):
-		return _target.global_position
-	return get_viewport().get_visible_rect().size * 0.5
+	return TARGET_LOCATOR.resolve_position(_target, get_viewport())
 
 
 func _apply_player_impact(collider: Object) -> bool:
-	var player := collider as Node2D
-	if player == null:
-		return false
-
-	var push_direction := player.global_position - global_position
-	if push_direction.length_squared() <= 0.001:
-		push_direction = velocity
-	if push_direction.length_squared() <= 0.001:
-		push_direction = Vector2.RIGHT
-
-	var impact_data := DamageData.new(0.0, self)
-	impact_data.damage_type = "impact"
-	impact_data.knockback = push_direction.normalized() * player_knockback_force
-	return player.receive_impact(impact_data)
+	return IMPACT_HELPER.apply_receive_impact(collider, self, global_position, velocity, player_knockback_force)
 
 
 func take_damage(data: DamageData) -> float:

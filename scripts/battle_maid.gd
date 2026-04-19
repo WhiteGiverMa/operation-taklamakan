@@ -5,6 +5,7 @@ extends CharacterBody2D
 
 const WEAPON_DEF := preload("res://scripts/resources/weapon_definition.gd")
 const LEAD_CALCULATOR := preload("res://scripts/lead_calculator.gd")
+const TARGET_LOCATOR := preload("res://scripts/target_locator.gd")
 
 signal repair_started(turret: Turret)
 signal repair_completed(turret: Turret)
@@ -193,20 +194,7 @@ func _refresh_combat_target() -> void:
 		_combat_target = null
 		return
 
-	var closest: Node2D = null
-	var closest_distance := INF
-	for candidate in get_tree().get_nodes_in_group("enemies"):
-		if not (candidate is Node2D) or not is_instance_valid(candidate):
-			continue
-		var enemy := candidate as Node2D
-		var distance := global_position.distance_to(enemy.global_position)
-		if distance > _attack_range:
-			continue
-		if distance < closest_distance:
-			closest = enemy
-			closest_distance = distance
-
-	_combat_target = closest
+	_combat_target = TARGET_LOCATOR.find_closest_node_in_group(get_tree(), global_position, &"enemies", _attack_range, self)
 
 
 func _update_state() -> void:
