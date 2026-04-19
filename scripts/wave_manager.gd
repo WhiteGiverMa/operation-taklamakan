@@ -27,6 +27,7 @@ enum State {
 @export var spawn_interval: float = 2.0
 @export var intermission_duration: float = 10.0
 @export var use_wave_set: bool = true
+@export var chapter_wave_plan: Resource
 
 @export_category("Spawn Area")
 @export var offscreen_spawn_margin: float = 260.0
@@ -63,6 +64,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_find_spawn_points()
 	_connect_signals()
+	if chapter_wave_plan == null:
+		chapter_wave_plan = load("res://resources/waves/chapter_wave_plan.tres")
 	
 	# Load default wave set if not assigned
 	if use_wave_set and not wave_set:
@@ -344,6 +347,9 @@ func _populate_spawn_queue() -> void:
 	_spawn_queue.shuffle()
 
 func _get_wave_sequence_for_chapter(chapter: int) -> Array[int]:
+	if chapter_wave_plan != null and chapter_wave_plan.has_method("get_sequence"):
+		return chapter_wave_plan.get_sequence(chapter)
+
 	match chapter:
 		1:
 			return [1, 2]

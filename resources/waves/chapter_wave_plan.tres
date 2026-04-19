@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ChapterWavePlan" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/chapter_wave_plan.gd" id="1_plan"]
+
+[resource]
+script = ExtResource("1_plan")
+chapter_1 = PackedInt32Array(1, 2)
+chapter_2 = PackedInt32Array(3, 4)
+chapter_3 = PackedInt32Array(5)
