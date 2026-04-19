@@ -11,6 +11,7 @@ signal turret_fired(target: Vector2)
 const TOUGHNESS_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
 # Preload TurretDefinition to ensure type is available
 const _TurretDefinitionScript := preload("res://scripts/resources/turret_definition.gd")
+const LEAD_CALCULATOR := preload("res://scripts/lead_calculator.gd")
 
 ## 炮塔类型定义（设置后自动应用）
 @export var definition: Resource:
@@ -190,69 +191,6 @@ func _handle_auto_fire() -> void:
 	_fire_at_position(lead_pos, target)
 
 
-## 计算预瞄提前量：根据敌人当前速度和投射物速度，求解拦截点
-## 经典弹道拦截二次方程：|D + V*t|² = (s*t)²
-## 展开为 (V·V - s²)t² + 2(D·V)t + D·D = 0
-## D=敌我相对位置, V=敌速, s=弹速, t=飞行时间
-## 当无有效解时（弹速不足或时间倒流），回退到敌人当前位置
-func _calculate_lead_position(turret_pos: Vector2, enemy: Node2D, proj_speed: float) -> Vector2:
-	# 读取敌人速度（CharacterBody2D.velocity，是 move_and_slide 后的近似值）
-	var enemy_velocity := Vector2.ZERO
-	if enemy is CharacterBody2D:
-		enemy_velocity = enemy.velocity
-
-	# 敌人静止 → 无需预瞄
-	if enemy_velocity.length_squared() < 0.01:
-		return enemy.global_position
-
-	# 投射物速度为零或负值 → 安全回退
-	if proj_speed <= 0.0:
-		return enemy.global_position
-
-	var relative_pos := enemy.global_position - turret_pos  # D
-	var speed_sq := proj_speed * proj_speed                 # s²
-	var vel_sq := enemy_velocity.length_squared()           # V·V
-
-	# 二次方程 at² + bt + c = 0
-	var a := vel_sq - speed_sq
-	var b := 2.0 * relative_pos.dot(enemy_velocity)
-	var c := relative_pos.length_squared()
-
-	# 退化情况：敌速与弹速接近（a ≈ 0）→ 线性求解
-	if is_equal_approx(vel_sq, speed_sq):
-		if absf(b) < 0.001:
-			return enemy.global_position
-		var t_linear := -c / b
-		if t_linear < 0.0:
-			return enemy.global_position
-		return enemy.global_position + enemy_velocity * t_linear
-
-	var discriminant := b * b - 4.0 * a * c
-	if discriminant < 0.0:
-		# 无实数解 → 弹速不足以拦截，瞄当前位置
-		return enemy.global_position
-
-	var sqrt_disc: float = sqrt(discriminant)
-	var two_a: float = 2.0 * a
-	var t1: float = (-b - sqrt_disc) / two_a
-	var t2: float = (-b + sqrt_disc) / two_a
-
-	# 取最小的非负时间解（更快命中）
-	var t: float = -1.0
-	if t1 >= 0.0 and t2 >= 0.0:
-		t = minf(t1, t2)
-	elif t1 >= 0.0:
-		t = t1
-	elif t2 >= 0.0:
-		t = t2
-
-	if t < 0.0:
-		# 两个解均为负 → 无法拦截
-		return enemy.global_position
-
-	return enemy.global_position + enemy_velocity * t
-
-
 ## 寻找最佳自动射击目标：基于预瞄提前量位置判断射界和距离
 ## 返回 { target: Node2D, lead_position: Vector2 } 或空字典（无目标）
 func _find_auto_target() -> Dictionary:
@@ -271,7 +209,7 @@ func _find_auto_target() -> Dictionary:
 			continue
 		# 用预瞄点判定射界，而非敌人当前位置
 		# 避免选到"当前在射界但提前量不在射界"的目标
-		var lead_pos := _calculate_lead_position(muzzle.global_position, enemy, projectile_speed)
+		var lead_pos := LEAD_CALCULATOR.calculate_intercept_point(muzzle.global_position, enemy, projectile_speed)
 		if not _resolve_fire_solution(lead_pos).get("within_arc", false):
 			continue
 		if distance < closest_distance:
@@ -297,23 +235,13 @@ func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
 	var direction := Vector2.RIGHT.rotated(firing_angle)
 
 	# 使用 ProjectileSpawner 生成投射物
-	var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
-	if spawner and spawner.has_method("spawn_projectile"):
-		spawner.spawn_projectile(
-			muzzle.global_position,
-			direction,
-			projectile_speed,
-			projectile_damage,
-			self
-		)
-	else:
-		# 回退：直接实例化（兼容旧逻辑）
-		push_warning("[Turret] ProjectileSpawner 不可用，使用回退逻辑")
-		var projectile_scene := preload("res://scenes/projectile.tscn")
-		var projectile := projectile_scene.instantiate() as Node2D
-		projectile.global_position = muzzle.global_position
-		projectile.setup(direction, projectile_speed, projectile_damage, self)
-		get_tree().root.add_child(projectile)
+	ProjectileSpawner.spawn_projectile(
+		muzzle.global_position,
+		direction,
+		projectile_speed,
+		projectile_damage,
+		self
+	)
 
 	turret_fired.emit(target_position)
 	EventBus.turret_fired.emit(self, target)

@@ -4,6 +4,7 @@ extends CharacterBody2D
 ## 舰上 AI 队友：优先维修瘫痪炮塔；空闲时自动索敌射击。
 
 const WEAPON_DEF := preload("res://scripts/resources/weapon_definition.gd")
+const LEAD_CALCULATOR := preload("res://scripts/lead_calculator.gd")
 
 signal repair_started(turret: Turret)
 signal repair_completed(turret: Turret)
@@ -287,53 +288,9 @@ func _handle_attack() -> void:
 	if _combat_target == null or not is_instance_valid(_combat_target):
 		return
 
-	var lead_position := _calculate_lead_position(muzzle.global_position, _combat_target, _weapon_projectile_speed)
+	var lead_position := LEAD_CALCULATOR.calculate_intercept_point(muzzle.global_position, _combat_target, _weapon_projectile_speed)
 	_aim_at(lead_position)
 	_fire_at_position(lead_position)
-
-
-func _calculate_lead_position(origin: Vector2, enemy: Node2D, projectile_speed: float) -> Vector2:
-	var enemy_velocity := Vector2.ZERO
-	if enemy is CharacterBody2D:
-		enemy_velocity = enemy.velocity
-
-	if enemy_velocity.length_squared() < 0.01 or projectile_speed <= 0.0:
-		return enemy.global_position
-
-	var relative_pos := enemy.global_position - origin
-	var speed_sq := projectile_speed * projectile_speed
-	var vel_sq := enemy_velocity.length_squared()
-	var a := vel_sq - speed_sq
-	var b := 2.0 * relative_pos.dot(enemy_velocity)
-	var c := relative_pos.length_squared()
-
-	if is_equal_approx(vel_sq, speed_sq):
-		if absf(b) < 0.001:
-			return enemy.global_position
-		var t_linear := -c / b
-		if t_linear < 0.0:
-			return enemy.global_position
-		return enemy.global_position + enemy_velocity * t_linear
-
-	var discriminant := b * b - 4.0 * a * c
-	if discriminant < 0.0:
-		return enemy.global_position
-
-	var sqrt_disc := sqrt(discriminant)
-	var two_a := 2.0 * a
-	var t1 := (-b - sqrt_disc) / two_a
-	var t2 := (-b + sqrt_disc) / two_a
-	var intercept_time := -1.0
-	if t1 >= 0.0 and t2 >= 0.0:
-		intercept_time = minf(t1, t2)
-	elif t1 >= 0.0:
-		intercept_time = t1
-	elif t2 >= 0.0:
-		intercept_time = t2
-
-	if intercept_time < 0.0:
-		return enemy.global_position
-	return enemy.global_position + enemy_velocity * intercept_time
 
 
 func _fire_at_position(target_position: Vector2) -> void:
@@ -344,16 +301,7 @@ func _fire_at_position(target_position: Vector2) -> void:
 	if direction.length_squared() <= 0.001:
 		return
 	var normalized_direction := direction.normalized()
-	var spawner := get_tree().root.get_node_or_null("ProjectileSpawner")
-	if spawner != null and spawner.has_method("spawn_projectile"):
-		spawner.spawn_projectile(muzzle.global_position, normalized_direction, _weapon_projectile_speed, _weapon_damage, self)
-	else:
-		push_warning("[BattleMaid] ProjectileSpawner 不可用，使用回退逻辑")
-		var projectile_scene := preload("res://scenes/projectile.tscn")
-		var projectile := projectile_scene.instantiate() as Node2D
-		projectile.global_position = muzzle.global_position
-		projectile.setup(normalized_direction, _weapon_projectile_speed, _weapon_damage, self)
-		get_tree().root.add_child(projectile)
+	ProjectileSpawner.spawn_projectile(muzzle.global_position, normalized_direction, _weapon_projectile_speed, _weapon_damage, self)
 
 
 func _aim_at(target_position: Vector2) -> void:
