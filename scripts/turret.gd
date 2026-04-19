@@ -443,15 +443,7 @@ func _resolve_player() -> Node2D:
 
 
 func _resolve_firing_arc_center_angle() -> float:
-	var ship := get_tree().get_first_node_in_group("ship") as Node2D
-	if ship == null:
-		return 0.0
-
-	var outward := global_position - ship.global_position
-	if outward.length_squared() <= 0.001:
-		return 0.0
-
-	return outward.angle()
+	return TURRET_TARGETING_HELPER.resolve_firing_arc_center_angle(get_tree(), global_position)
 
 func _resolve_fire_solution(target_position: Vector2) -> Dictionary:
 	return TURRET_TARGETING_HELPER.resolve_fire_solution(

@@ -103,7 +103,11 @@ func get_state() -> State:
 	return _state
 
 func get_state_name() -> String:
-	match _state:
+	return _state_name(_state)
+
+
+func _state_name(state: State) -> String:
+	match state:
 		State.INACTIVE:
 			return "INACTIVE"
 		State.BETWEEN_WAVES:
@@ -123,20 +127,7 @@ func set_state(new_state: State) -> void:
 	_state = new_state
 	wave_state_changed.emit(new_state)
 	
-	print("WaveManager: State changed from ", _get_state_name(old_state), " to ", get_state_name())
-
-func _get_state_name(state: State) -> String:
-	match state:
-		State.INACTIVE:
-			return "INACTIVE"
-		State.BETWEEN_WAVES:
-			return "BETWEEN_WAVES"
-		State.ACTIVE_WAVE:
-			return "ACTIVE_WAVE"
-		State.COMPLETE:
-			return "COMPLETE"
-		_:
-			return "UNKNOWN"
+	print("WaveManager: State changed from ", _state_name(old_state), " to ", get_state_name())
 
 # Combat Session Management
 
@@ -329,16 +320,8 @@ func _populate_spawn_queue() -> void:
 func _get_wave_sequence_for_chapter(chapter: int) -> Array[int]:
 	if chapter_wave_plan != null and chapter_wave_plan.has_method("get_sequence"):
 		return chapter_wave_plan.get_sequence(chapter)
-
-	match chapter:
-		1:
-			return [1, 2]
-		2:
-			return [3, 4]
-		3:
-			return [5]
-		_:
-			return [5]
+	push_warning("WaveManager: chapter_wave_plan 缺失或未实现 get_sequence，回退为空序列")
+	return []
 
 func _get_next_spawn_interval() -> float:
 	var base_interval: float = _current_wave_config.get("spawn_interval", spawn_interval)

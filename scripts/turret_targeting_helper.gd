@@ -22,6 +22,21 @@ static func resolve_fire_solution(
 	}
 
 
+static func resolve_firing_arc_center_angle(tree: SceneTree, turret_position: Vector2) -> float:
+	if tree == null:
+		return 0.0
+
+	var ship := tree.get_first_node_in_group("ship") as Node2D
+	if ship == null:
+		return 0.0
+
+	var outward := turret_position - ship.global_position
+	if outward.length_squared() <= 0.001:
+		return 0.0
+
+	return outward.angle()
+
+
 static func find_auto_target(
 		tree: SceneTree,
 		origin: Vector2,
