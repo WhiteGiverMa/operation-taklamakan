@@ -12,6 +12,7 @@ const TOUGHNESS_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
 # Preload TurretDefinition to ensure type is available
 const _TurretDefinitionScript := preload("res://scripts/resources/turret_definition.gd")
 const TURRET_TARGETING_HELPER := preload("res://scripts/turret_targeting_helper.gd")
+const TURRET_INTERACTION_HELPER := preload("res://scripts/turret_interaction_helper.gd")
 
 ## 炮塔类型定义（设置后自动应用）
 @export var definition: Resource:
@@ -277,7 +278,7 @@ func _on_player_knockback_started(player: Node2D, _source: Node) -> void:
 
 
 func _is_player(body: Node2D) -> bool:
-	return body.is_in_group("player") or body.has_method("is_player") or body.name == "Player" or body.name == "PlayerCharacter"
+	return TURRET_INTERACTION_HELPER.is_player(body)
 
 
 func _handle_interact_input() -> void:
@@ -289,28 +290,31 @@ func _handle_interact_input() -> void:
 
 
 func _handle_manual_exit_input() -> bool:
-	if _skip_manual_exit_once:
-		_skip_manual_exit_once = false
-		return false
+	var exit_state := TURRET_INTERACTION_HELPER.should_exit_manual_mode(
+		_skip_manual_exit_once,
+		InputManager.interact_action.is_triggered(),
+		InputManager.move_action.value_axis_2d.length_squared() > 0.0
+	)
+	_skip_manual_exit_once = exit_state.get("skip_manual_exit_once", false)
 
-	if InputManager.interact_action.is_triggered() or InputManager.move_action.value_axis_2d.length_squared() > 0.0:
+	if exit_state.get("should_exit", false):
 		exit_manual_mode()
 		return true
 	return false
 
 
 func _handle_repair(delta: float) -> void:
-	if not _player_in_range or not toughness_component.is_paralyzed():
-		_repair_timer = 0.0
-		return
-
-	if InputManager.repair_action.is_triggered():
-		_repair_timer += delta
-		if _repair_timer >= repair_duration:
-			toughness_component.repair_full()
-			_repair_timer = 0.0
-	else:
-		_repair_timer = 0.0
+	var repair_state := TURRET_INTERACTION_HELPER.step_repair_timer(
+		_repair_timer,
+		delta,
+		_player_in_range,
+		toughness_component.is_paralyzed(),
+		InputManager.repair_action.is_triggered(),
+		repair_duration
+	)
+	_repair_timer = repair_state.get("timer", 0.0)
+	if repair_state.get("completed", false):
+		toughness_component.repair_full()
 
 
 func _on_ship_damaged(amount: float, source: Node) -> void:
@@ -435,13 +439,7 @@ func _set_player_in_range(in_range: bool) -> void:
 
 
 func _resolve_player() -> Node2D:
-	var ship := get_tree().get_first_node_in_group("ship")
-	if ship != null:
-		var player_on_ship := ship.get_node_or_null("PlayerCharacter") as Node2D
-		if player_on_ship != null:
-			return player_on_ship
-
-	return get_tree().get_first_node_in_group("player") as Node2D
+	return TURRET_INTERACTION_HELPER.resolve_player(get_tree())
 
 
 func _resolve_firing_arc_center_angle() -> float:
