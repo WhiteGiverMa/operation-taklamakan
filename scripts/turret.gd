@@ -11,7 +11,7 @@ signal turret_fired(target: Vector2)
 const TOUGHNESS_BAR_SCENE := preload("res://scenes/ui/toughness_bar.tscn")
 # Preload TurretDefinition to ensure type is available
 const _TurretDefinitionScript := preload("res://scripts/resources/turret_definition.gd")
-const LEAD_CALCULATOR := preload("res://scripts/lead_calculator.gd")
+const TURRET_TARGETING_HELPER := preload("res://scripts/turret_targeting_helper.gd")
 
 ## 炮塔类型定义（设置后自动应用）
 @export var definition: Resource:
@@ -194,32 +194,15 @@ func _handle_auto_fire() -> void:
 ## 寻找最佳自动射击目标：基于预瞄提前量位置判断射界和距离
 ## 返回 { target: Node2D, lead_position: Vector2 } 或空字典（无目标）
 func _find_auto_target() -> Dictionary:
-	var enemies := get_tree().get_nodes_in_group("enemies")
-	var closest: Node2D = null
-	var closest_distance := INF
-	var closest_lead: Vector2 = Vector2.ZERO
-
-	for candidate in enemies:
-		if not (candidate is Node2D) or not is_instance_valid(candidate):
-			continue
-		var enemy := candidate as Node2D
-		var distance := global_position.distance_to(enemy.global_position)
-		# 只索敌射程内的敌人
-		if distance > auto_target_range:
-			continue
-		# 用预瞄点判定射界，而非敌人当前位置
-		# 避免选到"当前在射界但提前量不在射界"的目标
-		var lead_pos := LEAD_CALCULATOR.calculate_intercept_point(muzzle.global_position, enemy, projectile_speed)
-		if not _resolve_fire_solution(lead_pos).get("within_arc", false):
-			continue
-		if distance < closest_distance:
-			closest_distance = distance
-			closest = enemy
-			closest_lead = lead_pos
-
-	if closest == null:
-		return {}
-	return { "target": closest, "lead_position": closest_lead }
+	return TURRET_TARGETING_HELPER.find_auto_target(
+		get_tree(),
+		global_position,
+		muzzle.global_position,
+		auto_target_range,
+		projectile_speed,
+		_firing_arc_center_angle,
+		firing_arc_half_angle_degrees
+	)
 
 
 func _fire_at_position(target_position: Vector2, target: Node2D = null) -> void:
@@ -473,12 +456,9 @@ func _resolve_firing_arc_center_angle() -> float:
 	return outward.angle()
 
 func _resolve_fire_solution(target_position: Vector2) -> Dictionary:
-	var raw_angle := global_position.angle_to_point(target_position)
-	var relative_angle := wrapf(raw_angle - _firing_arc_center_angle, -PI, PI)
-	var half_arc := deg_to_rad(firing_arc_half_angle_degrees)
-	var clamped_relative_angle := clampf(relative_angle, -half_arc, half_arc)
-	return {
-		"raw_angle": raw_angle,
-		"within_arc": absf(relative_angle) <= half_arc,
-		"clamped_angle": _firing_arc_center_angle + clamped_relative_angle,
-	}
+	return TURRET_TARGETING_HELPER.resolve_fire_solution(
+		global_position,
+		target_position,
+		_firing_arc_center_angle,
+		firing_arc_half_angle_degrees
+	)
