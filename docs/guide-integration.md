@@ -343,7 +343,7 @@ velocity = input_direction * speed
 
 ### 方式二：Godot MCP 驱动
 
-当前项目已经有 `godot_mcp`，这是非常适合 GUIDE 验证的手段。
+当前项目使用外部 Godot MCP 做运行时验证；无需在仓库中保留 vendored addon。
 
 推荐检查项：
 

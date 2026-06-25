@@ -6,7 +6,7 @@
 
 它服务于以下场景：
 
-- 后续继续增强 `addons/godot_mcp/`；
+- 后续继续增强外部 Godot MCP 工具本身，而不是在本项目内 vendor runtime addon；
 - 为 MCP 仓库提 issue / roadmap；
 - 帮助代理在自动验收失败时快速判断是项目问题还是 MCP 能力边界；
 - 为将来的 GUT / MCP / 人工验收协同方案提供基础约束。

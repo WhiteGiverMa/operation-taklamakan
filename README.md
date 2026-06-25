@@ -36,7 +36,7 @@
 - 运行时场景驱动架构
 - Autoload 单例 + 类型化 EventBus 信号协调
 - GUIDE 输入系统（支持键鼠 / 手柄 / 触屏）
-- Godot MCP 运行时验证支持
+- 外部 Godot MCP 运行时验证支持（无需随项目 vendor addon）
 
 ---
 
@@ -193,16 +193,8 @@ operation-taklamakan/
 │           └── overlay_back.tres
 │
 ├── addons/                    # 插件
-│   ├── guide/                # GUIDE 输入系统
-│   │   └── plugin.cfg
-│   │
-│   └── godot_mcp/            # Godot MCP 运行时控制
-│       ├── plugin.cfg
-│       ├── mcp_interaction_server.gd
-│       ├── godot_operations.gd
-│       ├── mcp_editor_plugin.gd
-│       ├── AGENTS.md
-│       └── README.md
+│   └── guide/                # GUIDE 输入系统
+│       └── plugin.cfg
 │
 ├── config/
 │   └── mcp_server.json       # MCP 服务配置
@@ -230,7 +222,6 @@ operation-taklamakan/
 | `EventBus` | `scripts/event_bus.gd` | 类型化信号中心 |
 | `GameState` | `scripts/game_state.gd` | 全局游戏状态 |
 | `WaveManager` | `scripts/wave_manager.gd` | 波次流程控制 |
-| `McpInteractionServer` | `addons/godot_mcp/mcp_interaction_server.gd` | MCP 运行时服务 |
 
 ### 碰撞层
 
@@ -355,8 +346,8 @@ EventBus (类型化信号中心)
 ### Godot MCP 验证
 
 ```bash
-# 项目内置 MCP 服务，端口 127.0.0.1:9090
-# 可通过 MCP 客户端进行运行时验证
+# 通过外部 Godot MCP 的 run_project 启动；工具按需临时注入运行时桥。
+# 项目不再提交 addons/godot_mcp 或 McpInteractionServer autoload。
 ```
 
 ---
@@ -374,7 +365,6 @@ EventBus (类型化信号中心)
 | `scripts/AGENTS.md` | 脚本详细约定与风险热点 |
 | `scenes/README.md` | 场景目录说明 |
 | `scenes/AGENTS.md` | 场景装配约定与风险热点 |
-| `addons/godot_mcp/README.md` | MCP 插件说明 |
 
 ---
 
